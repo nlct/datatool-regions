@@ -1,0 +1,163 @@
+% arara: pdflatex
+\PassOptionsToPackage{noprint}{doc}% command names are too long
+\documentclass{ltxdoc}
+
+\usepackage[T1]{fontenc}
+\usepackage{tcolorbox}
+\usepackage[left=2.5cm,right=2.5cm]{geometry}
+
+\CheckSum{0}
+
+\newcommand*{\sty}[1]{\textsf{#1}}
+\newcommand*{\file}[1]{\texorpdfstring{\nolinkurl{#1}}{#1}}
+\newcommand*{\filemeta}[3]{%
+ \texorpdfstring
+  {\nolinkurl{#1}\meta{#2}\nolinkurl{#3}}%
+  {#1<#2>#3}%
+}
+\newcommand*{\filemetameta}[5]{%
+ \texorpdfstring
+ {\nolinkurl{#1}\meta{#2}\nolinkurl{#3}\meta{#4}\nolinkurl{#5}}%
+ {#1<#2>#3<#4>#5}%
+}
+\newcommand*{\opt}[1]{\textsf{#1}}
+\newcommand*{\qt}[1]{“#1”}
+\newcommand*{\setlocaleopts}[1]{%
+ \cs{DTLsetLocaleOptions}\allowbreak
+ \texttt{\brackets{\strong{#1}}}\allowbreak
+ \marg{key=val list}%
+}
+
+\definecolor{defbackground}{rgb}{1,1,0.75}
+\newtcolorbox{definition}{colback=defbackground}
+\newtcolorbox{important}{colback=red!5!white,colframe=red}
+
+\tcbuselibrary{documentation}
+\tcbset{verbatim ignore percent}
+
+\RecordChanges
+\PageIndex
+
+\title{Regions Support for \sty{datatool} Package}
+\author{Nicola L. C. Talbot}
+%%DATECMD%%
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This is the regions support for the \sty{datatool}
+package (version 3.0+). This needs to be installed in addition to
+\sty{datatool}. To ensure language support, you will also need to
+install the applicable language module (for example,
+\sty{datatool-english}).
+\end{abstract}
+
+\tableofcontents
+
+\section{Introduction}
+\label{sec:intro}
+
+This bundle provides language-independent region support files for
+\sty{datatool} v3.0+. The files simply need to be installed on \TeX's path.
+(They will be ignored if a pre-3.0 version of \sty{datatool} is installed.)
+The \sty{datatool-base} package (which is automatically loaded by
+\sty{datatool}) uses \sty{tracklang}'s interface for detecting
+localisation settings and finding the appropriate files.
+If you use \sty{babel} or \sty{polyglossia}, make sure that you
+specify the document dialects before the first package to load
+\sty{tracklang}.
+
+\begin{important}
+If the chosen document language does not have an associated region,
+no region support will be provided.
+\end{important}
+
+For example:
+\begin{dispListing}
+\usepackage[british]{babel}
+\usepackage{datatool-base}
+\end{dispListing}
+In this case, \opt{british} is associated with region \qt{GB} so
+\sty{datatool-base} will load \file{datatool-GB.ldf} if it's on
+\TeX's path.
+
+Alternatively, if you are not using a language package, simply use
+the \opt{locales} option. For example:
+\begin{dispListing}
+\usepackage[locales={en-GB}]{datatool-base}
+\end{dispListing}
+
+The \sty{tracklang} interface doesn't allow the language to be
+omitted, but \sty{datatool-base}'s \opt{locales} option will prefix
+a languageless region with \opt{und} (undetermined) before passing
+it to \sty{tracklang}. For example:
+\begin{dispListing}
+\usepackage[locales={GB}]{datatool-base}
+\end{dispListing}
+This is equivalent to:
+\begin{dispListing}
+\usepackage[locales={und-GB}]{datatool-base}
+\end{dispListing}
+
+In general, it's best to include the language to ensure the
+appropriate language files are also loaded, if they are available.
+
+Any option that can be passed to \sty{datatool-base} can also be
+passed to \sty{datatool} but if \sty{datatool-base} has already been
+loaded, it will be too late to use the \opt{locales} option.
+For example:
+\begin{dispListing}
+\usepackage[locales={en-GB}]{datatool}
+\end{dispListing}
+But not:
+\begin{dispListing*}{title={Incorrect!},colframe=red}
+\usepackage{datatool-base}
+\usepackage[locales={en-GB}]{datatool}
+\end{dispListing*}
+
+If another package that also loads \sty{tracklang} is loaded first,
+then \sty{datatool-base} can pick up the settings from that. For
+example:
+\begin{dispListing}
+\usepackage[en-GB]{datetime2}
+\usepackage{datatool}
+\end{dispListing}
+
+Supplementary packages provided with \sty{datatool} can also have
+the locales provided. For example:
+\begin{dispListing}
+\usepackage[locales={en-GB}]{datagidx}
+\end{dispListing}
+As with \sty{datatool}, these supplementary packages internally load
+\sty{datatool-base} so if that has already been loaded, then the
+localisation support should already have been set.
+
+\section{Region \qt{CA}}
+
+The \file{datatool-CA.ldf} file provides support for region \qt{CA}
+(Canada). This supplies the currency (CAD) but number formatting
+depends on the language, so this requires specific language \&
+region files, which should be provided by the applicable language
+module. For example, \sty{datatool-english} provides
+\file{datatool-en-CA.ldf}.
+
+\section{Region \qt{GB}}
+
+The \file{datatool-GB.ldf} file provides support for region \qt{GB}
+(United Kingdom).
+
+\section{Region \qt{ZA}}
+
+The \file{datatool-ZA.ldf} file provides support for region \qt{ZA}
+(South Africa). This supplies the currency (ZAR) but number formatting
+depends on the language, so this requires specific language \&
+region files, which should be provided by the applicable language
+module. For example, \sty{datatool-english} provides
+\file{datatool-en-ZA.ldf}.
+
+\StopEventually{%
+  \PrintChanges
+  \PrintIndex
+}
+\end{document}

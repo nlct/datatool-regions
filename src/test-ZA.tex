@@ -1,0 +1,15 @@
+% arara: pdflatex
+\documentclass{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[afrikaans,english]{babel}
+\usepackage[locales={af-ZA,en-ZA}]{datatool-base}
+
+\begin{document}
+\selectlanguage{afrikaans}
+Currency: \DTLdecimaltocurrency{1234.56}{\result}\result.
+
+\selectlanguage{english}
+Currency: \DTLdecimaltocurrency{1234.56}{\result}\result.
+
+\end{document}

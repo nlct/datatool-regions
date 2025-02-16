@@ -1,0 +1,10 @@
+% arara: pdflatex
+\documentclass{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[locales={GB}]{datatool-base}
+
+\begin{document}
+Currency: \DTLdecimaltocurrency{1234.56}{\result}\result.
+
+\end{document}

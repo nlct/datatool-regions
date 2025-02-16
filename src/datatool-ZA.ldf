@@ -1,0 +1,394 @@
+%\subsection{datatool-ZA.ldf}\label{sec:code:datatool-ZA}
+% Support for region ZA.
+%\changes{3.0}{??}{new}
+%    \begin{macrocode}
+\TrackLangProvidesResource{ZA}%%FILEVERSION%%
+%    \end{macrocode}
+% Switch on \LaTeX3 syntax:
+%    \begin{macrocode}
+\ExplSyntaxOn
+%    \end{macrocode}
+% Set the number group and decimal symbols for this region.
+% NB \file{datatool-en-ZA.ldf} (provided with
+% \file{datatool-english}) overrides this.
+%    \begin{macrocode}
+\newcommand \datatoolZASetNumberChars { \DTLsetnumberchars { ~ } { , } }
+%    \end{macrocode}
+% Set the currency format for this region.
+%    \begin{macrocode} 
+\newcommand \datatoolZAcurrencyfmt { \dtlcurrdefaultfmt }
+%    \end{macrocode}
+% Define the currency symbols for this region.
+%    \begin{macrocode}
+\datatool_def_currency:nnnn
+ { \datatoolZAcurrencyfmt }
+ { ZAR } { R } { R }
+%    \end{macrocode}
+% Provide a command to set the currency for this region (for use
+% with any hook used when the locale changes).
+%    \begin{macrocode}
+\newcommand \datatoolZAsetcurrency
+ {
+   \DTLsetdefaultcurrency { ZAD }
+%    \end{macrocode}
+%Number of digits that \cs{DTLdecimaltocurrency} should round to:
+%    \begin{macrocode}
+   \renewcommand \DTLCurrentLocaleCurrencyDP { 2 }
+ }
+%    \end{macrocode}
+% Date parsing is more complicated as there seems to be a confusing
+% mixture of ISO, day/month/year and month/day/year formats.
+% The default is year-month-day but may be changed with
+% \cs{DTLsetLocaleOptions}. For example:
+%\begin{verbatim}
+%\DTLsetLocaleOptions{ZA/parse}{date-style=dmyyyy, date-variant=slash}
+%\end{verbatim}
+%An appropriate language file will need to also be installed to
+%parse dates containing month names or day of week names.
+%
+%    \begin{macrocode}
+\tl_new:N \l__datatool_ZA_datevariant_tl
+\tl_set:Nn \l__datatool_ZA_datevariant_tl { hyphen }
+\tl_new:N \l__datatool_ZA_datestyle_tl
+\tl_set:Nn \l__datatool_ZA_datestyle_tl { yyyymmdd }
+\tl_new:N \l__datatool_ZA_timevariant_tl
+\tl_set:Nn \l__datatool_ZA_timevariant_tl { colon }
+%    \end{macrocode}
+%Time stamp parsing.
+%Use command
+%\cs{datatool_}\meta{date-style}\verb|_hhmmss_tz_parse_timestamp:nnNnTF|
+%with date regular expression 
+%\cs{c_datatool_}\meta{date-variant}\verb|_|\meta{date-style}\verb|_date_regex|
+%and time regular expression
+%\cs{c_datatool_}\meta{timevariant}\verb|_hhmmss_time_regex|
+%    \begin{macrocode}
+\cs_new:Nn \datatool_ZA_parse_timestamp:NnTF
+ {
+   \cs_if_exist:cTF
+     {
+       datatool_
+       \l__datatool_ZA_datestyle_tl
+       _hhmmss_tz_parse_timestamp:ccNnTF
+     }
+    {
+      \cs_if_exist:cTF
+       {
+          c_datatool_
+          \l__datatool_ZA_datevariant_tl
+          _
+          \l__datatool_ZA_datestyle_tl
+          _date_regex
+       }
+       {
+         \cs_if_exist:cTF
+          {
+            c_datatool_
+            \l__datatool_ZA_timevariant_tl
+            _hhmmss_time_regex
+          }
+          {
+            \use:c
+             {
+               datatool_
+              \l__datatool_ZA_datestyle_tl
+              _hhmmss_tz_parse_timestamp:ccNnTF
+             }
+             {
+               c_datatool_
+               \l__datatool_ZA_datevariant_tl
+               _
+               \l__datatool_ZA_datestyle_tl
+               _date_regex
+             }
+             {
+               c_datatool_
+               \l__datatool_ZA_timevariant_tl
+               _hhmmss_time_regex
+             }
+              #1 { #2 } { #3 } { #4 }
+          }
+          {
+            \PackageWarning { datatool-ZA }
+             {
+              No ~ support ~ for ~ time ~ variant ~
+              ` \l__datatool_ZA_timevariant_tl '
+             }
+            #4
+          }
+       }
+       {
+         \PackageWarning { datatool-ZA }
+          {
+           No ~ support ~ for ~ date ~ style ~
+           ` \l__datatool_ZA_datestyle_tl ' ~ with ~
+           variant ~
+           ` \l__datatool_ZA_datevariant_tl '
+          }
+         #4
+       }
+    }
+    {
+      \PackageWarning { datatool-ZA }
+       {
+          No ~ support ~ for ~ date ~ style ~
+          ` \l__datatool_ZA_datestyle_tl '
+       }
+      #4
+    }
+ }
+%    \end{macrocode}
+%Date parsing.
+%Use command \cs{datatool_}\meta{style}\verb|_parse_date:NNnTF|
+%with regular expression 
+%\cs{c_datatool_}\meta{variant}\verb|_anchored_|\meta{style}\verb|_date_regex|
+%    \begin{macrocode}
+\cs_new:Nn \datatool_ZA_parse_date:NnTF
+ {
+   \cs_if_exist:cTF
+     {
+       datatool_
+       \l__datatool_ZA_datestyle_tl
+       _parse_date:NNnTF
+     }
+    {
+      \cs_if_exist:cTF
+       {
+         c_datatool_
+         \l__datatool_ZA_datevariant_tl
+         _anchored_
+         \l__datatool_ZA_datestyle_tl
+         _date_regex
+       }
+       {
+         \exp_args:cc
+         {
+           datatool_
+           \l__datatool_ZA_datestyle_tl
+           _parse_date:NNnTF
+         }
+         {
+           c_datatool_
+           \l__datatool_ZA_datevariant_tl
+           _anchored_
+           \l__datatool_ZA_datestyle_tl
+           _date_regex
+         }
+          #1 { #2 } { #3 } { #4 }
+       }
+       {
+         \PackageWarning { datatool-ZA }
+          {
+           No ~ support ~ for ~ date ~ style ~
+           ` \l__datatool_ZA_datestyle_tl ' ~ with ~
+           variant ~
+           ` \l__datatool_ZA_datevariant_tl '
+          }
+         #4
+       }
+    }
+    {
+      \PackageWarning { datatool-ZA }
+       {
+          No ~ support ~ for ~ date ~ style ~
+          ` \l__datatool_ZA_datestyle_tl '
+       }
+      #4
+    }
+ }
+%    \end{macrocode}
+%Time parsing.
+%Use command \cs{datatool_}\meta{style}\verb|_parse_time:NNnTF|
+%with regular expression 
+%\cs{c_datatool_}\meta{variant}\verb|_anchored_|\meta{style}\verb|_time_regex|
+%    \begin{macrocode}
+\cs_new:Nn \datatool_ZA_parse_time:NnTF
+ {
+   \cs_if_exist:cTF
+    {
+      c_datatool_
+      \l__datatool_ZA_timevariant_tl
+      _anchored_hhmmss_time_regex
+    }
+    {
+      \datatool_hhmmss_parse_time:cNnTF
+       {
+        c_datatool_
+        \l__datatool_ZA_timevariant_tl
+        _anchored_hhmmss_time_regex
+       }
+        #1 { #2 } { #3 } { #4 }
+    }
+    {
+      \PackageWarning { datatool-ZA }
+       {
+        No ~ support ~ for ~ time ~ variant ~
+        ` \l__datatool_ZA_timevariant_tl '
+       }
+      #4
+    }
+ }
+%    \end{macrocode}
+%Define time zone mapping command for this region:
+%    \begin{macrocode}
+\cs_new:Nn \datatool_ZA_get_timezone_map:n
+ {
+   \datatool_region_get_timezone_map:n { ZA / #1 }
+ }
+%    \end{macrocode}
+%Define time zone IDs for this region (one-way map from ID to offset):
+%    \begin{macrocode}
+\datatool_region_set_timezone_map:nn { ZA / SAST } { +02:00 }
+%    \end{macrocode}
+%Define options for this region:
+%    \begin{macrocode}
+\datatool_locale_define_keys:nn { ZA }
+ {
+   date-style .choice: ,
+   date-style / dmyyyy .code: n =
+    {
+      \tl_set:Nn \l__datatool_ZA_datestyle_tl { ddmmyyyy }
+    } ,
+   date-style / mdyyyy .code: n =
+    {
+      \tl_set:Nn \l__datatool_ZA_datestyle_tl { mmddyyyy }
+    } ,
+   date-style / yyyymd .code: n =
+    {
+      \tl_set:Nn \l__datatool_ZA_datestyle_tl { yyyymmdd }
+    } ,
+   date-style / dmyy .code: n =
+    {
+      \tl_set:Nn \l__datatool_ZA_datestyle_tl { ddmmyy }
+    } ,
+   date-style / mdyy .code: n =
+    {
+      \tl_set:Nn \l__datatool_ZA_datestyle_tl { mmddyy }
+    } ,
+   date-style / yymd .code: n =
+    {
+      \tl_set:Nn \l__datatool_ZA_datestyle_tl { yymmdd }
+    } ,
+   date-variant .choice: ,
+   date-variant / slash .code:n =
+    {
+      \tl_set:Nn \l__datatool_ZA_datevariant_tl { slash }
+    } ,
+   date-variant / hyphen .code:n =
+    {
+      \tl_set:Nn \l__datatool_ZA_datevariant_tl { hyphen }
+    } ,
+   date-variant / dot .code:n =
+    {
+      \tl_set:Nn \l__datatool_ZA_datevariant_tl { dot }
+    } ,
+   date-variant / dialect .code:n =
+    {
+      \tl_set:Nn \l__datatool_ZA_datevariant_tl
+        { \CurrentTrackedLanguage }
+    } ,
+   time-variant .choice: ,
+   time-variant / colon .code:n =
+    {
+      \tl_set:Nn \l__datatool_ZA_timevariant_tl { colon }
+    } ,
+   time-variant / dot .code:n =
+    {
+      \tl_set:Nn \l__datatool_ZA_timevariant_tl { dot }
+    } ,
+   time-variant / dialect .code:n =
+    {
+      \tl_if_eq:NnTF \l__datatool_ZA_timevariant_tl { dot }
+       {
+         \tl_set:Nn \l__datatool_ZA_timevariant_tl
+          { \CurrentTrackedLanguage _dot }
+       }
+       {
+         \tl_if_in:NnF
+           \l__datatool_ZA_timevariant_tl { \CurrentTrackedLanguage }
+          {
+            \tl_set:Nn \l__datatool_ZA_timevariant_tl
+             { \CurrentTrackedLanguage _colon }
+          }
+       }
+    } ,
+   time-variant / dialect-colon .code:n =
+    {
+      \tl_set:Nn \l__datatool_ZA_timevariant_tl
+        { \CurrentTrackedLanguage _colon }
+    } ,
+   time-variant / dialect-dot .code:n =
+    {
+      \tl_set:Nn \l__datatool_ZA_timevariant_tl
+        { \CurrentTrackedLanguage _dot }
+    } ,
+ }
+%    \end{macrocode}
+%Command to update temporal parsing commands for this region:
+%    \begin{macrocode}
+\newcommand \datatoolZAsettemporalparsers
+ {
+   \renewcommand \DTLCurrentLocaleParseTimeStamp
+    { \datatool_ZA_parse_timestamp:NnTF }
+   \renewcommand \DTLCurrentLocaleParseDate
+    { \datatool_ZA_parse_date:NnTF }
+   \renewcommand \DTLCurrentLocaleParseTime
+    { \datatool_ZA_parse_time:NnTF }
+   \let
+    \DTLCurrentLocaleGetTimeZoneMap
+    \datatool_ZA_get_timezone_map:n
+ }
+%    \end{macrocode}
+%Set temporal formatting commands for this region. Currently this
+%just resets to the default, but may change in future.
+%Note that the defaults test if the applicable \sty{datetime2}
+%command is available and will fallback on ISO if not defined.
+%Bear in mind that the default style for \sty{datetime2} is
+%\texttt{iso} so there won't be a noticeable difference unless the
+%\sty{datetime2} regional setting is on.
+%    \begin{macrocode}
+\newcommand \datatoolZAsettemporalformatters
+ {
+   \let
+    \DTLCurrentLocaleFormatDate
+    \datatool_default_date_fmt:nnnn 
+   \let
+    \DTLCurrentLocaleFormatTime
+    \datatool_default_time_fmt:nn
+   \let
+    \DTLCurrentLocaleFormatTimeZone
+    \datatool_default_timezone_fmt:nn
+   \let
+    \DTLCurrentLocaleFormatTimeStampNoZone
+    \datatool_default_timestamp_fmt:nnnnnnn
+   \let
+    \DTLCurrentLocaleFormatTimeStampWithZone
+    \datatool_default_timestamp_fmt:nnnnnnnnn
+   \renewcommand \DTLCurrentLocaleTimeStampFmtSep { ~ }
+ }
+%    \end{macrocode}
+%Command to update currency and temporal parsing commands for this region:
+%\begin{macro}{\DataToolBaseZA}
+%\changes{3.0}{??}{new}
+%    \begin{macrocode}
+\newcommand \DataToolBaseZA
+ {
+  \datatoolZASetNumberChars
+  \datatoolZAsetcurrency
+  \datatoolZAsettemporalparsers
+  \datatoolZAsettemporalformatters
+%    \end{macrocode}
+%Allow language files to reference the region:
+%    \begin{macrocode}
+  \tl_set:Nn \l_datatool_current_region_tl { ZA }
+ }
+%    \end{macrocode}
+%\end{macro}
+%
+% Finished with \LaTeX3 syntax.
+%    \begin{macrocode}
+\ExplSyntaxOff
+%    \end{macrocode}
+% Add to language hook if applicable.
+%    \begin{macrocode}
+\TrackLangAddToCaptions{\DataToolBaseZA}
+%    \end{macrocode}

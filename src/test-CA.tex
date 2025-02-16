@@ -1,0 +1,17 @@
+% arara: pdflatex
+\documentclass{article}
+
+\usepackage[T1]{fontenc}
+\usepackage{babel}
+\babelprovide{canadianenglish}
+\babelprovide{canadianfrench}
+\usepackage{datatool-base}
+
+\begin{document}
+\selectlanguage{english}
+Currency: \DTLdecimaltocurrency{1234.56}{\result}\result.
+
+\selectlanguage{french}
+Currency: \DTLdecimaltocurrency{1234.56}{\result}\result.
+
+\end{document}
