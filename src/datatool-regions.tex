@@ -103,6 +103,15 @@ This is equivalent to:
 In general, it's best to include the language to ensure the
 appropriate language files are also loaded, if they are available.
 
+\begin{important}
+Bear in mind that if \sty{tracklang} can't determine the
+applicable dialect label for the captions hook, the settings may not
+be applied when the language changes in multilingual documents.
+In this case, you can either load \sty{tracklang} before
+\sty{datatool-base} and set up the appropriate mappings or 
+just add the applicable commands to the relevant captions hook.
+\end{important}
+
 Any option that can be passed to \sty{datatool-base} can also be
 passed to \sty{datatool} but if \sty{datatool-base} has already been
 loaded, it will be too late to use the \opt{locales} option.

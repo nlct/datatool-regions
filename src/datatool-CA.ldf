@@ -16,6 +16,7 @@
 % \file{datatool-en-CA.ldf} is provided with
 % \file{datatool-english}.
 %
+%\subsubsection{Currency}
 % Set the currency format for this region.
 %    \begin{macrocode} 
 \newcommand \datatoolCAcurrencyfmt { \dtlcurrdefaultfmt }
@@ -40,13 +41,14 @@
    \renewcommand \DTLCurrentLocaleCurrencyDP { 2 }
  }
 %    \end{macrocode}
+%\subsubsection{Date and Time Parsing}
 % Date parsing is more complicated as there seems to be a confusing
 % mixture of ISO, day/month/year and month/day/year formats.
 % This defaults to year-month-day and should be changed as
 % appropriate using \cs{DTLsetLocaleOptions}. For example:
-%\begin{verbatim}
+%\begin{dispListing}
 %\DTLsetLocaleOptions{CA/parse}{date-style=dmyyyy, date-variant=slash}
-%\end{verbatim}
+%\end{dispListing}
 %An appropriate language file will need to also be installed to
 %parse dates containing month names or day of week names.
 %
@@ -59,13 +61,13 @@
 \tl_new:N \l__datatool_CA_timevariant_tl
 \tl_set:Nn \l__datatool_CA_timevariant_tl { colon }
 %    \end{macrocode}
-%Time stamp parsing.
+%\paragraph{Time Stamp Parsing}
 %Use command
-%\cs{datatool_}\meta{date-style}\verb|_hhmmss_tz_parse_timestamp:nnNnTF|
+%\cs{datatool\_}\meta{date-style}\verb|_hhmmss_tz_parse_timestamp:nnNnTF|
 %with date regular expression 
-%\cs{c_datatool_}\meta{date-variant}\verb|_|\meta{date-style}\verb|_date_regex|
+%\cs{c\_datatool\_}\meta{date-variant}\verb|_|\meta{date-style}\verb|_date_regex|
 %and time regular expression
-%\cs{c_datatool_}\meta{timevariant}\verb|_hhmmss_time_regex|
+%\cs{c\_datatool\_}\meta{time-variant}\verb|_hhmmss_time_regex|
 %    \begin{macrocode}
 \cs_new:Nn \datatool_CA_parse_timestamp:NnTF
  {
@@ -142,10 +144,10 @@
     }
  }
 %    \end{macrocode}
-%Date parsing.
-%Use command \cs{datatool_}\meta{style}\verb|_parse_date:NNnTF|
+%\paragraph{Date Parsing}
+%Use command \cs{datatool\_}\meta{style}\verb|_parse_date:NNnTF|
 %with regular expression 
-%\cs{c_datatool_}\meta{variant}\verb|_anchored_|\meta{style}\verb|_date_regex|
+%\cs{c\_datatool\_}\meta{variant}\verb|_anchored_|\meta{style}\verb|_date_regex|
 %    \begin{macrocode}
 \cs_new:Nn \datatool_CA_parse_date:NnTF
  {
@@ -201,10 +203,10 @@
     }
  }
 %    \end{macrocode}
-%Time parsing.
-%Use command \cs{datatool_}\meta{style}\verb|_parse_time:NNnTF|
+%\paragraph{Time Parsing}
+%Use command \cs{datatool\_}\meta{style}\verb|_parse_time:NNnTF|
 %with regular expression 
-%\cs{c_datatool_}\meta{variant}\verb|_anchored_|\meta{style}\verb|_time_regex|
+%\cs{c\_datatool\_}\meta{variant}\verb|_anchored_|\meta{style}\verb|_time_regex|
 %    \begin{macrocode}
 \cs_new:Nn \datatool_CA_parse_time:NnTF
  {
@@ -233,6 +235,7 @@
     }
  }
 %    \end{macrocode}
+%\paragraph{Time Zone Mappings}
 %Define time zone mapping command for this region:
 %    \begin{macrocode}
 \cs_new:Nn \datatool_CA_get_timezone_map:n
@@ -255,6 +258,7 @@
 \datatool_region_set_timezone_map:nn { CA / PST } { -08:00 }
 \datatool_region_set_timezone_map:nn { CA / PDT } { -07:00 }
 %    \end{macrocode}
+%\subsubsection{Options}
 %Define options for this region:
 %    \begin{macrocode}
 \datatool_locale_define_keys:nn { CA }
@@ -358,6 +362,7 @@
     } ,
  }
 %    \end{macrocode}
+%\subsubsection{Hooks}
 %Command to update temporal parsing commands for this region:
 %    \begin{macrocode}
 \newcommand \datatoolCAsettemporalparsers

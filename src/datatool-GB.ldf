@@ -55,9 +55,9 @@
 % Provide a way to configure temporal parsing style.
 % The default is day/month/year but may be changed with
 % \cs{DTLsetLocaleOptions}. For example:
-%\begin{verbatim}
+%\begin{dispListing}
 %\DTLsetLocaleOptions{GB/parse}{date-style=dmyy, date-variant=dot}
-%\end{verbatim}
+%\end{dispListing}
 %An appropriate language file will need to also be installed to
 %parse dates containing month names or day of week names.
 %
@@ -69,13 +69,13 @@
 \tl_new:N \l__datatool_GB_timevariant_tl
 \tl_set:Nn \l__datatool_GB_timevariant_tl { colon }
 %    \end{macrocode}
-%Time stamp parsing.
+%\paragraph{Time Stamp Parsing}
 %Use command
-%\cs{datatool_}\meta{date-style}\verb|_hhmmss_tz_parse_timestamp:nnNnTF|
+%\cs{datatool\_}\meta{date-style}\verb|_hhmmss_tz_parse_timestamp:nnNnTF|
 %with date regular expression 
-%\cs{c_datatool_}\meta{date-variant}\verb|_|\meta{date-style}\verb|_date_regex|
+%\cs{c\_datatool\_}\meta{date-variant}\verb|_|\meta{date-style}\verb|_date_regex|
 %and time regular expression
-%\cs{c_datatool_}\meta{timevariant}\verb|_hhmmss_time_regex|
+%\cs{c\_datatool\_}\meta{time-variant}\verb|_hhmmss_time_regex|
 %    \begin{macrocode}
 \cs_new:Nn \datatool_GB_parse_timestamp:NnTF
  {
@@ -164,10 +164,10 @@
     }
  }
 %    \end{macrocode}
-%Date parsing.
-%Use command \cs{datatool_}\meta{style}\verb|_parse_date:NNnTF|
+%\paragraph{Date Parsing}
+%Use command \cs{datatool\_}\meta{style}\verb|_parse_date:NNnTF|
 %with regular expression 
-%\cs{c_datatool_}\meta{variant}\verb|_anchored_|\meta{style}\verb|_date_regex|
+%\cs{c\_datatool\_}\meta{variant}\verb|_anchored_|\meta{style}\verb|_date_regex|
 %    \begin{macrocode}
 \cs_new:Nn \datatool_GB_parse_date:NnTF
  {
@@ -229,10 +229,10 @@
     }
  }
 %    \end{macrocode}
-%Time parsing.
-%Use command \cs{datatool_}\meta{style}\verb|_parse_time:NNnTF|
+%\paragraph{Time Parsing}
+%Use command \cs{datatool\_}\meta{style}\verb|_parse_time:NNnTF|
 %with regular expression 
-%\cs{c_datatool_}\meta{variant}\verb|_anchored_|\meta{style}\verb|_time_regex|
+%\cs{c\_datatool\_}\meta{variant}\verb|_anchored_|\meta{style}\verb|_time_regex|
 %    \begin{macrocode}
 \cs_new:Nn \datatool_GB_parse_time:NnTF
  {
@@ -268,7 +268,7 @@
  }
 %    \end{macrocode}
 %
-%\subsubsection{Time Zones}
+%\paragraph{Time Zones}
 %Define time zone mapping command for this region:
 %    \begin{macrocode}
 \cs_new:Nn \datatool_GB_get_timezone_map:n
@@ -378,7 +378,7 @@
  }
 %    \end{macrocode}
 %
-%\subsubsection{Captions Hook}
+%\subsubsection{Hooks}
 %Command to update temporal parsing commands for this region:
 %    \begin{macrocode}
 \newcommand \datatoolGBsettemporalparsers
