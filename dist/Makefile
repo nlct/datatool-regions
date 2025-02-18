@@ -22,8 +22,8 @@ datatool-GB.ldf	: datatool-regions.dtx datatool-regions.ins
 	latex datatool-regions.ins
 
 datatool-regions.dtx	: ../src/datatool-regions.tex ../src/version.txt $(ldfs)
-	cd ../src; makedtx -author "Nicola Talbot" \
-	-src "(datatool-.*\.ldf)\Z=>\1" \
+	cd ../src; makedtx -author "Nicola Talbot" -section "chapter" \
+	-src "(datatool-[A-Z]{2}\.ldf)\Z=>\1" \
 	-doc datatool-regions.tex datatool-regions
 	cp2dist -f ../src/version.txt ../src/datatool-regions.{dtx,ins} .
 	rm -f ../src/datatool-regions.{dtx,ins}

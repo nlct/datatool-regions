@@ -1,4 +1,4 @@
-%\subsection{datatool-ZA.ldf}\label{sec:code:datatool-ZA}
+%\section{datatool-ZA.ldf}\label{sec:code:datatool-ZA}
 % Support for region ZA.
 %\changes{3.0}{??}{new}
 %    \begin{macrocode}
@@ -8,7 +8,7 @@
 %    \begin{macrocode}
 \ExplSyntaxOn
 %    \end{macrocode}
-%\subsubsection{Numbers and Currency}
+%\subsection{Numbers and Currency}
 % Set the number group and decimal symbols for this region.
 % NB \file{datatool-en-ZA.ldf} (provided with
 % \file{datatool-english}) overrides this.
@@ -37,7 +37,7 @@
    \renewcommand \DTLCurrentLocaleCurrencyDP { 2 }
  }
 %    \end{macrocode}
-%\subsubsection{Date and Time Parsing}
+%\subsection{Date and Time Parsing}
 % Date parsing is more complicated as there seems to be a confusing
 % mixture of ISO, day/month/year and month/day/year formats.
 % The default is year-month-day but may be changed with
@@ -56,7 +56,7 @@
 \tl_new:N \l__datatool_ZA_timevariant_tl
 \tl_set:Nn \l__datatool_ZA_timevariant_tl { colon }
 %    \end{macrocode}
-%\paragraph{Time Stamp Parsing}
+%\subsubsection{Time Stamp Parsing}
 %Use command
 %\cs{datatool\_}\meta{date-style}\verb|_hhmmss_tz_parse_timestamp:nnNnTF|
 %with date regular expression 
@@ -139,7 +139,7 @@
     }
  }
 %    \end{macrocode}
-%\paragraph{Date Parsing}
+%\subsubsection{Date Parsing}
 %Use command \cs{datatool\_}\meta{style}\verb|_parse_date:NNnTF|
 %with regular expression 
 %\cs{c\_datatool\_}\meta{variant}\verb|_anchored_|\meta{style}\verb|_date_regex|
@@ -198,7 +198,7 @@
     }
  }
 %    \end{macrocode}
-%\paragraph{Time Parsing}
+%\subsubsection{Time Parsing}
 %Use command \cs{datatool\_}\meta{style}\verb|_parse_time:NNnTF|
 %with regular expression 
 %\cs{c\_datatool\_}\meta{variant}\verb|_anchored_|\meta{style}\verb|_time_regex|
@@ -230,7 +230,7 @@
     }
  }
 %    \end{macrocode}
-%\paragraph{Time Zone Mapping}
+%\subsubsection{Time Zone Mapping}
 %Define time zone mapping command for this region:
 %    \begin{macrocode}
 \cs_new:Nn \datatool_ZA_get_timezone_map:n
@@ -242,7 +242,7 @@
 %    \begin{macrocode}
 \datatool_region_set_timezone_map:nn { ZA / SAST } { +02:00 }
 %    \end{macrocode}
-%\subsubsection{Options}
+%\subsection{Options}
 %Define options for this region:
 %    \begin{macrocode}
 \datatool_locale_define_keys:nn { ZA }
@@ -327,7 +327,7 @@
     } ,
  }
 %    \end{macrocode}
-%\subsubsection{Hooks}
+%\subsection{Hooks}
 %Command to update temporal parsing commands for this region:
 %    \begin{macrocode}
 \newcommand \datatoolZAsettemporalparsers

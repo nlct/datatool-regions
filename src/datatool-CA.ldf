@@ -1,4 +1,4 @@
-%\subsection{datatool-CA.ldf}\label{sec:code:datatool-CA}
+%\section{datatool-CA.ldf}\label{sec:code:datatool-CA}
 % Support for region CA.
 %\changes{3.0}{??}{new}
 %    \begin{macrocode}
@@ -8,6 +8,8 @@
 %    \begin{macrocode}
 \ExplSyntaxOn
 %    \end{macrocode}
+%
+%\subsection{Numbers and Currency}
 % NB the number group and decimal symbols for this region should be
 % set in the files \file{datatool-en-CA.ldf} and
 % \file{datatool-fr-CA.ldf} as they depend on both the language
@@ -16,7 +18,6 @@
 % \file{datatool-en-CA.ldf} is provided with
 % \file{datatool-english}.
 %
-%\subsubsection{Currency}
 % Set the currency format for this region.
 %    \begin{macrocode} 
 \newcommand \datatoolCAcurrencyfmt { \dtlcurrdefaultfmt }
@@ -41,7 +42,7 @@
    \renewcommand \DTLCurrentLocaleCurrencyDP { 2 }
  }
 %    \end{macrocode}
-%\subsubsection{Date and Time Parsing}
+%\subsection{Date and Time Parsing}
 % Date parsing is more complicated as there seems to be a confusing
 % mixture of ISO, day/month/year and month/day/year formats.
 % This defaults to year-month-day and should be changed as
@@ -61,7 +62,7 @@
 \tl_new:N \l__datatool_CA_timevariant_tl
 \tl_set:Nn \l__datatool_CA_timevariant_tl { colon }
 %    \end{macrocode}
-%\paragraph{Time Stamp Parsing}
+%\subsubsection{Time Stamp Parsing}
 %Use command
 %\cs{datatool\_}\meta{date-style}\verb|_hhmmss_tz_parse_timestamp:nnNnTF|
 %with date regular expression 
@@ -144,7 +145,7 @@
     }
  }
 %    \end{macrocode}
-%\paragraph{Date Parsing}
+%\subsubsection{Date Parsing}
 %Use command \cs{datatool\_}\meta{style}\verb|_parse_date:NNnTF|
 %with regular expression 
 %\cs{c\_datatool\_}\meta{variant}\verb|_anchored_|\meta{style}\verb|_date_regex|
@@ -203,7 +204,7 @@
     }
  }
 %    \end{macrocode}
-%\paragraph{Time Parsing}
+%\subsubsection{Time Parsing}
 %Use command \cs{datatool\_}\meta{style}\verb|_parse_time:NNnTF|
 %with regular expression 
 %\cs{c\_datatool\_}\meta{variant}\verb|_anchored_|\meta{style}\verb|_time_regex|
@@ -235,7 +236,7 @@
     }
  }
 %    \end{macrocode}
-%\paragraph{Time Zone Mappings}
+%\subsubsection{Time Zone Mappings}
 %Define time zone mapping command for this region:
 %    \begin{macrocode}
 \cs_new:Nn \datatool_CA_get_timezone_map:n
@@ -258,7 +259,7 @@
 \datatool_region_set_timezone_map:nn { CA / PST } { -08:00 }
 \datatool_region_set_timezone_map:nn { CA / PDT } { -07:00 }
 %    \end{macrocode}
-%\subsubsection{Options}
+%\subsection{Options}
 %Define options for this region:
 %    \begin{macrocode}
 \datatool_locale_define_keys:nn { CA }
@@ -362,7 +363,7 @@
     } ,
  }
 %    \end{macrocode}
-%\subsubsection{Hooks}
+%\subsection{Hooks}
 %Command to update temporal parsing commands for this region:
 %    \begin{macrocode}
 \newcommand \datatoolCAsettemporalparsers

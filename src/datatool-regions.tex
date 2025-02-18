@@ -1,6 +1,5 @@
-% arara: pdflatex
-\PassOptionsToPackage{noprint}{doc}% command names are too long
-\documentclass{ltxdoc}
+\documentclass[titlepage=false]{scrreport}
+\usepackage[noprint]{doc}% command names are too long
 
 \usepackage[T1]{fontenc}
 \usepackage{tcolorbox}
@@ -55,7 +54,7 @@ install the applicable language module (for example,
 
 \tableofcontents
 
-\section{Introduction}
+\chapter{Introduction}
 \label{sec:intro}
 
 This bundle provides language-independent region support files for
@@ -141,6 +140,10 @@ the locales provided. For example:
 As with \sty{datatool}, these supplementary packages internally load
 \sty{datatool-base} so if that has already been loaded, then the
 localisation support should already have been set.
+
+\chapter{Supported Regions}
+
+Only a limited number of regions are currently supported.
 
 \section{Region \qt{CA}}
 

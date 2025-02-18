@@ -1,4 +1,4 @@
-%\subsection{datatool-GB.ldf}\label{sec:datatool-GB}
+%\section{datatool-GB.ldf}\label{sec:datatool-GB}
 % Support for region GB.
 %\changes{3.0}{??}{new}
 %    \begin{macrocode}
@@ -8,7 +8,7 @@
 %    \begin{macrocode}
 \ExplSyntaxOn
 %    \end{macrocode}
-%\subsubsection{Numbers and Currency}
+%\subsection{Numbers and Currency}
 % Set the number group and decimal symbols for this region.
 %    \begin{macrocode}
 \cs_new:Nn \datatool_gb_set_numberchars_official:
@@ -51,7 +51,7 @@
  }
 %    \end{macrocode}
 %
-%\subsubsection{Parsing Dates and Time}
+%\subsection{Parsing Dates and Time}
 % Provide a way to configure temporal parsing style.
 % The default is day/month/year but may be changed with
 % \cs{DTLsetLocaleOptions}. For example:
@@ -69,7 +69,7 @@
 \tl_new:N \l__datatool_GB_timevariant_tl
 \tl_set:Nn \l__datatool_GB_timevariant_tl { colon }
 %    \end{macrocode}
-%\paragraph{Time Stamp Parsing}
+%\subsubsection{Time Stamp Parsing}
 %Use command
 %\cs{datatool\_}\meta{date-style}\verb|_hhmmss_tz_parse_timestamp:nnNnTF|
 %with date regular expression 
@@ -164,7 +164,7 @@
     }
  }
 %    \end{macrocode}
-%\paragraph{Date Parsing}
+%\subsubsection{Date Parsing}
 %Use command \cs{datatool\_}\meta{style}\verb|_parse_date:NNnTF|
 %with regular expression 
 %\cs{c\_datatool\_}\meta{variant}\verb|_anchored_|\meta{style}\verb|_date_regex|
@@ -229,7 +229,7 @@
     }
  }
 %    \end{macrocode}
-%\paragraph{Time Parsing}
+%\subsubsection{Time Parsing}
 %Use command \cs{datatool\_}\meta{style}\verb|_parse_time:NNnTF|
 %with regular expression 
 %\cs{c\_datatool\_}\meta{variant}\verb|_anchored_|\meta{style}\verb|_time_regex|
@@ -268,7 +268,7 @@
  }
 %    \end{macrocode}
 %
-%\paragraph{Time Zones}
+%\subsubsection{Time Zones}
 %Define time zone mapping command for this region:
 %    \begin{macrocode}
 \cs_new:Nn \datatool_GB_get_timezone_map:n
@@ -284,7 +284,7 @@
 \datatool_region_set_timezone_map:nn { GB / CEST } { +02:00 }
 %    \end{macrocode}
 %
-%\subsubsection{Options}
+%\subsection{Options}
 %Define options for this region:
 %    \begin{macrocode}
 \datatool_locale_define_keys:nn { GB }
@@ -378,7 +378,7 @@
  }
 %    \end{macrocode}
 %
-%\subsubsection{Hooks}
+%\subsection{Hooks}
 %Command to update temporal parsing commands for this region:
 %    \begin{macrocode}
 \newcommand \datatoolGBsettemporalparsers
