@@ -12,7 +12,8 @@ Region files may additionally (if not dependent on the language) set
 the number group and decimal characters and parsing numeric dates
 and times.
 
-The language support is distributed separately. Any setting that
+The language support is distributed separately (except for
+`datatool-undetermined.ldf` which is supplied with `datatool` v3.0+). Any setting that
 depends on _both_ language and region should be supplied with the
 applicable language bundle. This may occur for regions with multiple
 official languages, where the number formatting or date/time parsing
@@ -40,6 +41,13 @@ In most cases the language and region are not inter-connected.
 This means that you would get the same result for the above with
 `locales={cy-GB}`, `locales={gd-GB}`, `locales={ga-GB}`,
 `locales={sco-GB}`, or simply `locales={GB}.`
+
+**Note:** bear in mind that if `tracklang` can't determine the
+applicable dialect label for the captions hook, the settings may not
+be applied when the language changes in multilingual documents.
+In this case, you can either load `tracklang` before `datatool` and
+set up the appropriate mappings or just add the applicable commands
+to the relevant captions hook.
 
 
 Further reading: [Localisation with datatool v3.0+](https://www.dickimaw-books.com/latex/tracklang/datatool-locale.shtml)
