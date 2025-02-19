@@ -1,11 +1,22 @@
 % arara: pdflatex
+%\listfiles
 \documentclass{article}
 
 \usepackage[T1]{fontenc}
 \usepackage[afrikaans,english]{babel}
-\usepackage[locales={af-ZA,en-ZA}]{datatool-base}
+\usepackage[locales={ZA}]{datatool-base}
 
 \begin{document}
+Dialects:
+\ForEachTrackedDialect\thisdialect
+{
+\par
+\thisdialect:
+language tag: \GetTrackedLanguageTag{\thisdialect};
+language: \TrackedLanguageFromDialect{\thisdialect};
+region: \TrackedIsoCodeFromLanguage{\TwoLetterIsoCountryCode}{\thisdialect}.
+ }
+
 \selectlanguage{afrikaans}
 Currency: \DTLdecimaltocurrency{1234.56}{\result}\result.
 

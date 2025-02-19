@@ -2,9 +2,7 @@
 \documentclass{article}
 
 \usepackage[T1]{fontenc}
-\usepackage{babel}
-\babelprovide{canadianenglish}
-\babelprovide{canadianfrench}
+\usepackage[canadian,british]{babel}
 \usepackage{datatool-base}
 
 \begin{document}
@@ -18,10 +16,10 @@ language: \TrackedLanguageFromDialect{\thisdialect};
 region: \TrackedIsoCodeFromLanguage{\TwoLetterIsoCountryCode}{\thisdialect}.
  }
 
-\selectlanguage{english}
+\selectlanguage{british}
 Currency: \DTLdecimaltocurrency{1234.56}{\result}\result.
 
-\selectlanguage{french}
+\selectlanguage{canadian}
 Currency: \DTLdecimaltocurrency{1234.56}{\result}\result.
 
 \end{document}

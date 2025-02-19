@@ -446,7 +446,5 @@
 %    \begin{macrocode}
 \ExplSyntaxOff
 %    \end{macrocode}
-% Add to language hook if applicable.
-%    \begin{macrocode}
-\TrackLangAddToCaptions{\DataToolBaseGB}
-%    \end{macrocode}
+%Note that the hook is added to the captions by \sty{datatool-base}
+%not by the region file.
