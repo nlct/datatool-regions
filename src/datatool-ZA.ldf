@@ -30,7 +30,7 @@
 %    \begin{macrocode}
 \newcommand \datatoolZAsetcurrency
  {
-   \DTLsetdefaultcurrency { ZAD }
+   \DTLsetdefaultcurrency { ZAR }
 %    \end{macrocode}
 %Number of digits that \cs{DTLdecimaltocurrency} should round to:
 %    \begin{macrocode}
