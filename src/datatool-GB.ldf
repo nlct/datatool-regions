@@ -10,25 +10,54 @@
 %    \end{macrocode}
 %\subsection{Numbers and Currency}
 % Set the number group and decimal symbols for this region.
+%Official style has comma number group and decimal dot.
 %    \begin{macrocode}
-\cs_new:Nn \datatool_gb_set_numberchars_official:
+\cs_new:Nn \datatool_GB_set_numberchars_official:
  {
    \DTLsetnumberchars { , } { . } 
  }
-\cs_new:Nn \datatool_gb_set_numberchars_education:
+%    \end{macrocode}
+% This will allow a normal space, \cs{,} (thin space command) or
+% the thin space Unicode character U+2009 as the number group separator when
+% parsing and will use \cs{,} when formatting.
+%    \begin{macrocode}
+\cs_new:Nn \datatool_GB_set_numberchars_education:
  {
-   \DTLsetnumberchars { ~ } { . } 
+   \datatool_set_thinspace_group_decimal_char:n { . }
  }
-\cs_new:Nn \datatool_gb_set_numberchars_old:
+%    \end{macrocode}
+%Old style uses mid-dot as the decimal point.
+%    \begin{macrocode}
+\cs_new:Nn \datatool_GB_set_numberchars_old:
  {
    \datatool_set_numberchars:nV { , } \l_datatool_middot_tl 
  }
+%    \end{macrocode}
+%Hook to set the number group and decimal characters for the region:
+%    \begin{macrocode}
 \newcommand \datatoolGBSetNumberChars
- { \datatool_gb_set_numberchars_official: }
+ {
+   \bool_if:NT \l_datatool_region_set_numberchars_bool
+    {
+      \datatool_GB_set_numberchars_official:
+    }
+ }
 %    \end{macrocode}
 % Set the currency format for this region.
 %    \begin{macrocode}
-\newcommand \datatoolGBcurrencyfmt { \dtlcurrdefaultfmt }
+\newcommand \datatoolGBcurrencyfmt [ 2 ]
+ {
+   \dtlcurrprefixfmt
+    {
+      \datatoolGBsymbolprefix { GB }
+      #1
+    }
+    { #2 }
+ }
+%    \end{macrocode}
+%Prefix for symbol, if required.
+%    \begin{macrocode}
+\newcommand \datatoolGBsymbolprefix [ 1 ] { }
 %    \end{macrocode}
 % Define the currency symbols for this region.
 %    \begin{macrocode}
@@ -40,14 +69,19 @@
 %    \end{macrocode}
 % Provide a command to set the currency for this region (for use
 % with any hook used when the locale changes).
+% NB this should do nothing with
+% \verb|\DTLsetup{region-currency=false}|
 %    \begin{macrocode}
-\newcommand \datatoolGBsetcurrency
+\newcommand \datatoolGBSetCurrency
  {
-   \DTLsetdefaultcurrency { GBP }
+   \bool_if:NT \l_datatool_region_set_currency_bool
+    {
+      \DTLsetdefaultcurrency { GBP }
 %    \end{macrocode}
 %Number of digits that \cs{DTLdecimaltocurrency} should round to:
 %    \begin{macrocode}
-   \renewcommand \DTLCurrentLocaleCurrencyDP { 2 }
+      \renewcommand \DTLCurrentLocaleCurrencyDP { 2 }
+    }
  }
 %    \end{macrocode}
 %
@@ -292,10 +326,31 @@
    number-style .choices:nn =
     { official , education , old }
     {
-      \cs_set_eq:Nc 
+      \exp_args:NNe \renewcommand
         \datatoolGBSetNumberChars
-        { datatool_gb_set_numberchars_ \l_keys_choice_tl : }
+         {
+           \exp_not:N \bool_if:NT
+            \exp_not:N \l_datatool_region_set_numberchars_bool
+             {
+               \exp_not:c { datatool_GB_set_numberchars_ \l_keys_choice_tl : }
+             }
+         }
+      \tl_if_eq:NnT \l_datatool_current_region_tl { GB }
+       {
+         \datatoolGBSetNumberChars
+       }
     } , 
+   currency-symbol-prefix .choice: ,
+   currency-symbol-prefix / false .code:n =
+    {
+      \cs_set_eq:NN \datatoolGBsymbolprefix \use_none:n
+    } ,
+   currency-symbol-prefix / true .code:n =
+    {
+      \cs_set_eq:NN
+       \datatoolGBsymbolprefix 
+       \datatool_currency_symbol_region_prefix:n
+    } ,
    date-style .choice: ,
    date-style / dmyyyy .code: n =
     {
@@ -381,7 +436,7 @@
 %\subsection{Hooks}
 %Command to update temporal parsing commands for this region:
 %    \begin{macrocode}
-\newcommand \datatoolGBsettemporalparsers
+\newcommand \datatoolGBSetTemporalParsers
  {
    \renewcommand \DTLCurrentLocaleParseTimeStamp
     { \datatool_GB_parse_timestamp:NnTF }
@@ -402,7 +457,7 @@
 %\texttt{iso} so there won't be a noticeable difference unless the
 %\sty{datetime2} regional setting is on.
 %    \begin{macrocode}
-\newcommand \datatoolGBsettemporalformatters
+\newcommand \datatoolGBSetTemporalFormatters
  {
    \let
     \DTLCurrentLocaleFormatDate
@@ -423,17 +478,17 @@
  }
 %    \end{macrocode}
 %
-%\begin{macro}{\DataToolBaseGB}
+%\begin{macro}{\DTLGBLocaleHook}
 %Command to update number symbols, currency and temporal parsing commands
 %for this region:
 %\changes{3.0}{??}{new}
 %    \begin{macrocode}
-\newcommand \DataToolBaseGB
+\newcommand \DTLGBLocaleHook
  {
   \datatoolGBSetNumberChars
-  \datatoolGBsetcurrency
-  \datatoolGBsettemporalparsers
-  \datatoolGBsettemporalformatters
+  \datatoolGBSetCurrency
+  \datatoolGBSetTemporalParsers
+  \datatoolGBSetTemporalFormatters
 %    \end{macrocode}
 %Allow language files to reference the region:
 %    \begin{macrocode}

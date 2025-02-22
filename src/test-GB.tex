@@ -5,6 +5,17 @@
 \usepackage[locales={GB}]{datatool-base}
 
 \begin{document}
+Currency code: \DTLCurrencyCode.
+
 Currency: \DTLdecimaltocurrency{1234.56}{\result}\result.
+%\show\result
+
+Parse: \DTLparse\result{\pounds 1,235}\result.
+%\show\result
+
+\DTLsetup{numeric={auto-reformat}}
+
+Parse: \DTLparse\result{£1,235}\result.
+%\show\result
 
 \end{document}

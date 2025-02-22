@@ -17,10 +17,53 @@
 % \sty{datatool} language module. For example,
 % \file{datatool-en-CA.ldf} is provided with
 % \file{datatool-english}.
+% However, a region hook is still needed to support 
+%\verb|\DTLsetup{numeric={region-number-chars}}| although it's not
+%added to the language hook:
+%    \begin{macrocode}
+\newcommand \datatoolCASetNumberChars
+ {
+   \bool_if:NT \l_datatool_region_set_numberchars_bool
+    {
+      \tl_if_empty:NTF \l_datatool_current_language_tl
+       {
+          \PackageWarning { datatool-CA }
+           {
+              No ~ current ~ language: ~ can't ~ set ~
+              number ~ group ~ and ~ decimal ~ characters
+           }
+       }
+       {
+         \cs_if_exist_use:cF
+          { datatool \l_datatool_current_language_tl CASetNumberChars }
+           {
+             \PackageWarning { datatool-CA }
+              {
+                 No ~ support ~ for ~ locale ~
+                 ` \l_datatool_current_language_tl - CA': ~ can't ~ set ~
+                 number ~ group ~ and ~ decimal ~ characters
+              }
+           }
+       }
+    }
+ }
+%    \end{macrocode}
 %
 % Set the currency format for this region.
 %    \begin{macrocode} 
-\newcommand \datatoolCAcurrencyfmt { \dtlcurrdefaultfmt }
+\newcommand \datatoolCAcurrencyfmt [ 2 ]
+ { 
+   \dtlcurrprefixfmt
+    {
+      \datatoolCAsymbolprefix { CA }
+      #1
+    }
+    { #2 }
+ }
+%    \end{macrocode}
+%Prefix for symbol, if required.
+%    \begin{macrocode}
+\newcommand \datatoolCAsymbolprefix [ 1 ] { }
 %    \end{macrocode}
 % Define the currency symbols for this region.
 %    \begin{macrocode}
@@ -32,14 +75,19 @@
 %    \end{macrocode}
 % Provide a command to set the currency for this region (for use
 % with any hook used when the locale changes).
+% NB this should do nothing with
+% \verb|\DTLsetup{region-currency=false}|
 %    \begin{macrocode}
-\newcommand \datatoolCAsetcurrency
+\newcommand \datatoolCASetCurrency
  {
-   \DTLsetdefaultcurrency { CAD }
+   \bool_if:NT \l_datatool_region_set_currency_bool
+    {
+      \DTLsetdefaultcurrency { CAD }
 %    \end{macrocode}
 %Number of digits that \cs{DTLdecimaltocurrency} should round to:
 %    \begin{macrocode}
-   \renewcommand \DTLCurrentLocaleCurrencyDP { 2 }
+      \renewcommand \DTLCurrentLocaleCurrencyDP { 2 }
+    }
  }
 %    \end{macrocode}
 %\subsection{Date and Time Parsing}
@@ -282,6 +330,17 @@
           }
        }
     } ,
+   currency-symbol-prefix .choice: ,
+   currency-symbol-prefix / false .code:n = 
+    {
+      \cs_set_eq:NN \datatoolCAsymbolprefix \use_none:n
+    } ,
+   currency-symbol-prefix / true .code:n = 
+    {
+      \cs_set_eq:NN
+        \datatoolCAsymbolprefix
+        \datatool_currency_symbol_region_prefix:n
+    } ,
    date-style .choice: ,
    date-style / dmyyyy .code: n =
     {
@@ -366,7 +425,7 @@
 %\subsection{Hooks}
 %Command to update temporal parsing commands for this region:
 %    \begin{macrocode}
-\newcommand \datatoolCAsettemporalparsers
+\newcommand \datatoolCASetTemporalParsers
  {
    \renewcommand \DTLCurrentLocaleParseTimeStamp
     { \datatool_CA_parse_timestamp:NnTF }
@@ -387,7 +446,7 @@
 %\texttt{iso} so there won't be a noticeable difference unless the
 %\sty{datetime2} regional setting is on.
 %    \begin{macrocode}
-\newcommand \datatoolCAsettemporalformatters
+\newcommand \datatoolCASetTemporalFormatters
  {
    \let
     \DTLCurrentLocaleFormatDate
@@ -409,14 +468,14 @@
 %    \end{macrocode}
 %
 %Command to update currency and temporal parsing commands for this region:
-%\begin{macro}{\DataToolBaseCA}
+%\begin{macro}{\DTLCALocaleHook}
 %\changes{3.0}{??}{new}
 %    \begin{macrocode}
-\newcommand \DataToolBaseCA
+\newcommand \DTLCALocaleHook
  {
-  \datatoolCAsetcurrency
-  \datatoolCAsettemporalparsers
-  \datatoolCAsettemporalformatters
+  \datatoolCASetCurrency
+  \datatoolCASetTemporalParsers
+  \datatoolCASetTemporalFormatters
 %    \end{macrocode}
 %Allow language files to reference the region:
 %    \begin{macrocode}
