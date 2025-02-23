@@ -9,40 +9,30 @@
 %    \end{macrocode}
 %
 %\subsection{Numbers and Currency}
-% NB the number group and decimal symbols for this region should be
-% set in the language file \filemeta{datatool-}{lang}{ZA.ldf} as they depend on both the language
-% and region. Those files should be included in the applicable
-% \sty{datatool} language module. For example,
-% \file{datatool-en-ZA.ldf} is provided with
-% \file{datatool-english}.
-% However, a region hook is still needed to support 
-%\verb|\DTLsetup{numeric={region-number-chars}}| although it's not
-%added to the language hook:
+%Official style is to use dot separator and decimal dot.
+%    \begin{macrocode} 
+\cs_new:Nn \datatool_ZA_set_numberchars_official:
+ {
+   \DTLsetnumberchars { . } { , }
+ } 
+%    \end{macrocode}
+%but allow dialect to use another style.
+%    \begin{macrocode} 
+\cs_new:Nn \datatool_ZA_set_numberchars_dialect:
+ {
+   \cs_if_exist_use:cF
+    { datatool \l_datatool_current_language_tl ZASetNumberChars }
+    {
+      \datatool_ZA_set_numberchars_official:
+    }
+ } 
+%    \end{macrocode}
 %    \begin{macrocode}
 \newcommand \datatoolZASetNumberChars
  {
    \bool_if:NT \l_datatool_region_set_numberchars_bool
     {
-      \tl_if_empty:NTF \l_datatool_current_language_tl
-       {
-          \PackageWarning { datatool-ZA }
-           {
-              No ~ current ~ language: ~ can't ~ set ~
-              number ~ group ~ and ~ decimal ~ characters
-           }
-       }
-       {
-         \cs_if_exist_use:cF
-          { datatool \l_datatool_current_language_tl ZASetNumberChars }
-           {
-             \PackageWarning { datatool-ZA }
-              {
-                 No ~ support ~ for ~ locale ~
-                 ` \l_datatool_current_language_tl - ZA': ~ can't ~ set ~
-                 number ~ group ~ and ~ decimal ~ characters
-              }
-           }
-       }
+      \datatool_ZA_set_numberchars_official:
     }
  }
 %    \end{macrocode}
@@ -283,6 +273,23 @@
 %    \begin{macrocode}
 \datatool_locale_define_keys:nn { ZA }
  {
+   number-style .choices:nn =
+    { official , dialect }
+    {
+      \exp_args:NNe \renewcommand
+        \datatoolZASetNumberChars
+         {
+           \exp_not:N \bool_if:NT
+            \exp_not:N \l_datatool_region_set_numberchars_bool
+             {
+               \exp_not:c { datatool_ZA_set_numberchars_ \l_keys_choice_tl : }
+             }
+         }
+      \tl_if_eq:NnT \l_datatool_current_region_tl { ZA }
+       {
+         \datatoolZASetNumberChars
+       }
+    } ,
    date-style .choice: ,
    date-style / dmyyyy .code: n =
     {
