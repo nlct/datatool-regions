@@ -64,7 +64,7 @@
  { \datatoolGBcurrencyfmt }
  { GBP }
  { \pounds }
- \l_datatool_pound_str 
+ \l_datatool_pound_tl 
 %    \end{macrocode}
 %Register the currency code with this region:
 %    \begin{macrocode}
