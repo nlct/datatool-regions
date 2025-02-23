@@ -1,0 +1,56 @@
+Test	Notes
+1,234	Comma
+1,234.5	Comma Dot
+1.234	Dot
+1.234,5	Dot Comma
+1'234	Apostrophe (straight)
+1'234.5	Apostrophe (straight) Dot
+1'234,5	Apostrophe (straight) Comma
+1’234	Apostrophe (curly)
+1’234.5	Apostrophe (curly) Dot
+1’234,5	Apostrophe (curly) Comma
+1 234	Space
+1 234.5	Space Dot
+1 234	Thin space
+1 234.5	Thin space Dot
+1 234,5	Thin space Comma
+1_234	Underscore
+1_234.5	Underscore Dot
+1_234,5	Underscore Comma
+1,234·5	Comma Mid-Dot
+1 234·5	Space Mid-Dot
+1 234.5	Thin space Mid-Dot
+$1,234	Dollar Comma
+$1.234	Dollar Dot
+£1,234	Pound Comma
+£1.234	Pound Dot
+€1,234	Pound Comma
+€1.234	Pound Dot
+R1,234	Rand Comma
+R1.234	Rand Dot
+2025-02-23	Year Month Day (hyphen)
+02-23-2025	Day Month Year (hyphen)
+02/23/2025	Day Month Year (slash)
+02.23.2025	Day Month Year (dot)
+23-02-2025	Month Day Year (hyphen)
+23/02/2025	Month Day Year (slash)
+23.02.2025	Month Day Year (dot)
+Sunday 23rd March 2025	English Day Month Year
+March 23, 2025	English Month Day Year
+Sun 23rd Mar 2025	English Day Month Year (abbreviated)
+Mar 23, 2025	English Month Day Year (abbreviated)
+1st Sep 2025	English Day Month Year (abbreviated dotless)
+1st Sep. 2025	English Day Month Year (abbreviated dot)
+1st Sept 2025	English Day Month Year (abbreviated 4-letters)
+13:33	Hour Minute (colon)
+13:33:24	Hour Minute Second (colon)
+13.33	Hour Minute (dot)
+1:33pm	English 12-Hour Minute
+1:33am	English 12-Hour Minute
+1pm	English 12-Hour
+1am	English 12-Hour
+1:33 in the morning	English 12-Hour Minute
+1:33 in the afternoon	English 12-Hour Minute
+02/23/2025 13:33 GMT	Day Month Year (slash) Hour Minute Time Zone
+02/23/2025 1pm GMT	Day Month Year (slash) English 12-Hour Time Zone
+02/06/2025 11:34 BST	Day Month Year (slash) Time Zone

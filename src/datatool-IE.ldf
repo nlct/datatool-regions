@@ -1,201 +1,162 @@
-%\section{datatool-GB.ldf}\label{sec:datatool-GB}
-% Support for region GB.
+%\section{datatool-IE.ldf}\label{sec:datatool-IE}
+% Support for region IE.
 %    \begin{macrocode}
-\TrackLangProvidesResource{GB}%%FILEVERSION%%
+\TrackLangProvidesResource{IE}%%FILEVERSION%%
 %    \end{macrocode}
 % Switch on \LaTeX3 syntax:
 %    \begin{macrocode}
-\ExplSyntaxOn
+\ExplSyntaxOn 
 %    \end{macrocode}
 %\subsection{Numbers and Currency}
-% Set the number group and decimal symbols for this region.
-%Official style has comma number group and decimal dot.
+%Set the number group and decimal symbols for this region.
 %    \begin{macrocode}
-\cs_new:Nn \datatool_GB_set_numberchars_official:
- {
-   \DTLsetnumberchars { , } { . } 
+\cs_new:Nn \datatool_IE_set_numberchars_official:
+ {  
+  \datatool_set_numberchars:nn { , } { . }
  }
 %    \end{macrocode}
-% This will allow a normal space, \cs{,} (thin space command) or
-% the thin space Unicode character U+2009 as the number group separator when
-% parsing and will use \cs{,} when formatting.
+%Unofficial style.
 %    \begin{macrocode}
-\cs_new:Nn \datatool_GB_set_numberchars_education:
- {
-   \datatool_set_thinspace_group_decimal_char:n { . }
- }
-%    \end{macrocode}
-%Old style uses mid-dot as the decimal point.
-%    \begin{macrocode}
-\cs_new:Nn \datatool_GB_set_numberchars_old:
- {
-   \datatool_set_numberchars:nV { , } \l_datatool_middot_tl 
+\cs_new:Nn \datatool_IE_set_numberchars_unofficial:
+ {  
+  \datatool_set_thinspace_group_decimal_char:n { . }
  }
 %    \end{macrocode}
 %Hook to set the number group and decimal characters for the region:
 %    \begin{macrocode}
-\newcommand \datatoolGBSetNumberChars
+\newcommand \datatoolIESetNumberChars
  {
    \bool_if:NT \l_datatool_region_set_numberchars_bool
     {
-      \datatool_GB_set_numberchars_official:
+      \datatool_IE_set_numberchars_official:
     }
  }
 %    \end{macrocode}
-% Set the currency format for this region.
+% The EUR currency is already defined by \sty{datatool-base}, but we
+% need to register the currency code with this region:
 %    \begin{macrocode}
-\newcommand \datatoolGBcurrencyfmt [ 2 ]
- {
-   \dtlcurrprefixfmt
-    {
-      \datatoolGBsymbolprefix { GB }
-      #1
-    }
-    { #2 }
- }
-%    \end{macrocode}
-%Prefix for symbol, if required.
-%    \begin{macrocode}
-\newcommand \datatoolGBsymbolprefix [ 1 ] { }
-%    \end{macrocode}
-% Define the currency symbols for this region.
-%    \begin{macrocode}
-\datatool_def_currency:nnnV
- { \datatoolGBcurrencyfmt }
- { GBP }
- { \pounds }
- \l_datatool_pound_str 
-%    \end{macrocode}
-%Register the currency code with this region:
-%    \begin{macrocode}
-\datatool_register_regional_currency_code:nn { GB } { GBP }
+\datatool_register_regional_currency_code:nn { IE } { EUR }
 %    \end{macrocode}
 % Provide a command to set the currency for this region (for use
 % with any hook used when the locale changes).
-% NB this should do nothing with
-% \verb|\DTLsetup{region-currency=false}|
 %    \begin{macrocode}
-\newcommand \datatoolGBSetCurrency
- {
-   \bool_if:NT \l_datatool_region_set_currency_bool
-    {
-      \DTLsetdefaultcurrency { GBP }
+\newcommand \datatoolIEsetcurrency
+{
+  \DTLsetdefaultcurrency { EUR }
 %    \end{macrocode}
 %Number of digits that \cs{DTLdecimaltocurrency} should round to:
 %    \begin{macrocode}
-      \renewcommand \DTLCurrentLocaleCurrencyDP { 2 }
-    }
- }
+  \renewcommand \DTLCurrentLocaleCurrencyDP { 2 }
+}
 %    \end{macrocode}
-%
-%\subsection{Parsing Dates and Time}
-% Provide a way to configure temporal parsing style.
-% The default is day/month/year but may be changed with
-% \cs{DTLsetLocaleOptions}. For example:
+%\subsection{Date and Time Parsing}
+% This defaults to day/month/year and should be changed as
+% appropriate using \cs{DTLsetLocaleOptions}. For example:
 %\begin{dispListing}
-%\DTLsetLocaleOptions{GB/parse}{date-style=dmyy, date-variant=dot}
+%\DTLsetLocaleOptions{IE}{date-style=dmyyyy, date-variant=slash}
 %\end{dispListing}
 %An appropriate language file will need to also be installed to
 %parse dates containing month names or day of week names.
 %
+% Provide a way to configure parsing style.
 %    \begin{macrocode}
-\tl_new:N \l__datatool_GB_datevariant_tl
-\tl_set:Nn \l__datatool_GB_datevariant_tl { slash }
-\tl_new:N \l__datatool_GB_datestyle_tl
-\tl_set:Nn \l__datatool_GB_datestyle_tl { ddmmyyyy }
-\tl_new:N \l__datatool_GB_timevariant_tl
-\tl_set:Nn \l__datatool_GB_timevariant_tl { colon }
+\tl_new:N __datatool_IE_datevariant_tl
+\tl_set:Nn __datatool_IE_datevariant_tl { slash }
+\tl_new:N __datatool_IE_datestyle_tl
+\tl_set:Nn __datatool_IE_datestyle_tl { ddmmyyyy }
+\tl_new:N __datatool_IE_timevariant_tl
+\tl_set:Nn __datatool_IE_timevariant_tl { colon }
 %    \end{macrocode}
 %\subsubsection{Time Stamp Parsing}
 %Use command
-%\cs{datatool\_}\meta{date-style}\verb|_hhmmss_tz_parse_timestamp:nnNnTF|
+%\cs{datatool_}\meta{date-style}\verb|_hhmmss_tz_parse_timestamp:nnNnTF|
 %with date regular expression 
 %\cs{c\_datatool\_}\meta{date-variant}\verb|_|\meta{date-style}\verb|_date_regex|
 %and time regular expression
 %\cs{c\_datatool\_}\meta{time-variant}\verb|_hhmmss_time_regex|
 %    \begin{macrocode}
-\cs_new:Nn \datatool_GB_parse_timestamp:NnTF
+\cs_new:Nn \datatool_IE_parse_timestamp:NnTF
  {
    \cs_if_exist:cTF
      {
        datatool_
-       \l__datatool_GB_datestyle_tl
+       \l__datatool_IE_datestyle_tl
        _hhmmss_tz_parse_timestamp:ccNnTF
      }
     {
       \cs_if_exist:cTF
        {
           c_datatool_
-          \l__datatool_GB_datevariant_tl
+          \l__datatool_IE_datevariant_tl
           _
-          \l__datatool_GB_datestyle_tl
+          \l__datatool_IE_datestyle_tl
           _date_regex
        }
        {
          \cs_if_exist:cTF
           {
             c_datatool_
-            \l__datatool_GB_timevariant_tl
+            \l__datatool_IE_timevariant_tl
             _hhmmss_time_regex
           }
           {
             \use:c
              {
                datatool_
-              \l__datatool_GB_datestyle_tl
+              \l__datatool_IE_datestyle_tl
               _hhmmss_tz_parse_timestamp:ccNnTF
              }
              {
                c_datatool_
-               \l__datatool_GB_datevariant_tl
+               \l__datatool_IE_datevariant_tl
                _
-               \l__datatool_GB_datestyle_tl
+               \l__datatool_IE_datestyle_tl
                _date_regex
              }
              {
                c_datatool_
-               \l__datatool_GB_timevariant_tl
+               \l__datatool_IE_timevariant_tl
                _hhmmss_time_regex
              }
               #1 { #2 } { #3 } { #4 }
           }
           {
             \datatool_warn_check_head_language_empty:Vnnn
-             \l__datatool_GB_timevariant_tl
-             { datatool-GB }
+             \l__datatool_IE_timevariant_tl
+             { datatool-IE }
              {
                No ~ language ~ support ~ for ~ time ~ variant ~
-               ` \exp_args:Ne \tl_tail:n { \l__datatool_GB_timevariant_tl } '
+               ` \exp_args:Ne \tl_tail:n { \l__datatool_IE_timevariant_tl } '
              }
              {
               No ~ support ~ for ~ time ~ variant ~
-              ` \l__datatool_GB_timevariant_tl '
+              ` \l__datatool_IE_timevariant_tl '
              }
             #4
           }
        }
        {
          \datatool_warn_check_head_language_empty:Vnnn
-           \l__datatool_GB_datevariant_tl
-           { datatool-GB }
+           \l__datatool_IE_datevariant_tl
+           { datatool-IE }
            {
              No ~ language ~ support ~ for ~ date ~ style ~
-              ` \l__datatool_GB_datestyle_tl '
+              ` \l__datatool_IE_datestyle_tl '
            }
            {
              No ~ support ~ for ~ date ~ style ~
-             ` \l__datatool_GB_datestyle_tl ' ~ with ~
+             ` \l__datatool_IE_datestyle_tl ' ~ with ~
              variant ~
-             ` \l__datatool_GB_datevariant_tl '
+             ` \l__datatool_IE_datevariant_tl '
            }
          #4
        }
     }
     {
-      \PackageWarning { datatool-GB }
+      \PackageWarning { datatool-IE }
        {
           No ~ support ~ for ~ date ~ style ~
-          ` \l__datatool_GB_datestyle_tl '
+          ` \l__datatool_IE_datestyle_tl '
        }
       #4
     }
@@ -206,61 +167,61 @@
 %with regular expression 
 %\cs{c\_datatool\_}\meta{variant}\verb|_anchored_|\meta{style}\verb|_date_regex|
 %    \begin{macrocode}
-\cs_new:Nn \datatool_GB_parse_date:NnTF
+\cs_new:Nn \datatool_IE_parse_date:NnTF
  {
    \cs_if_exist:cTF
      {
        datatool_
-       \l__datatool_GB_datestyle_tl
+       \l__datatool_IE_datestyle_tl
        _parse_date:NNnTF
      }
     {
       \cs_if_exist:cTF
        {
          c_datatool_
-         \l__datatool_GB_datevariant_tl
+         \l__datatool_IE_datevariant_tl
          _anchored_
-         \l__datatool_GB_datestyle_tl
+         \l__datatool_IE_datestyle_tl
          _date_regex
        }
        {
          \exp_args:cc
          {
            datatool_
-           \l__datatool_GB_datestyle_tl
+           \l__datatool_IE_datestyle_tl
            _parse_date:NNnTF
          }
          {
            c_datatool_
-           \l__datatool_GB_datevariant_tl
+           \l__datatool_IE_datevariant_tl
            _anchored_
-           \l__datatool_GB_datestyle_tl
+           \l__datatool_IE_datestyle_tl
            _date_regex
          }
           #1 { #2 } { #3 } { #4 }
        }
        {
          \datatool_warn_check_head_language_empty:Vnnn
-          \l__datatool_GB_datevariant_tl 
-          { datatool-GB }
+          \l__datatool_IE_datevariant_tl 
+          { datatool-IE }
           {
             No ~ language ~ support ~ for ~ date ~ style ~
-             ` \l__datatool_GB_datestyle_tl '
+             ` \l__datatool_IE_datestyle_tl '
           }
           {
              No ~ support ~ for ~ date ~ style ~
-             ` \l__datatool_GB_datestyle_tl ' ~ with ~
+             ` \l__datatool_IE_datestyle_tl ' ~ with ~
              variant ~
-             ` \l__datatool_GB_datevariant_tl '
+             ` \l__datatool_IE_datevariant_tl '
           }
          #4
        }
     }
     {
-      \PackageWarning { datatool-GB }
+      \PackageWarning { datatool-IE }
        {
           No ~ support ~ for ~ date ~ style ~
-          ` \l__datatool_GB_datestyle_tl '
+          ` \l__datatool_IE_datestyle_tl '
        }
       #4
     }
@@ -271,186 +232,174 @@
 %with regular expression 
 %\cs{c\_datatool\_}\meta{variant}\verb|_anchored_|\meta{style}\verb|_time_regex|
 %    \begin{macrocode}
-\cs_new:Nn \datatool_GB_parse_time:NnTF
+\cs_new:Nn \datatool_IE_parse_time:NnTF
  {
    \cs_if_exist:cTF
     {
       c_datatool_
-      \l__datatool_GB_timevariant_tl
+      \l__datatool_IE_timevariant_tl
       _anchored_hhmmss_time_regex
     }
     {
       \datatool_hhmmss_parse_time:cNnTF
        {
         c_datatool_
-        \l__datatool_GB_timevariant_tl
+        \l__datatool_IE_timevariant_tl
         _anchored_hhmmss_time_regex
        }
         #1 { #2 } { #3 } { #4 }
     }
     {
       \datatool_warn_check_head_language_empty:Vnnn
-        \l__datatool_GB_timevariant_tl 
-        { datatool-GB }
+        \l__datatool_IE_timevariant_tl 
+        { datatool-IE }
         {
            No ~ language ~ support ~ for ~ time ~ variant ~
-           ` \exp_args:Ne \tl_tail:n { \l__datatool_GB_timevariant_tl } '
+           ` \exp_args:Ne \tl_tail:n { \l__datatool_IE_timevariant_tl } '
         }
         {
            No ~ support ~ for ~ time ~ variant ~
-           ` \l__datatool_GB_timevariant_tl '
+           ` \l__datatool_IE_timevariant_tl '
         }
       #4
     }
  }
 %    \end{macrocode}
 %
-%\subsubsection{Time Zones}
+%\subsubsection{Time Zone Mappings}
 %Define time zone mapping command for this region:
 %    \begin{macrocode}
-\cs_new:Nn \datatool_GB_get_timezone_map:n
+\cs_new:Nn \datatool_IE_get_timezone_map:n
  {
-   \datatool_region_get_timezone_map:n { GB / #1 }
+   \datatool_region_get_timezone_map:n { IE / #1 }
  }
 %    \end{macrocode}
 %Define time zone IDs for this region (one-way map from ID to offset):
 %    \begin{macrocode}
-\datatool_region_set_timezone_map:nn { GB / GMT } { +00:00 }
-\datatool_region_set_timezone_map:nn { GB / BST } { +01:00 }
-\datatool_region_set_timezone_map:nn { GB / CET } { +01:00 }
-\datatool_region_set_timezone_map:nn { GB / CEST } { +02:00 }
+\datatool_region_set_timezone_map:nn { IE / IST } { +01:00 }
+\datatool_region_set_timezone_map:nn { IE / GMT } { +00:00 }
+\datatool_region_set_timezone_map:nn { IE / CEST } { +02:00 }
+\datatool_region_set_timezone_map:nn { IE / CET } { +01:00 }
 %    \end{macrocode}
-%
 %\subsection{Options}
 %Define options for this region:
 %    \begin{macrocode}
-\datatool_locale_define_keys:nn { GB }
+\datatool_locale_define_keys:nn { IE }
  {
+
    number-style .choices:nn =
-    { official , education , old }
+    { official, unofficial }
     {
       \exp_args:NNe \renewcommand
-        \datatoolGBSetNumberChars
+        \datatoolIESetNumberChars
          {
            \exp_not:N \bool_if:NT
             \exp_not:N \l_datatool_region_set_numberchars_bool
              {
-               \exp_not:c { datatool_GB_set_numberchars_ \l_keys_choice_tl : }
+               \exp_not:c { datatool_IE_set_numberchars_ \l_keys_choice_tl : }
              }
          }
-      \tl_if_eq:NnT \l_datatool_current_region_tl { GB }
+      \tl_if_eq:NnT \l_datatool_current_region_tl { IE }
        {
-         \datatoolGBSetNumberChars
+         \datatoolIESetNumberChars
        }
-    } , 
-   currency-symbol-prefix .choice: ,
-   currency-symbol-prefix / false .code:n =
-    {
-      \cs_set_eq:NN \datatoolGBsymbolprefix \use_none:n
     } ,
-   currency-symbol-prefix / true .code:n =
-    {
-      \cs_set_eq:NN
-       \datatoolGBsymbolprefix 
-       \datatool_currency_symbol_region_prefix:n
-    } ,
-   currency-symbol-prefix .default:n = { true } ,
+
    date-style .choice: ,
    date-style / dmyyyy .code: n =
     {
-      \tl_set:Nn \l__datatool_GB_datestyle_tl { ddmmyyyy }
+      \tl_set:Nn \l__datatool_IE_datestyle_tl { ddmmyyyy }
     } ,
    date-style / mdyyyy .code: n =
     {
-      \tl_set:Nn \l__datatool_GB_datestyle_tl { mmddyyyy }
+      \tl_set:Nn \l__datatool_IE_datestyle_tl { mmddyyyy }
     } ,
    date-style / yyyymd .code: n =
     {
-      \tl_set:Nn \l__datatool_GB_datestyle_tl { yyyymmdd }
+      \tl_set:Nn \l__datatool_IE_datestyle_tl { yyyymmdd }
     } ,
    date-style / dmyy .code: n =
     {
-      \tl_set:Nn \l__datatool_GB_datestyle_tl { ddmmyy }
+      \tl_set:Nn \l__datatool_IE_datestyle_tl { ddmmyy }
     } ,
    date-style / mdyy .code: n =
     {
-      \tl_set:Nn \l__datatool_GB_datestyle_tl { mmddyy }
+      \tl_set:Nn \l__datatool_IE_datestyle_tl { mmddyy }
     } ,
    date-style / yymd .code: n =
     {
-      \tl_set:Nn \l__datatool_GB_datestyle_tl { yymmdd }
+      \tl_set:Nn \l__datatool_IE_datestyle_tl { yymmdd }
     } ,
    date-variant .choice: ,
    date-variant / slash .code:n =
     {
-      \tl_set:Nn \l__datatool_GB_datevariant_tl { slash }
+      \tl_set:Nn \l__datatool_IE_datevariant_tl { slash }
     } ,
    date-variant / hyphen .code:n =
     {
-      \tl_set:Nn \l__datatool_GB_datevariant_tl { hyphen }
+      \tl_set:Nn \l__datatool_IE_datevariant_tl { hyphen }
     } ,
    date-variant / dot .code:n =
     {
-      \tl_set:Nn \l__datatool_GB_datevariant_tl { dot }
+      \tl_set:Nn \l__datatool_IE_datevariant_tl { dot }
     } ,
    date-variant / dialect .code:n =
     {
-      \tl_set:Nn \l__datatool_GB_datevariant_tl
+      \tl_set:Nn \l__datatool_IE_datevariant_tl
         { \l_datatool_current_language_tl }
     } ,
    time-variant .choice: ,
    time-variant / colon .code:n =
     {
-      \tl_set:Nn \l__datatool_GB_timevariant_tl { colon }
+      \tl_set:Nn \l__datatool_IE_timevariant_tl { colon }
     } ,
    time-variant / dot .code:n =
     {
-      \tl_set:Nn \l__datatool_GB_timevariant_tl { dot }
+      \tl_set:Nn \l__datatool_IE_timevariant_tl { dot }
     } ,
    time-variant / dialect .code:n =
     {
-      \tl_if_eq:NnTF \l__datatool_GB_timevariant_tl { dot }
+      \tl_if_eq:NnTF \l__datatool_IE_timevariant_tl { dot }
        {
-         \tl_set:Nn \l__datatool_GB_timevariant_tl
+         \tl_set:Nn \l__datatool_IE_timevariant_tl
           { \l_datatool_current_language_tl _dot }
        }
        {
          \tl_if_in:NnF
-           \l__datatool_GB_timevariant_tl
+           \l__datatool_IE_timevariant_tl
             { \l_datatool_current_language_tl }
           {
-            \tl_set:Nn \l__datatool_GB_timevariant_tl
+            \tl_set:Nn \l__datatool_IE_timevariant_tl
              { \l_datatool_current_language_tl _colon }
           }
        }
     } ,
    time-variant / dialect-colon .code:n =
     {
-      \tl_set:Nn \l__datatool_GB_timevariant_tl
+      \tl_set:Nn \l__datatool_IE_timevariant_tl
         { \l_datatool_current_language_tl _colon }
     } ,
    time-variant / dialect-dot .code:n =
     {
-      \tl_set:Nn \l__datatool_GB_timevariant_tl
+      \tl_set:Nn \l__datatool_IE_timevariant_tl
         { \l_datatool_current_language_tl _dot }
     } ,
  }
 %    \end{macrocode}
-%
 %\subsection{Hooks}
 %Command to update temporal parsing commands for this region:
 %    \begin{macrocode}
-\newcommand \datatoolGBSetTemporalParsers
+\newcommand \datatoolIESetTemporalParsers
  {
    \renewcommand \DTLCurrentLocaleParseTimeStamp
-    { \datatool_GB_parse_timestamp:NnTF }
+    { \datatool_IE_parse_timestamp:NnTF }
    \renewcommand \DTLCurrentLocaleParseDate
-    { \datatool_GB_parse_date:NnTF } 
-   \renewcommand \DTLCurrentLocaleParseTime
-    { \datatool_GB_parse_time:NnTF }
+    { \datatool_IE_parse_date:NnTF }
+   \renewcommand \DTLCurrentLocaleParseTime 
+    { \datatool_IE_parse_time:NnTF }
    \let
     \DTLCurrentLocaleGetTimeZoneMap
-    \datatool_GB_get_timezone_map:n
+    \datatool_IE_get_timezone_map:n
  }
 %    \end{macrocode}
 %Set temporal formatting commands for this region. Currently this
@@ -461,11 +410,11 @@
 %\texttt{iso} so there won't be a noticeable difference unless the
 %\sty{datetime2} regional setting is on.
 %    \begin{macrocode}
-\newcommand \datatoolGBSetTemporalFormatters
+\newcommand \datatoolIESetTemporalFormatters
  {
    \let
     \DTLCurrentLocaleFormatDate
-    \datatool_default_date_fmt:nnnn 
+    \datatool_default_date_fmt:nnnn
    \let
     \DTLCurrentLocaleFormatTime
     \datatool_default_time_fmt:nn
@@ -482,20 +431,20 @@
  }
 %    \end{macrocode}
 %
-%\begin{macro}{\DTLGBLocaleHook}
-%Command to update number symbols, currency and temporal parsing commands
-%for this region:
+
+%Command to update currency and temporal parsing commands for this region:
+%\begin{macro}{\DTLIELocaleHook}
 %    \begin{macrocode}
-\newcommand \DTLGBLocaleHook
+\newcommand \DTLIELocaleHook
  {
-  \datatoolGBSetNumberChars
-  \datatoolGBSetCurrency
-  \datatoolGBSetTemporalParsers
-  \datatoolGBSetTemporalFormatters
+  \datatoolIESetNumberChars
+  \datatoolIESetCurrency
+  \datatoolIESetTemporalParsers
+  \datatoolIESetTemporalFormatters
 %    \end{macrocode}
 %Allow language files to reference the region:
 %    \begin{macrocode}
-  \tl_set:Nn \l_datatool_current_region_tl { GB }
+  \tl_set:Nn \l_datatool_current_region_tl { IE }
  }
 %    \end{macrocode}
 %\end{macro}

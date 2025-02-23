@@ -1,0 +1,100 @@
+% arara: pdflatex
+% arara: pdflatex
+\documentclass[10pt,english]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[left=1cm,right=1cm,top=1cm]{geometry}
+\usepackage{xcolor}
+\usepackage{longtable}
+\usepackage[
+ locales={CA,GB,IE,ZA}
+]{datatool}
+
+\DeclareUnicodeCharacter{2009}{\,}
+
+\DTLsetup{
+ store-datum,
+ numeric = { auto-reformat },
+ datetime = { parse = iso+region },
+% datetime={parse=region-only}
+}
+
+\DTLsetLocaleOptions{GB}
+{
+ %number-style = education,
+ %currency-symbol-prefix,
+ %date-variant = dialect,
+ %time-variant = dialect,
+}
+
+\DTLread[format=tsv,csv-content=literal]{test}
+
+\ExplSyntaxOn
+\RenewDocumentCommand \DTLdisplaydbAddItem { m m m m m m m m }
+{
+  \tl_put_right:Nn #1 { #3 { #2 } & \my_details:n { #2 } }
+}
+
+\cs_new:Nn \my_type_name:n
+ {
+   \int_case:nnF { #1 }
+    {
+       { \c_datatool_string_int } { String }
+       { \c_datatool_integer_int } { Integer }
+       { \c_datatool_decimal_int } { Decimal }
+       { \c_datatool_currency_int } { Currency }
+       { \c_datatool_datetime_int } { Datetime }
+       { \c_datatool_date_int } { Date }
+       { \c_datatool_time_int } { Time }
+    }
+    { Unknown }
+ }
+
+\cs_new:Nn \my_details:n
+ {
+   \DTLparse \l_tmpa_tl { #1 }
+   \my_type_name:n { \DTLdatumtype { \l_tmpa_tl } }
+   . \c_space_tl
+   \DTLifnumerical { \l_tmpa_tl }
+    {
+      Value: ~ \DTLdatumvalue { \l_tmpa_tl } . 
+      \DTLifcurrency { \l_tmpa_tl }
+       {
+         \c_space_tl
+         Currency ~ symbol: ~ \DTLdatumcurrency { \l_tmpa_tl } ~
+       }
+       { 
+         \DTLiftemporal { \l_tmpa_tl }
+          {
+            \group_begin:
+             \c_space_tl
+             \cs_set_eq:NN \DTLtemporalvalue \use_ii:nn
+             \DTLdatumvalue { \l_tmpa_tl } 
+            \group_end:
+          }
+          { }
+       }
+    }
+    { }
+ }
+\ExplSyntaxOff
+
+
+\begin{document}
+Currency code: \DTLCurrencyCode.
+Number:
+\DTLdecimaltolocale{12345.6789}{\result}\result.
+Currency:
+\DTLdecimaltocurrency{12345.6789}{\result}\result.
+
+\DTLaction
+ [
+   options =
+    {
+       only-columns={1},
+       align-specs={ll}
+    }
+ ]
+{display long}
+\end{document}

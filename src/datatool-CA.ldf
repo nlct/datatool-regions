@@ -72,6 +72,10 @@
  { \$ }
  \c_dollar_str
 %    \end{macrocode}
+%Register the currency code with this region:
+%    \begin{macrocode}
+\datatool_register_regional_currency_code:nn { CA } { CAD }
+%    \end{macrocode}
 % Provide a command to set the currency for this region (for use
 % with any hook used when the locale changes).
 % NB this should do nothing with

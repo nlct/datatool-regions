@@ -1,21 +1,26 @@
 % arara: pdflatex
-\documentclass{article}
+% arara: pdflatex
+\documentclass[10pt]{article}
 
 \usepackage[T1]{fontenc}
-\usepackage[locales={GB}]{datatool-base}
+\usepackage[utf8]{inputenc}
+\usepackage{xcolor}
+\usepackage[locales={GB}]{datatool}
 
 \begin{document}
 Currency code: \DTLCurrencyCode.
+Number:
+\DTLdecimaltolocale{12345.6789}{\result}\result.
+Currency:
+\DTLdecimaltocurrency{12345.6789}{\result}\result.
 
-Currency: \DTLdecimaltocurrency{1234.56}{\result}\result.
-%\show\result
+\DTLparse\result{12,345}\result. 
+ (\DTLdatumtype{\result}; \DTLdatumvalue{\result})
 
-Parse: \DTLparse\result{\pounds 1,235}\result.
-%\show\result
+\DTLparse\result{12,345.678}\result. 
+ (\DTLdatumtype{\result}; \DTLdatumvalue{\result})
 
-\DTLsetup{numeric={auto-reformat}}
-
-Parse: \DTLparse\result{£1,235}\result.
-%\show\result
-
+\DTLparse\result{£12,345.678}\result. 
+ (\DTLdatumtype{\result}; \DTLdatumvalue{\result};
+\DTLdatumcurrency{\result})
 \end{document}

@@ -8,13 +8,17 @@ use open qw(:std :utf8);
 
 my $region = &regex_prompt(qr/^[A-Z]{2}$/,
   "Enter the two-letter region code.",
-  "The region code should consist of two uppercase letters and identify the filename as 'datatool-REGION.ldf' where REGION is the region code.");
+  "The region code should consist of two uppercase letters (e.g. XY) and will identify the filename as 'datatool-XY.ldf' where XY is the region code.");
 
 my $ldf = "datatool-${region}.ldf";
 
 if (-e $ldf)
 {
-   die "File '$ldf' already exists!\n";
+   unless (&yes_no_prompt("File `$ldf' already exists. Do you want to overwrite it?",
+     "Enter 'Y' if you want to overwrite the file, otherwise enter 'n', which will exit this script. Alternatively, you can enter 'x' to exit."))
+   {
+      die "Exiting\n";
+   }
 }
 
 my $hasNumChars = &yes_no_prompt(
@@ -24,32 +28,52 @@ my $hasNumChars = &yes_no_prompt(
 my $numGroupChar = '';
 my $decimalChar = '';
 
+my $numGroupChar2 = '';
+my $decimalChar2 = '';
+
 if ($hasNumChars)
 {
+   print "An 'official' number style will be created. You may also add an unofficial style later.\n";
+
    my @numGroupCharPrompts = (
-    'comma) a comma separator (e.g. 1,234,567)',
-    'dot) a period separator (e.g. 1.234.567)',
-    'space) a space separator (e.g. 1 234 567)',
-    'thinspace) a thin-space separator for formatting, normal space allowed when parsing',
-    'apos) an apostrophe separator (e.g. 1\'234\'567)',
-    'middot) a mid-dot separator (e.g. 1·234·567)'
+    "comma)\t\ta comma separator (e.g. 1,234,567)",
+    "dot)\t\ta period separator (e.g. 1.234.567)",
+    "space)\t\ta space separator (e.g. 1 234 567)",
+    "thinspace)\ta thin-space separator for formatting, normal space allowed when parsing",
+    "apos)\t\tan apostrophe separator (e.g. 1'234'567)",
+    "underscore)\tan underscore separator (e.g. 1_234_567)",
+    "middot)\t\ta mid-dot separator (e.g. 1·234·567)"
    );
 
-   $numGroupChar = &choice_prompt(qw/^(?:comma|dot|space|thinspace|apos|middot)$/,
+   $numGroupChar = &choice_prompt(qw/^(?:comma|dot|space|thinspace|apos|underscore|middot)$/,
      \@numGroupCharPrompts,
-    "What symbol is used for the number group separator? (A space indicates a space character for parsing and thin space for formatting.)",
+    "For the official style, what symbol is used for the number group separator?",
     "Enter the punctuation character used to separate number groups. For example, a comma, period or space character.");
 
    my @decimalCharPrompts = (
-    'comma) a comma (e.g. 1,23)',
-    'dot) a period (e.g. 1.23)',
-    'middot) a mid-dot (e.g. 1·23)'
+    "comma)\ta comma (e.g. 1,23)",
+    "dot)\ta baseline dot (e.g. 1.23)",
+    "middot)\ta mid-dot (e.g. 1·23)"
    );
 
    $decimalChar = &choice_prompt(qw/^(comma|dot|middot)$/,
      \@decimalCharPrompts,
-    "What symbol is used for the decimal character?",
+    "For the official style, what symbol is used for the decimal character?",
     "Enter the type of punctuation character used to for the decimal character. For example, a c'omma' for a comma or 'dot' for a period.");
+
+   if (&yes_no_prompt("Would you also like to create an unoffical style?",
+        "Enter 'Y' if you want to add an 'unofficial' option, otherwise enter 'n'."))
+   {
+      $numGroupChar2 = &choice_prompt(qw/^(?:comma|dot|space|thinspace|apos|underscore|middot)$/,
+        \@numGroupCharPrompts,
+       "For the unofficial style, what symbol is used for the number group separator?",
+       "Enter the punctuation character used to separate number groups. For example, a comma, period or space character.");
+
+      $decimalChar2 = &choice_prompt(qw/^(comma|dot|middot)$/,
+        \@decimalCharPrompts,
+       "For the unofficial style, what symbol is used for the decimal character?",
+       "Enter the type of punctuation character used to for the decimal character. For example, a c'omma' for a comma or 'dot' for a period.");
+   }
 }
 
 my %currency = (
@@ -58,36 +82,60 @@ my %currency = (
   'label' => '',
   'command' => '',
   'strvar' => '',
-  'prefix' => 0
+  'prefix' => ''
 );
 
-$currency{'code'} = &regex_prompt(qr/^[A-Z]{3}$/,
- "What is the three letter currency code for region $region?",
- "The currency code should consist of three uppercase letters. For example, EUR for the Euro or the region code followed by a letter that identifies the currency.");
-
-if ($currency{'code'} eq 'EUR')
-{
-   $currency{'symbol'} = '€';
-   $currency{'label'} = 'euro';
-   $currency{'command'} = '\\texteuro';
-}
-
-if ($currency{'symbol'} eq '')
+while ($currency{'symbol'} eq '')
 {
    my $currencySym = &any_prompt(
      "What is the currency symbol? Type in the actual Unicode character or U+<hex> where <hex> is the hexadecimal code point.",
      "Enter the currency symbol (for example, \$ or £ ) or the codepoint. Type 'x' to exit.");
 
-   if ($currencySym=~/U+([0-9A-Ea-e]+)/)
+   my $currencySymCp='';
+
+   if ($currencySym=~/^U\+([0-9A-Ea-e]+)$/)
    {
-      my $cp = hex($1);
-      $currency{'symbol'} = chr($cp);
-      &lookup_currency($cp, \%currency);
+      $currencySymCp=hex($1);
+      $currency{'symbol'} = chr($currencySymCp);
    }
    else
    {
+      $currencySymCp=ord($currencySym);
       $currency{'symbol'} = $currencySym;
-      &lookup_currency(ord($currencySym), \%currency);
+   }
+
+   &lookup_currency($currencySymCp, \%currency);
+
+   printf("Currency symbol '%s' (U+%X)\n", $currency{'symbol'}, $currencySymCp);
+
+   if ($currency{'label'} eq '')
+   {
+      unless (&yes_no_prompt(
+       sprintf("I don't recognise currency '%s' (U+%X). Do you still want to proceed?", $currency{'symbol'}, $currencySymCp),
+        "If the currency symbol is correct, you will be prompted for further information. Otherwise enter 'n' to try again."))
+      {
+         $currency{'symbol'} = '';
+         next;
+      }
+   }
+
+   if ($currency{'label'} eq 'euro')
+   {
+      $currency{'code'} = 'EUR';
+   }
+   else
+   {
+      my $chr = 'X';
+
+      unless ($currency{'label'} eq '')
+      {
+         $chr = uc(substr($currency{'label'}, 0, 1));
+      }
+
+      $currency{'code'} = &regex_prompt(qr/^[A-Z]{3}$/,
+       sprintf("What is the three letter currency code for region '%s'? (For example, %s%s)",
+         $region, $region, $chr),
+       "The currency code should consist of three uppercase letters.");
    }
 
    if ($currency{'command'} eq '')
@@ -97,9 +145,12 @@ if ($currency{'symbol'} eq '')
        "Is there a command, such as \\textcurrency, available to produce the currency symbol? If there is, enter it. If not, just enter 'none'");
    }
 
-   $currency{'prefix'} = &yes_no_prompt(
+   if ($currency{'prefix'} eq '')
+   {
+      $currency{'prefix'} = &yes_no_prompt(
     "Can the currency symbol be prefixed with the region code? (${region}$currency{'symbol'})",
     "A prefix for the symbol is not shown by default but, in order to disambiguate it from other regional currencies with the same symbol, the region code may be used as a prefix. If this doesn't make sense for the currency, for example, the currency is only applicable to region ${region}, then enter 'n'.");
+   }
 }
 
 my $currencyDigits = &regex_prompt(qw/^\d*$/,
@@ -129,10 +180,10 @@ if ($hasDateFormat)
      "Enter ymd for year month day (for example, 2025/2/23), or dmy for day month year (for example, 23/2/2025), or mdy for month day year (for example, 2/23/2025)");
 
    my @dateSepPrompts = (
-     'slash) slash "/" separator',
-     'hyphen) hyphen "-" separator',
-     'dot) dot "." separator',
-     'none) skip temporal parsing code'
+     "slash)\tslash '/' separator",
+     "hyphen)\thyphen '-' separator",
+     "dot)\tdot '.' separator",
+     "none)\tskip temporal parsing code"
    );
 
    $dateSep = &choice_prompt(qr/^(?:slash|hyphen|dot|none)$/,
@@ -147,9 +198,9 @@ if ($hasDateFormat)
    else
    {
       my @timeSepPrompts = (
-        'colon) colon ":" separator',
-        'dot) dot "," separator',
-        'none) skip temporal parsing code'
+        "colon)\tcolon ':' separator",
+        "dot)\tdot ',' separator",
+        "none)\tskip temporal parsing code"
       );
 
      $timeSep = &choice_prompt(qr/^(?:colon|dot|none)$/,
@@ -190,6 +241,8 @@ if ($hasDateFormat)
 open (my $fh, '>:encoding(UTF-8)', $ldf)
  or die "Couldn't open '$ldf' $!\n";
 
+print "Writing $ldf\n";
+
 print $fh <<"_END";
 %\\section{datatool-${region}.ldf}\\label{sec:datatool-${region}}
 % Support for region ${region}.
@@ -212,9 +265,27 @@ if ($hasNumChars)
  {  
 _END
 
+   print $fh '  ';
+
    if ($numGroupChar eq 'thinspace')
    {
-      print $fh, "\\datatool_set_thinspace_group_decimal_char:";
+      print $fh "\\datatool_set_thinspace_group_decimal_char:";
+
+      print $fh &get_variant($decimalChar), ' ';
+
+      print $fh &get_param($decimalChar), "\n";
+   }
+   elsif ($numGroupChar eq 'apos')
+   {
+      print $fh "\\datatool_set_apos_group_decimal_char:";
+
+      print $fh &get_variant($decimalChar), ' ';
+
+      print $fh &get_param($decimalChar), "\n";
+   }
+   elsif ($numGroupChar eq 'underscore')
+   {
+      print $fh "\\datatool_set_underscore_group_decimal_char:";
 
       print $fh &get_variant($decimalChar), ' ';
 
@@ -233,6 +304,61 @@ _END
    print $fh <<"_END";
  }
 %    \\end{macrocode}
+_END
+
+   if ($numGroupChar2 ne '' and $decimalChar2 ne '')
+   {
+      print $fh <<"_END";
+%Unofficial style.
+%    \\begin{macrocode}
+\\cs_new:Nn \\datatool_${region}_set_numberchars_unofficial:
+ {  
+_END
+
+      print $fh '  ';
+
+      if ($numGroupChar2 eq 'thinspace')
+      {
+         print $fh "\\datatool_set_thinspace_group_decimal_char:";
+
+         print $fh &get_variant($decimalChar2), ' ';
+
+         print $fh &get_param($decimalChar2), "\n";
+      }
+      elsif ($numGroupChar2 eq 'apos')
+      {
+         print $fh "\\datatool_set_apos_group_decimal_char:";
+
+         print $fh &get_variant($decimalChar2), ' ';
+
+         print $fh &get_param($decimalChar2), "\n";
+      }
+      elsif ($numGroupChar2 eq 'underscore')
+      {
+         print $fh "\\datatool_set_underscore_group_decimal_char:";
+
+         print $fh &get_variant($decimalChar2), ' ';
+
+         print $fh &get_param($decimalChar2), "\n";
+      }
+      else
+      {
+         print $fh "\\datatool_set_numberchars:";
+
+         print $fh &get_variant($numGroupChar2);
+         print $fh &get_variant($decimalChar2);
+
+         print $fh ' ', &get_param($numGroupChar2);
+         print $fh ' ', &get_param($decimalChar2), "\n";
+      } 
+
+   print $fh <<"_END";
+ }
+%    \\end{macrocode}
+_END
+   } 
+
+print $fh <<"_END";
 %Hook to set the number group and decimal characters for the region:
 %    \\begin{macrocode}
 \\newcommand \\datatool${region}SetNumberChars
@@ -289,9 +415,13 @@ _END
 if ($currency{'code'} eq 'EUR')
 {
    print $fh <<"_END";
+% The EUR currency is already defined by \\sty{datatool-base}, but we
+% need to register the currency code with this region:
+%    \\begin{macrocode}
+\\datatool_register_regional_currency_code:nn { ${region} } { EUR }
+%    \\end{macrocode}
 % Provide a command to set the currency for this region (for use
-% with any hook used when the locale changes). The EUR currency
-% already defined by \\sty{datatool-base}.
+% with any hook used when the locale changes).
 %    \\begin{macrocode}
 \\newcommand \\datatool${region}setcurrency
 {
@@ -385,6 +515,10 @@ _END
 
    print $fh <<"_END";
 %    \\end{macrocode}
+% Register the currency code with this region:
+%    \\begin{macrocode}
+\\datatool_register_regional_currency_code:nn { ${region} } { $currency{code} }
+%    \\end{macrocode}
 % Provide a command to set the currency for this region (for use
 % with any hook used when the locale changes).
 % NB this should do nothing with
@@ -435,7 +569,13 @@ if ($hasDateFormat)
       $dateSepChar = '.';
    }
 
-   $dateInfo =~s/([ymd])([ymd])(ymd)/$1${dateSep}$2${dateSep}$3/g;
+   my %dateNames = (
+     'd' => 'day',
+     'm' => 'month',
+     'y' => 'year'
+   );
+
+   $dateInfo =~s/([ymd])([ymd])([ymd])/$dateNames{$1}${dateSepChar}$dateNames{$2}${dateSepChar}$dateNames{$3}/;
 
    my $dateStyle = $dateOrder;
 
@@ -705,10 +845,16 @@ _END
 
 if ($hasNumChars)
 {
+   print $fh "   number-style .choices:nn =\n    { official";
+
+   unless ($numGroupChar2 eq '')
+   {
+      print $fh ", unofficial";
+   }
+
+   print $fh " }\n";
 
 print $fh <<"_END";
-   number-style .choices:nn =
-    { official }
     {
       \\exp_args:NNe \\renewcommand
         \\datatool${region}SetNumberChars
@@ -765,6 +911,7 @@ print $fh <<"_END";
        \\datatool${region}symbolprefix
        \\datatool_currency_symbol_region_prefix:n
     } ,
+   currency-symbol-prefix .default:n = { true } ,
 _END
 }
 
@@ -930,7 +1077,7 @@ _END
 
    if ($hasNumChars)
    {
-      print $fh "\\datatool${region}SetNumberChars\n";
+      print $fh "  \\datatool${region}SetNumberChars\n";
    }
 
 print $fh <<"_END";
@@ -992,10 +1139,6 @@ sub get_param{
    {
       return '{ , }';
    }
-   elsif ($option eq 'apos')
-   {
-      return '{ \' }';
-   }
    else
    {
       return '{ ~ }';
@@ -1005,8 +1148,8 @@ sub get_param{
 sub choice_prompt{
    my ($regexp, $choices, $msg, $help) = @_;
 
-   print &word_wrapped($msg), "\n";
-   print "Type ? for help or x to exit.\n";
+   print &word_wrapped($msg), "\n\n";
+   print "Type ? for help or x to exit.\n\n";
 
    my $result = '';
 
@@ -1030,7 +1173,7 @@ sub choice_prompt{
       }
       elsif ($_ eq '?')
       {
-         print &word_wrapped($help), "\n";
+         print &word_wrapped($help), "\n\n";
       }
       elsif ($_ eq 'x')
       {
@@ -1048,7 +1191,7 @@ sub choice_prompt{
 sub regex_prompt{
    my ($regexp, $msg, $help) = @_;
 
-   print &word_wrapped($msg), "\n";
+   print &word_wrapped($msg), "\n\n";
    print "Type ? for help or x to exit.\n\n";
 
    my $result = '';
@@ -1066,7 +1209,7 @@ sub regex_prompt{
       }
       elsif ($_ eq '?')
       {
-         print &word_wrapped($help), "\n";
+         print &word_wrapped($help), "\n\n";
       }
       elsif ($_ eq 'x')
       {
@@ -1084,7 +1227,7 @@ sub regex_prompt{
 sub yes_no_prompt{
    my ($msg, $help) = @_;
 
-   print &word_wrapped($msg), "\n";
+   print &word_wrapped($msg), "\n\n";
 
    my $result = '';
 
@@ -1109,7 +1252,7 @@ sub yes_no_prompt{
       }
       elsif ($_ eq '?')
       {
-         print &word_wrapped($help), "\n";
+         print &word_wrapped($help), "\n\n";
       }
       elsif ($_ eq 'x')
       {
@@ -1143,7 +1286,7 @@ sub any_prompt{
 
       if ($_ eq '?')
       {
-         print &word_wrapped($help), "\n";
+         print &word_wrapped($help), "\n\n";
       }
       elsif ($_ eq 'x')
       {
@@ -1165,6 +1308,8 @@ sub word_wrapped{
      $_[0] .= ' ';
      $_[0] =~s/(?:.{1,79}\S|\S+)\K\s+/\n/g;
   }
+
+  $_[0]=~s/\s+$//;
 
   $_[0];
 }
@@ -1230,6 +1375,7 @@ sub lookup_currency{
    {
       $currency->{'label'} = 'euro';
       $currency->{'command'} = '\\texteuro';
+      $currency->{'prefix'} = 0;
    }
    elsif ($cp == 0x20AD)
    {
