@@ -501,7 +501,7 @@ _END
    {
       if ($currency{'strval'} eq '')
       {
-          $currency{'strval'} = "\\l_datatool_$currency{label}_str";
+          $currency{'strval'} = "\\l_datatool_$currency{label}_tl";
       }
 
       print $fh <<"_END";
