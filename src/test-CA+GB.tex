@@ -22,4 +22,16 @@ Currency: \DTLdecimaltocurrency{1234.56}{\result}\result.
 \selectlanguage{canadian}
 Currency: \DTLdecimaltocurrency{1234.56}{\result}\result.
 
+\DTLsetup{numeric={auto-reformat}}
+%\DTLsetLocaleOptions{GB,CA}{currency-symbol-prefix}
+
+%\DTLparse\result{£12}\result
+%\show\result
+
+%\DTLparse\result{\pounds12}\result
+%\show\result
+
+\DTLparse\result{\$}\result
+\show\result
+
 \end{document}
