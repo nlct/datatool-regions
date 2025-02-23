@@ -344,6 +344,7 @@
         \datatoolCAsymbolprefix
         \datatool_currency_symbol_region_prefix:n
     } ,
+   currency-symbol-prefix .default:n = { true } ,
    date-style .choice: ,
    date-style / dmyyyy .code: n =
     {
