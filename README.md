@@ -49,6 +49,12 @@ In this case, you can either load `tracklang` before `datatool` and
 set up the appropriate mappings or just add the applicable commands
 to the relevant captions hook.
 
+If you want to add new region files, you can use the Perl script
+`src/createregion.pl`. It's an interactive command line script that doesn't take
+any arguments. At each prompt you can type `?` for further
+information or `x` to exit. The file is only created after all
+information is supplied, so if you exit early no file will be
+created.
 
 Further reading: [Localisation with datatool v3.0+](https://www.dickimaw-books.com/latex/tracklang/datatool-locale.shtml)
 
