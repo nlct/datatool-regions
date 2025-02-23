@@ -10,11 +10,9 @@ datatool-regions.zip	: datatool-regions.dtx datatool-regions.ins \
 
 datatool-regions.pdf	: datatool-regions.dtx datatool-GB.ldf
 	pdflatex datatool-regions.dtx
-	makeindex -s gind.ist datatool-regions.idx
-	makeindex -s gglo.ist -o datatool-regions.gls datatool-regions.glo
+	makeindex datatool-regions.idx
 	pdflatex datatool-regions.dtx
-	makeindex -s gind.ist datatool-regions.idx
-	makeindex -s gglo.ist -o datatool-regions.gls datatool-regions.glo
+	makeindex datatool-regions.idx
 	pdflatex datatool-regions.dtx
 	pdflatex datatool-regions.dtx
 

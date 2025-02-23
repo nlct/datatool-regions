@@ -1,6 +1,5 @@
 %\section{datatool-CA.ldf}\label{sec:code:datatool-CA}
 % Support for region CA.
-%\changes{3.0}{??}{new}
 %    \begin{macrocode}
 \TrackLangProvidesResource{CA}%%FILEVERSION%%
 %    \end{macrocode}
@@ -96,7 +95,7 @@
 % This defaults to year-month-day and should be changed as
 % appropriate using \cs{DTLsetLocaleOptions}. For example:
 %\begin{dispListing}
-%\DTLsetLocaleOptions{CA/parse}{date-style=dmyyyy, date-variant=slash}
+%\DTLsetLocaleOptions{CA}{date-style=dmyyyy, date-variant=slash}
 %\end{dispListing}
 %An appropriate language file will need to also be installed to
 %parse dates containing month names or day of week names.
@@ -469,7 +468,6 @@
 %
 %Command to update currency and temporal parsing commands for this region:
 %\begin{macro}{\DTLCALocaleHook}
-%\changes{3.0}{??}{new}
 %    \begin{macrocode}
 \newcommand \DTLCALocaleHook
  {

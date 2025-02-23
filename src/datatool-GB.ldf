@@ -1,6 +1,5 @@
 %\section{datatool-GB.ldf}\label{sec:datatool-GB}
 % Support for region GB.
-%\changes{3.0}{??}{new}
 %    \begin{macrocode}
 \TrackLangProvidesResource{GB}%%FILEVERSION%%
 %    \end{macrocode}
@@ -481,7 +480,6 @@
 %\begin{macro}{\DTLGBLocaleHook}
 %Command to update number symbols, currency and temporal parsing commands
 %for this region:
-%\changes{3.0}{??}{new}
 %    \begin{macrocode}
 \newcommand \DTLGBLocaleHook
  {

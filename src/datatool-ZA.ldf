@@ -1,6 +1,5 @@
 %\section{datatool-ZA.ldf}\label{sec:code:datatool-ZA}
 % Support for region ZA.
-%\changes{3.0}{??}{new}
 %    \begin{macrocode}
 \TrackLangProvidesResource{ZA}%%FILEVERSION%%
 %    \end{macrocode}
@@ -410,7 +409,6 @@
 %    \end{macrocode}
 %Command to update currency and temporal parsing commands for this region:
 %\begin{macro}{\DTLZALocaleHook}
-%\changes{3.0}{??}{new}
 %    \begin{macrocode}
 \newcommand \DTLZALocaleHook
  {

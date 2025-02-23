@@ -1,3 +1,6 @@
+% arara: lualatex
+% arara: makeindex
+% arara: lualatex
 \documentclass[titlepage=false]{scrreport}
 \usepackage[noprint]{doc}% command names are too long
 
@@ -88,19 +91,27 @@ the \opt{locales} option. For example:
 \end{dispListing}
 
 The \sty{tracklang} interface doesn't allow the language to be
-omitted, but \sty{datatool-base}'s \opt{locales} option will prefix
-a languageless region with \opt{und} (undetermined) before passing
-it to \sty{tracklang}. For example:
+omitted, but \sty{datatool-base}'s \opt{locales} option will
+check for any item in the list that simply consists of two uppercase
+letters. If found, the region will be added to any tracked dialects
+that don't have a region set. If no dialects have been tracked,
+the region will be tracked with the language set to
+\opt{und} (undetermined). For example:
 \begin{dispListing}
+\documentclass{article}
 \usepackage[locales={GB}]{datatool-base}
 \end{dispListing}
 This is equivalent to:
 \begin{dispListing}
 \usepackage[locales={und-GB}]{datatool-base}
 \end{dispListing}
-
-In general, it's best to include the language to ensure the
-appropriate language files are also loaded, if they are available.
+(since no language has been specified). Whereas
+\begin{dispListing}
+\usepackage[afrikaans,english]{babel}
+\usepackage[locales={ZA}]{datatool-base}
+\end{dispListing}
+will add the region \opt{ZA} to \opt{afrikaans} and \opt{english}
+dialects.
 
 \begin{important}
 Bear in mind that if \sty{tracklang} can't determine the
@@ -108,7 +119,8 @@ applicable dialect label for the captions hook, the settings may not
 be applied when the language changes in multilingual documents.
 In this case, you can either load \sty{tracklang} before
 \sty{datatool-base} and set up the appropriate mappings or 
-just add the applicable commands to the relevant captions hook.
+just add the applicable \texttt{\cs{DTL}\meta{tag}{LocaleHook}} 
+command to the relevant captions hook.
 \end{important}
 
 Any option that can be passed to \sty{datatool-base} can also be

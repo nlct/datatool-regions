@@ -1,0 +1,1298 @@
+#!/usr/bin/perl
+
+binmode STDOUT, ':utf8';
+use utf8;
+use strict;
+use warnings;
+use open qw(:std :utf8);
+
+my $region = &regex_prompt(qr/^[A-Z]{2}$/,
+  "Enter the two-letter region code.",
+  "The region code should consist of two uppercase letters and identify the filename as 'datatool-REGION.ldf' where REGION is the region code.");
+
+my $ldf = "datatool-${region}.ldf";
+
+if (-e $ldf)
+{
+   die "File '$ldf' already exists!\n";
+}
+
+my $hasNumChars = &yes_no_prompt(
+ "Is the number formatting in $region consistent across the region? (That is, either the region only has one official language, or the number group and decimal characters do not depend on the language.)",
+ "Enter Y if the number formatting for region ${region} does not depend on the language, otherwise enter n.");
+
+my $numGroupChar = '';
+my $decimalChar = '';
+
+if ($hasNumChars)
+{
+   my @numGroupCharPrompts = (
+    'comma) a comma separator (e.g. 1,234,567)',
+    'dot) a period separator (e.g. 1.234.567)',
+    'space) a space separator (e.g. 1 234 567)',
+    'thinspace) a thin-space separator for formatting, normal space allowed when parsing',
+    'apos) an apostrophe separator (e.g. 1\'234\'567)',
+    'middot) a mid-dot separator (e.g. 1·234·567)'
+   );
+
+   $numGroupChar = &choice_prompt(qw/^(?:comma|dot|space|thinspace|apos|middot)$/,
+     \@numGroupCharPrompts,
+    "What symbol is used for the number group separator? (A space indicates a space character for parsing and thin space for formatting.)",
+    "Enter the punctuation character used to separate number groups. For example, a comma, period or space character.");
+
+   my @decimalCharPrompts = (
+    'comma) a comma (e.g. 1,23)',
+    'dot) a period (e.g. 1.23)',
+    'middot) a mid-dot (e.g. 1·23)'
+   );
+
+   $decimalChar = &choice_prompt(qw/^(comma|dot|middot)$/,
+     \@decimalCharPrompts,
+    "What symbol is used for the decimal character?",
+    "Enter the type of punctuation character used to for the decimal character. For example, a c'omma' for a comma or 'dot' for a period.");
+}
+
+my %currency = (
+  'code' => '',
+  'symbol' => '',
+  'label' => '',
+  'command' => '',
+  'strvar' => '',
+  'prefix' => 0
+);
+
+$currency{'code'} = &regex_prompt(qr/^[A-Z]{3}$/,
+ "What is the three letter currency code for region $region?",
+ "The currency code should consist of three uppercase letters. For example, EUR for the Euro or the region code followed by a letter that identifies the currency.");
+
+if ($currency{'code'} eq 'EUR')
+{
+   $currency{'symbol'} = '€';
+   $currency{'label'} = 'euro';
+   $currency{'command'} = '\\texteuro';
+}
+
+if ($currency{'symbol'} eq '')
+{
+   my $currencySym = &any_prompt(
+     "What is the currency symbol? Type in the actual Unicode character or U+<hex> where <hex> is the hexadecimal code point.",
+     "Enter the currency symbol (for example, \$ or £ ) or the codepoint. Type 'x' to exit.");
+
+   if ($currencySym=~/U+([0-9A-Ea-e]+)/)
+   {
+      my $cp = hex($1);
+      $currency{'symbol'} = chr($cp);
+      &lookup_currency($cp, \%currency);
+   }
+   else
+   {
+      $currency{'symbol'} = $currencySym;
+      &lookup_currency(ord($currencySym), \%currency);
+   }
+
+   if ($currency{'command'} eq '')
+   {
+      $currency{'command'} = &any_prompt(
+       "What is the LaTeX command used to create the symbol $currency{'symbol'}? Type 'none' if there isn't one.",
+       "Is there a command, such as \\textcurrency, available to produce the currency symbol? If there is, enter it. If not, just enter 'none'");
+   }
+
+   $currency{'prefix'} = &yes_no_prompt(
+    "Can the currency symbol be prefixed with the region code? (${region}$currency{'symbol'})",
+    "A prefix for the symbol is not shown by default but, in order to disambiguate it from other regional currencies with the same symbol, the region code may be used as a prefix. If this doesn't make sense for the currency, for example, the currency is only applicable to region ${region}, then enter 'n'.");
+}
+
+my $currencyDigits = &regex_prompt(qw/^\d*$/,
+  "How many digits should currencies be rounded to? (Empty if no rounding.)",
+  "If any currencies are formatted, should the decimal part be rounded? If so, enter the number of digits otherwise press return without entering anything.");
+
+my $hasDateFormat = &yes_no_prompt(
+  "Is the numeric date formatting in $region consistent across the region? (That is, either the region only has one official language, or the order of the day, month, and year is not dependent on the language.)",
+  "The region support only deals with numeric dates, not dates that include month names or other textual elements. Enter Y if the numeric date format for region ${region} does not depend on the language, otherwise enter n.");
+
+my $dateOrder = '';
+my $dateSep = '';
+my $timeSep = '';
+my %timezones = ();
+
+if ($hasDateFormat)
+{
+   my @dateOrderPrompts = (
+    'ymd) year month day',
+    'dmy) day month year',
+    'mdy) month day year'
+   );
+
+   $dateOrder = &choice_prompt(qr/^(?:ymd|dmy|mdy)$/,
+     \@dateOrderPrompts,
+     "What order should the year, month and day be in for region ${region}?",
+     "Enter ymd for year month day (for example, 2025/2/23), or dmy for day month year (for example, 23/2/2025), or mdy for month day year (for example, 2/23/2025)");
+
+   my @dateSepPrompts = (
+     'slash) slash "/" separator',
+     'hyphen) hyphen "-" separator',
+     'dot) dot "." separator',
+     'none) skip temporal parsing code'
+   );
+
+   $dateSep = &choice_prompt(qr/^(?:slash|hyphen|dot|none)$/,
+     \@dateSepPrompts,
+     "What separator is the default for numeric dates?",
+     "There is currently only support for slash, hyphen and dot. Enter 'none' to cancel the date/time parsing code.");
+
+   if ($dateSep eq 'none')
+   {
+      $hasDateFormat = 0;
+   }
+   else
+   {
+      my @timeSepPrompts = (
+        'colon) colon ":" separator',
+        'dot) dot "," separator',
+        'none) skip temporal parsing code'
+      );
+
+     $timeSep = &choice_prompt(qr/^(?:colon|dot|none)$/,
+       \@timeSepPrompts,
+       "What separator is the default for numeric times?",
+       "There is currently only support for colon or dot. Enter 'none' to cancel the date/time parsing code.");
+
+      if ($timeSep eq 'none')
+      {
+         $hasDateFormat = 0;
+      }
+      else
+      {
+         my $tzprompt = 'Do you want to provide any time zone mappings?';
+
+         while (&yes_no_prompt($tzprompt,
+              'Enter Y if you want to provide a time zone mapping or n otherwise'))
+         {
+            $tzprompt = 'Do you want to provide another time zone mapping?';
+
+            my $timeZoneLabel = &any_prompt(
+             "Enter the time zone label (e.g GMT or CET) or empty to cancel this mapping.",
+             "Enter just the zone identifier. You will be prompted for the offset next.");
+
+            if ($timeZoneLabel ne '')
+            {
+               my $timeZoneOffset = &regex_prompt(qw/^[+\-]\d{2}:\d{2}$/,
+                "Enter the time zone offset, including sign, in the form hh:mm (e.g. +01:00).",
+                "Make sure that you include the + or - sign and use two digits for both the hour and the minute");
+
+               $timezones{$timeZoneLabel} = $timeZoneOffset;
+            }
+         }
+      }
+   }
+}
+
+open (my $fh, '>:encoding(UTF-8)', $ldf)
+ or die "Couldn't open '$ldf' $!\n";
+
+print $fh <<"_END";
+%\\section{datatool-${region}.ldf}\\label{sec:datatool-${region}}
+% Support for region ${region}.
+%    \\begin{macrocode}
+\\TrackLangProvidesResource{${region}}%%FILEVERSION%%
+%    \\end{macrocode}
+% Switch on \\LaTeX3 syntax:
+%    \\begin{macrocode}
+\\ExplSyntaxOn 
+%    \\end{macrocode}
+%\\subsection{Numbers and Currency}
+_END
+
+if ($hasNumChars)
+{
+      print $fh <<"_END";
+%Set the number group and decimal symbols for this region.
+%    \\begin{macrocode}
+\\cs_new:Nn \\datatool_${region}_set_numberchars_official:
+ {  
+_END
+
+   if ($numGroupChar eq 'thinspace')
+   {
+      print $fh, "\\datatool_set_thinspace_group_decimal_char:";
+
+      print $fh &get_variant($decimalChar), ' ';
+
+      print $fh &get_param($decimalChar), "\n";
+   }
+   else
+   {
+      print $fh "\\datatool_set_numberchars:";
+
+      print $fh &get_variant($numGroupChar);
+      print $fh &get_variant($decimalChar);
+
+      print $fh ' ', &get_param($numGroupChar);
+      print $fh ' ', &get_param($decimalChar), "\n";
+   } 
+   print $fh <<"_END";
+ }
+%    \\end{macrocode}
+%Hook to set the number group and decimal characters for the region:
+%    \\begin{macrocode}
+\\newcommand \\datatool${region}SetNumberChars
+ {
+   \\bool_if:NT \\l_datatool_region_set_numberchars_bool
+    {
+      \\datatool_${region}_set_numberchars_official:
+    }
+ }
+%    \\end{macrocode}
+_END
+}
+else
+{
+   print $fh <<"_END";
+% NB the number group and decimal symbols for this region should be
+% set in the language file \\filemeta{datatool-}{lang}{${region}.ldf} as they depend
+% on both the language and region. Those files should be included in the applicable
+% \\sty{datatool} language module.
+% However, a region hook is still needed to support 
+%\\verb|\\DTLsetup{numeric={region-number-chars}}| although it's not
+%added to the language hook:
+%    \\begin{macrocode}
+\\newcommand \\datatool${region}SetNumberChars
+ {
+   \\bool_if:NT \\l_datatool_region_set_numberchars_bool
+    {
+      \\tl_if_empty:NTF \\l_datatool_current_language_tl
+       {
+          \\PackageWarning { datatool-${region} }
+           {
+              No ~ current ~ language: ~ can't ~ set ~
+              number ~ group ~ and ~ decimal ~ characters
+           }
+       }
+       {
+         \\cs_if_exist_use:cF
+          { datatool \\l_datatool_current_language_tl ${region}SetNumberChars }
+           {
+             \\PackageWarning { datatool-${region} }
+              {
+                 No ~ support ~ for ~ locale ~
+                 ` \\l_datatool_current_language_tl - ${region}': ~ can't ~ set ~
+                 number ~ group ~ and ~ decimal ~ characters
+              }
+           }
+       }
+    }
+ }
+%    \\end{macrocode}
+_END
+}
+
+if ($currency{'code'} eq 'EUR')
+{
+   print $fh <<"_END";
+% Provide a command to set the currency for this region (for use
+% with any hook used when the locale changes). The EUR currency
+% already defined by \\sty{datatool-base}.
+%    \\begin{macrocode}
+\\newcommand \\datatool${region}setcurrency
+{
+  \\DTLsetdefaultcurrency { EUR }
+_END
+
+   unless ($currencyDigits eq '')
+   {
+      print $fh <<"_END";
+%    \\end{macrocode}
+%Number of digits that \\cs{DTLdecimaltocurrency} should round to:
+%    \\begin{macrocode}
+  \\renewcommand \\DTLCurrentLocaleCurrencyDP { ${currencyDigits} }
+_END
+   }
+
+   print $fh <<"_END";
+}
+%    \\end{macrocode}
+_END
+}
+else
+{
+   print $fh <<"_END";
+% Set the currency format for this region.
+%    \\begin{macrocode}
+\\newcommand \\datatool${region}currencyfmt [ 2 ]
+ {
+   \\dtlcurrprefixfmt
+    {
+_END
+
+   if ($currency{'prefix'})
+   {
+      print $fh "\\datatool${region}symbolprefix { ${region} }\n";
+   }
+
+   print $fh <<"_END";
+      #1
+    }
+    { #2 }
+ }
+%    \\end{macrocode}
+_END
+
+   if ($currency{'prefix'})
+   {
+      print $fh <<"_END";
+%Prefix for symbol, if required.
+%    \\begin{macrocode}
+\\newcommand \\datatool${region}symbolprefix [ 1 ] { }
+%    \\end{macrocode}
+_END
+   }
+
+   if ($currency{'command'} eq '')
+   {
+     $currency{'command'} = $currency{'symbol'};
+   }
+
+   print $fh <<"_END";
+% Define the currency symbols for this region.
+%    \\begin{macrocode}
+_END
+
+   if ($currency{label} eq '')
+   {
+      print $fh <<"_END";
+\\datatool_def_currency:nnnn
+ { \\datatool${region}currencyfmt }
+ { $currency{code} }
+ { $currency{command} }
+ { $currency{symbol} }
+_END
+   }
+   else
+   {
+      if ($currency{'strval'} eq '')
+      {
+          $currency{'strval'} = "\\l_datatool_$currency{label}_str";
+      }
+
+      print $fh <<"_END";
+\\datatool_def_currency:nnnV
+ { \\datatool${region}currencyfmt }
+ { $currency{code} }
+ { $currency{command} }
+ $currency{strval}
+_END
+   }
+
+   print $fh <<"_END";
+%    \\end{macrocode}
+% Provide a command to set the currency for this region (for use
+% with any hook used when the locale changes).
+% NB this should do nothing with
+% \\verb|\\DTLsetup{region-currency=false}|
+%    \\begin{macrocode}
+\\newcommand \\datatool${region}SetCurrency
+ {
+   \\bool_if:NT \\l_datatool_region_set_currency_bool
+    {
+      \\DTLsetdefaultcurrency { ${region} }
+_END
+
+   unless ($currencyDigits eq '')
+   {
+      print $fh <<"_END";
+%    \\end{macrocode}
+%Number of digits that \\cs{DTLdecimaltocurrency} should round to:
+%    \\begin{macrocode}
+\\renewcommand \\DTLCurrentLocaleCurrencyDP { ${currencyDigits} }
+_END
+   }
+
+      print $fh <<"_END";
+    }
+ }
+%    \\end{macrocode}
+_END
+}
+
+print $fh "%\\subsection{Date and Time Parsing}\n";
+
+if ($hasDateFormat)
+{
+   my $dateInfo = $dateOrder;
+
+   my $dateSepChar = '';
+
+   if ($dateSep eq 'hyphen')
+   {
+      $dateSepChar = '-';
+   }
+   elsif ($dateSep eq 'slash')
+   {
+      $dateSepChar = '/';
+   }
+   elsif ($dateSep eq 'dot')
+   {
+      $dateSepChar = '.';
+   }
+
+   $dateInfo =~s/([ymd])([ymd])(ymd)/$1${dateSep}$2${dateSep}$3/g;
+
+   my $dateStyle = $dateOrder;
+
+   $dateStyle =~s/y/yyyy/;
+   $dateStyle =~s/m/mm/;
+   $dateStyle =~s/d/dd/;
+
+   print $fh <<"_END";
+% This defaults to $dateInfo and should be changed as
+% appropriate using \\cs{DTLsetLocaleOptions}. For example:
+%\\begin{dispListing}
+%\\DTLsetLocaleOptions{${region}}{date-style=dmyyyy, date-variant=slash}
+%\\end{dispListing}
+%An appropriate language file will need to also be installed to
+%parse dates containing month names or day of week names.
+%
+% Provide a way to configure parsing style.
+%    \\begin{macrocode}
+\\tl_new:N \l__datatool_${region}_datevariant_tl
+\\tl_set:Nn \l__datatool_${region}_datevariant_tl { $dateSep }
+\\tl_new:N \l__datatool_${region}_datestyle_tl
+\\tl_set:Nn \l__datatool_${region}_datestyle_tl { ${dateStyle} }
+\\tl_new:N \l__datatool_${region}_timevariant_tl
+\\tl_set:Nn \l__datatool_${region}_timevariant_tl { $timeSep }
+%    \\end{macrocode}
+%\\subsubsection{Time Stamp Parsing}
+%Use command
+%\\cs{datatool\_}\\meta{date-style}\\verb|_hhmmss_tz_parse_timestamp:nnNnTF|
+%with date regular expression 
+%\\cs{c\\_datatool\\_}\\meta{date-variant}\\verb|_|\\meta{date-style}\\verb|_date_regex|
+%and time regular expression
+%\\cs{c\\_datatool\\_}\\meta{time-variant}\\verb|_hhmmss_time_regex|
+%    \\begin{macrocode}
+\\cs_new:Nn \\datatool_${region}_parse_timestamp:NnTF
+ {
+   \\cs_if_exist:cTF
+     {
+       datatool_
+       \\l__datatool_${region}_datestyle_tl
+       _hhmmss_tz_parse_timestamp:ccNnTF
+     }
+    {
+      \\cs_if_exist:cTF
+       {
+          c_datatool_
+          \\l__datatool_${region}_datevariant_tl
+          _
+          \\l__datatool_${region}_datestyle_tl
+          _date_regex
+       }
+       {
+         \\cs_if_exist:cTF
+          {
+            c_datatool_
+            \\l__datatool_${region}_timevariant_tl
+            _hhmmss_time_regex
+          }
+          {
+            \\use:c
+             {
+               datatool_
+              \\l__datatool_${region}_datestyle_tl
+              _hhmmss_tz_parse_timestamp:ccNnTF
+             }
+             {
+               c_datatool_
+               \\l__datatool_${region}_datevariant_tl
+               _
+               \\l__datatool_${region}_datestyle_tl
+               _date_regex
+             }
+             {
+               c_datatool_
+               \\l__datatool_${region}_timevariant_tl
+               _hhmmss_time_regex
+             }
+              #1 { #2 } { #3 } { #4 }
+          }
+          {
+            \\datatool_warn_check_head_language_empty:Vnnn
+             \\l__datatool_${region}_timevariant_tl
+             { datatool-${region} }
+             {
+               No ~ language ~ support ~ for ~ time ~ variant ~
+               ` \\exp_args:Ne \\tl_tail:n { \\l__datatool_${region}_timevariant_tl } '
+             }
+             {
+              No ~ support ~ for ~ time ~ variant ~
+              ` \\l__datatool_${region}_timevariant_tl '
+             }
+            #4
+          }
+       }
+       {
+         \\datatool_warn_check_head_language_empty:Vnnn
+           \\l__datatool_${region}_datevariant_tl
+           { datatool-${region} }
+           {
+             No ~ language ~ support ~ for ~ date ~ style ~
+              ` \\l__datatool_${region}_datestyle_tl '
+           }
+           {
+             No ~ support ~ for ~ date ~ style ~
+             ` \\l__datatool_${region}_datestyle_tl ' ~ with ~
+             variant ~
+             ` \\l__datatool_${region}_datevariant_tl '
+           }
+         #4
+       }
+    }
+    {
+      \\PackageWarning { datatool-${region} }
+       {
+          No ~ support ~ for ~ date ~ style ~
+          ` \\l__datatool_${region}_datestyle_tl '
+       }
+      #4
+    }
+ }
+%    \\end{macrocode}
+%\\subsubsection{Date Parsing}
+%Use command \\cs{datatool\\_}\\meta{style}\\verb|_parse_date:NNnTF|
+%with regular expression 
+%\\cs{c\\_datatool\\_}\\meta{variant}\\verb|_anchored_|\\meta{style}\\verb|_date_regex|
+%    \\begin{macrocode}
+\\cs_new:Nn \\datatool_${region}_parse_date:NnTF
+ {
+   \\cs_if_exist:cTF
+     {
+       datatool_
+       \\l__datatool_${region}_datestyle_tl
+       _parse_date:NNnTF
+     }
+    {
+      \\cs_if_exist:cTF
+       {
+         c_datatool_
+         \\l__datatool_${region}_datevariant_tl
+         _anchored_
+         \\l__datatool_${region}_datestyle_tl
+         _date_regex
+       }
+       {
+         \\exp_args:cc
+         {
+           datatool_
+           \\l__datatool_${region}_datestyle_tl
+           _parse_date:NNnTF
+         }
+         {
+           c_datatool_
+           \\l__datatool_${region}_datevariant_tl
+           _anchored_
+           \\l__datatool_${region}_datestyle_tl
+           _date_regex
+         }
+          #1 { #2 } { #3 } { #4 }
+       }
+       {
+         \\datatool_warn_check_head_language_empty:Vnnn
+          \\l__datatool_${region}_datevariant_tl 
+          { datatool-${region} }
+          {
+            No ~ language ~ support ~ for ~ date ~ style ~
+             ` \\l__datatool_${region}_datestyle_tl '
+          }
+          {
+             No ~ support ~ for ~ date ~ style ~
+             ` \\l__datatool_${region}_datestyle_tl ' ~ with ~
+             variant ~
+             ` \\l__datatool_${region}_datevariant_tl '
+          }
+         #4
+       }
+    }
+    {
+      \\PackageWarning { datatool-${region} }
+       {
+          No ~ support ~ for ~ date ~ style ~
+          ` \\l__datatool_${region}_datestyle_tl '
+       }
+      #4
+    }
+ }
+%    \\end{macrocode}
+%\\subsubsection{Time Parsing}
+%Use command \\cs{datatool\\_}\\meta{style}\\verb|_parse_time:NNnTF|
+%with regular expression 
+%\\cs{c\\_datatool\\_}\\meta{variant}\\verb|_anchored_|\\meta{style}\\verb|_time_regex|
+%    \\begin{macrocode}
+\\cs_new:Nn \\datatool_${region}_parse_time:NnTF
+ {
+   \\cs_if_exist:cTF
+    {
+      c_datatool_
+      \\l__datatool_${region}_timevariant_tl
+      _anchored_hhmmss_time_regex
+    }
+    {
+      \\datatool_hhmmss_parse_time:cNnTF
+       {
+        c_datatool_
+        \\l__datatool_${region}_timevariant_tl
+        _anchored_hhmmss_time_regex
+       }
+        #1 { #2 } { #3 } { #4 }
+    }
+    {
+      \\datatool_warn_check_head_language_empty:Vnnn
+        \\l__datatool_${region}_timevariant_tl 
+        { datatool-${region} }
+        {
+           No ~ language ~ support ~ for ~ time ~ variant ~
+           ` \\exp_args:Ne \\tl_tail:n { \\l__datatool_${region}_timevariant_tl } '
+        }
+        {
+           No ~ support ~ for ~ time ~ variant ~
+           ` \\l__datatool_${region}_timevariant_tl '
+        }
+      #4
+    }
+ }
+%    \\end{macrocode}
+%
+%\\subsubsection{Time Zone Mappings}
+_END
+
+   if (%timezones)
+   {
+      print $fh <<"_END";
+%Define time zone mapping command for this region:
+%    \\begin{macrocode}
+\\cs_new:Nn \\datatool_${region}_get_timezone_map:n
+ {
+   \\datatool_region_get_timezone_map:n { ${region} / #1 }
+ }
+%    \\end{macrocode}
+%Define time zone IDs for this region (one-way map from ID to offset):
+%    \\begin{macrocode}
+_END
+
+      foreach my $tz (keys %timezones)
+      {
+         print $fh "\\datatool_region_set_timezone_map:nn { ${region} / ${tz} } { $timezones{$tz} }\n";
+      }
+
+      print $fh "%    \\end{macrocode}\n";
+   }
+   else
+   {
+      print $fh "No time zone mappings provided.\n";
+   }
+}
+else
+{
+   print $fh "%Not provided\n";
+}
+
+print $fh <<"_END";
+%\\subsection{Options}
+%Define options for this region:
+%    \\begin{macrocode}
+\\datatool_locale_define_keys:nn { ${region} }
+ {
+
+_END
+
+if ($hasNumChars)
+{
+
+print $fh <<"_END";
+   number-style .choices:nn =
+    { official }
+    {
+      \\exp_args:NNe \\renewcommand
+        \\datatool${region}SetNumberChars
+         {
+           \\exp_not:N \\bool_if:NT
+            \\exp_not:N \\l_datatool_region_set_numberchars_bool
+             {
+               \\exp_not:c { datatool_${region}_set_numberchars_ \\l_keys_choice_tl : }
+             }
+         }
+      \\tl_if_eq:NnT \\l_datatool_current_region_tl { ${region} }
+       {
+         \\datatool${region}SetNumberChars
+       }
+    } ,
+_END
+
+}
+else
+{
+print $fh <<"_END";
+   number-style .code:n =
+    { 
+      \\keys_if_exist:nnTF
+         { datatool / locale / \\l_datatool_current_language_tl - ${region} }
+         { number-style }
+       {
+         \\keys_set:nn
+          { datatool / locale / \\l_datatool_current_language_tl - ${region} }
+          { number-style = { #1 } }
+       }
+       {
+         \\PackageWarning { datatool-${region} }
+          {
+            No ~ number-style ~ available ~ for ~ current ~ locale ~
+            (additional ~ language ~ module ~ may ~ need ~ installing)
+          }
+       }
+    } ,
+_END
+}
+
+if ($currency{'prefix'})
+{
+print $fh <<"_END";
+   currency-symbol-prefix .choice: ,
+   currency-symbol-prefix / false .code:n =
+    {
+      \\cs_set_eq:NN \\datatool${region}symbolprefix \\use_none:n
+    } ,
+   currency-symbol-prefix / true .code:n =
+    {
+      \\cs_set_eq:NN
+       \\datatool${region}symbolprefix
+       \\datatool_currency_symbol_region_prefix:n
+    } ,
+_END
+}
+
+if ($hasDateFormat)
+{
+print $fh <<"_END";
+
+   date-style .choice: ,
+   date-style / dmyyyy .code: n =
+    {
+      \\tl_set:Nn \\l__datatool_${region}_datestyle_tl { ddmmyyyy }
+    } ,
+   date-style / mdyyyy .code: n =
+    {
+      \\tl_set:Nn \\l__datatool_${region}_datestyle_tl { mmddyyyy }
+    } ,
+   date-style / yyyymd .code: n =
+    {
+      \\tl_set:Nn \\l__datatool_${region}_datestyle_tl { yyyymmdd }
+    } ,
+   date-style / dmyy .code: n =
+    {
+      \\tl_set:Nn \\l__datatool_${region}_datestyle_tl { ddmmyy }
+    } ,
+   date-style / mdyy .code: n =
+    {
+      \\tl_set:Nn \\l__datatool_${region}_datestyle_tl { mmddyy }
+    } ,
+   date-style / yymd .code: n =
+    {
+      \\tl_set:Nn \\l__datatool_${region}_datestyle_tl { yymmdd }
+    } ,
+   date-variant .choice: ,
+   date-variant / slash .code:n =
+    {
+      \\tl_set:Nn \\l__datatool_${region}_datevariant_tl { slash }
+    } ,
+   date-variant / hyphen .code:n =
+    {
+      \\tl_set:Nn \\l__datatool_${region}_datevariant_tl { hyphen }
+    } ,
+   date-variant / dot .code:n =
+    {
+      \\tl_set:Nn \\l__datatool_${region}_datevariant_tl { dot }
+    } ,
+   date-variant / dialect .code:n =
+    {
+      \\tl_set:Nn \\l__datatool_${region}_datevariant_tl
+        { \\l_datatool_current_language_tl }
+    } ,
+   time-variant .choice: ,
+   time-variant / colon .code:n =
+    {
+      \\tl_set:Nn \\l__datatool_${region}_timevariant_tl { colon }
+    } ,
+   time-variant / dot .code:n =
+    {
+      \\tl_set:Nn \\l__datatool_${region}_timevariant_tl { dot }
+    } ,
+   time-variant / dialect .code:n =
+    {
+      \\tl_if_eq:NnTF \\l__datatool_${region}_timevariant_tl { dot }
+       {
+         \\tl_set:Nn \\l__datatool_${region}_timevariant_tl
+          { \\l_datatool_current_language_tl _dot }
+       }
+       {
+         \\tl_if_in:NnF
+           \\l__datatool_${region}_timevariant_tl
+            { \\l_datatool_current_language_tl }
+          {
+            \\tl_set:Nn \\l__datatool_${region}_timevariant_tl
+             { \\l_datatool_current_language_tl _colon }
+          }
+       }
+    } ,
+   time-variant / dialect-colon .code:n =
+    {
+      \\tl_set:Nn \\l__datatool_${region}_timevariant_tl
+        { \\l_datatool_current_language_tl _colon }
+    } ,
+   time-variant / dialect-dot .code:n =
+    {
+      \\tl_set:Nn \\l__datatool_${region}_timevariant_tl
+        { \\l_datatool_current_language_tl _dot }
+    } ,
+_END
+}
+
+print $fh <<"_END";
+ }
+%    \\end{macrocode}
+%\\subsection{Hooks}
+_END
+
+if ($hasDateFormat)
+{
+   print $fh <<"_END";
+%Command to update temporal parsing commands for this region:
+%    \\begin{macrocode}
+\\newcommand \\datatool${region}SetTemporalParsers
+ {
+   \\renewcommand \\DTLCurrentLocaleParseTimeStamp
+    { \\datatool_${region}_parse_timestamp:NnTF }
+   \\renewcommand \\DTLCurrentLocaleParseDate
+    { \\datatool_${region}_parse_date:NnTF }
+   \\renewcommand \\DTLCurrentLocaleParseTime 
+    { \\datatool_${region}_parse_time:NnTF }
+_END
+
+   if (%timezones)
+   {
+      print $fh <<"_END";
+   \\let
+    \\DTLCurrentLocaleGetTimeZoneMap
+    \\datatool_${region}_get_timezone_map:n
+_END
+   }
+
+   print $fh <<"_END";
+ }
+%    \\end{macrocode}
+%Set temporal formatting commands for this region. Currently this
+%just resets to the default, but may change in future.
+%Note that the defaults test if the applicable \\sty{datetime2}
+%command is available and will fallback on ISO if not defined.
+%Bear in mind that the default style for \\sty{datetime2} is
+%\\texttt{iso} so there won't be a noticeable difference unless the
+%\\sty{datetime2} regional setting is on.
+%    \\begin{macrocode}
+\\newcommand \\datatool${region}SetTemporalFormatters
+ {
+   \\let
+    \\DTLCurrentLocaleFormatDate
+    \\datatool_default_date_fmt:nnnn
+   \\let
+    \\DTLCurrentLocaleFormatTime
+    \\datatool_default_time_fmt:nn
+   \\let
+    \\DTLCurrentLocaleFormatTimeZone
+    \\datatool_default_timezone_fmt:nn
+   \\let
+    \\DTLCurrentLocaleFormatTimeStampNoZone
+    \\datatool_default_timestamp_fmt:nnnnnnn
+   \\let
+    \\DTLCurrentLocaleFormatTimeStampWithZone
+    \\datatool_default_timestamp_fmt:nnnnnnnnn
+   \\renewcommand \\DTLCurrentLocaleTimeStampFmtSep { ~ }
+ }
+%    \\end{macrocode}
+%
+
+_END
+}
+
+print $fh <<"_END";
+%Command to update currency and temporal parsing commands for this region:
+%\\begin{macro}{\\DTL${region}LocaleHook}
+%    \\begin{macrocode}
+\\newcommand \\DTL${region}LocaleHook
+ {
+_END
+
+   if ($hasNumChars)
+   {
+      print $fh "\\datatool${region}SetNumberChars\n";
+   }
+
+print $fh <<"_END";
+  \\datatool${region}SetCurrency
+_END
+
+   if ($hasDateFormat)
+   {
+print $fh <<"_END";
+  \\datatool${region}SetTemporalParsers
+  \\datatool${region}SetTemporalFormatters
+_END
+   }
+
+print $fh <<"_END";
+%    \\end{macrocode}
+%Allow language files to reference the region:
+%    \\begin{macrocode}
+  \\tl_set:Nn \\l_datatool_current_region_tl { ${region} }
+ }
+%    \\end{macrocode}
+%\\end{macro}
+%
+% Finished with \\LaTeX3 syntax.
+%    \\begin{macrocode}
+\\ExplSyntaxOff
+%    \\end{macrocode}
+%Note that the hook is added to the captions by \\sty{datatool-base}
+%not by the region file.
+_END
+
+close $fh;
+
+sub get_variant{
+   my ($option) = @_;
+
+   if ($option eq 'middot')
+   {
+      return 'V';
+   }
+   else
+   {
+      return 'n';
+   }
+}
+
+sub get_param{
+   my ($option) = @_;
+
+   if ($option eq 'middot')
+   {
+      return '\\l_datatool_middot_tl';
+   }
+   elsif ($option eq 'dot')
+   {
+      return '{ . }';
+   }
+   elsif ($option eq 'comma')
+   {
+      return '{ , }';
+   }
+   elsif ($option eq 'apos')
+   {
+      return '{ \' }';
+   }
+   else
+   {
+      return '{ ~ }';
+   }
+}
+
+sub choice_prompt{
+   my ($regexp, $choices, $msg, $help) = @_;
+
+   print &word_wrapped($msg), "\n";
+   print "Type ? for help or x to exit.\n";
+
+   my $result = '';
+
+   while ($result eq '')
+   {
+      for (my $i = 0; $i < @$choices; $i++)
+      {
+         print $choices->[$i], "\n";
+      }
+
+      print "?) help\n";
+      print "x) exit\n";
+      print "> ";
+
+      $_ = <STDIN>;
+      chomp;
+
+      if (/$regexp/)
+      {
+         $result = $_;
+      }
+      elsif ($_ eq '?')
+      {
+         print &word_wrapped($help), "\n";
+      }
+      elsif ($_ eq 'x')
+      {
+        exit;
+      }
+      else
+      {
+         print "Invalid response '$_' (type ? for help)\n";
+      }
+   }
+
+   $result;
+}
+
+sub regex_prompt{
+   my ($regexp, $msg, $help) = @_;
+
+   print &word_wrapped($msg), "\n";
+   print "Type ? for help or x to exit.\n\n";
+
+   my $result = '';
+
+   while ($result eq '')
+   {
+      print "> ";
+
+      $_ = <STDIN>;
+      chomp;
+
+      if (/$regexp/)
+      {
+         $result = $_;
+      }
+      elsif ($_ eq '?')
+      {
+         print &word_wrapped($help), "\n";
+      }
+      elsif ($_ eq 'x')
+      {
+        exit;
+      }
+      else
+      {
+         print "Invalid response '$_' (type ? for help)\n";
+      }
+   }
+
+   $result;
+}
+
+sub yes_no_prompt{
+   my ($msg, $help) = @_;
+
+   print &word_wrapped($msg), "\n";
+
+   my $result = '';
+
+   while ($result eq '')
+   {
+      print "Y) yes\n";
+      print "n) no\n";
+      print "?) help\n";
+      print "x) exit\n";
+      print "> ";
+
+      $_ = <STDIN>;
+      chomp;
+
+      if ($_ eq 'Y')
+      {
+         $result = 1;
+      }
+      elsif ($_ eq 'n')
+      {
+         $result = 0;
+      }
+      elsif ($_ eq '?')
+      {
+         print &word_wrapped($help), "\n";
+      }
+      elsif ($_ eq 'x')
+      {
+        exit;
+      }
+      else
+      {
+         print "Invalid response '$_'.\n";
+      }
+   }
+
+   $result;
+}
+
+sub any_prompt{
+   my ($msg, $help) = @_;
+
+   print &word_wrapped($msg), "\n\n";
+
+   my $result = '';
+
+   while ($result eq '')
+   {
+      print "Enter response or:\n";
+      print "?) help\n";
+      print "x) exit\n";
+      print "> ";
+
+      $_ = <STDIN>;
+      chomp;
+
+      if ($_ eq '?')
+      {
+         print &word_wrapped($help), "\n";
+      }
+      elsif ($_ eq 'x')
+      {
+        exit;
+      }
+      else
+      {
+         $result = $_;
+      }
+   }
+
+   $result;
+}
+
+sub word_wrapped{
+
+  if (length($_[0]) > 80)
+  {
+     $_[0] .= ' ';
+     $_[0] =~s/(?:.{1,79}\S|\S+)\K\s+/\n/g;
+  }
+
+  $_[0];
+}
+
+sub lookup_currency{
+   my ($cp, $currency) = @_;
+
+   if ($cp == 0x24)
+   {
+      $currency->{'label'} = 'dollar';
+      $currency->{'command'} = '\\$';
+      $currency->{'strval'} = '\\c_dollar_str';
+   }
+   elsif ($cp == 0xA3)
+   {
+      $currency->{'label'} = 'pound';
+      $currency->{'command'} = '\\pounds';
+   }
+   elsif ($cp == 0xA5)
+   {
+      $currency->{'label'} = 'yen';
+      $currency->{'command'} = '\\textyen';
+   }
+   elsif ($cp == 0x20A1)
+   {
+      $currency->{'label'} = 'colonsign';
+      $currency->{'command'} = '\\textcolonmonetary';
+   }
+   elsif ($cp == 0x0E3F)
+   {
+      $currency->{'label'} = 'baht';
+      $currency->{'command'} = '\\textbaht';
+   }
+   elsif ($cp == 0x20A2)
+   {
+      $currency->{'label'} = 'cruzerio';
+   }
+   elsif ($cp == 0x20A4)
+   {
+      $currency->{'label'} = 'lira';
+      $currency->{'command'} = '\\textlira';
+   }
+   elsif ($cp == 0x20A6)
+   {
+      $currency->{'label'} = 'naira';
+      $currency->{'command'} = '\\textnaira';
+   }
+   elsif ($cp == 0x20A9)
+   {
+      $currency->{'label'} = 'won';
+      $currency->{'command'} = '\\textwon';
+   }
+   elsif ($cp == 0x20AA)
+   {
+      $currency->{'label'} = 'shekel';
+   }
+   elsif ($cp == 0x20AB)
+   {
+      $currency->{'label'} = 'dong';
+      $currency->{'command'} = '\\textdong';
+   }
+   elsif ($cp == 0x20AC)
+   {
+      $currency->{'label'} = 'euro';
+      $currency->{'command'} = '\\texteuro';
+   }
+   elsif ($cp == 0x20AD)
+   {
+      $currency->{'label'} = 'kip';
+   }
+   elsif ($cp == 0x20AE)
+   {
+      $currency->{'label'} = 'tugrik';
+   }
+   elsif ($cp == 0x20AF)
+   {
+      $currency->{'label'} = 'drachma';
+   }
+   elsif ($cp == 0x20B1)
+   {
+      $currency->{'label'} = 'peso';
+      $currency->{'command'} = '\\textpeso';
+   }
+   elsif ($cp == 0x20B2)
+   {
+      $currency->{'label'} = 'guarani';
+      $currency->{'command'} = '\\textguarani';
+   }
+   elsif ($cp == 0x20B4)
+   {
+      $currency->{'label'} = 'hryvnia';
+   }
+   elsif ($cp == 0x20B5)
+   {
+      $currency->{'label'} = 'cedi';
+   }
+   elsif ($cp == 0x20B8)
+   {
+      $currency->{'label'} = 'tenge';
+   }
+   elsif ($cp == 0x20B9)
+   {
+      $currency->{'label'} = 'indianrupee';
+   }
+   elsif ($cp == 0x20BA)
+   {
+      $currency->{'label'} = 'turkishlira';
+   }
+   elsif ($cp == 0x20BC)
+   {
+      $currency->{'label'} = 'manat';
+   }
+   elsif ($cp == 0x20BD)
+   {
+      $currency->{'label'} = 'ruble';
+   }
+   elsif ($cp == 0x20BE)
+   {
+      $currency->{'label'} = 'lari';
+   }
+   elsif ($cp == 0x20BF)
+   {
+      $currency->{'label'} = 'bitcoin';
+   }
+   elsif ($cp == 0x20C0)
+   {
+      $currency->{'label'} = 'som';
+   }
+}
+
+1;
