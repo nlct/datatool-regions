@@ -153,7 +153,7 @@
        }
     }
     {
-      \PackageWarning { datatool-IE }
+      \datatool_locale_warn:n { datatool-IE }
        {
           No ~ support ~ for ~ date ~ style ~
           ` \l__datatool_IE_datestyle_tl '
@@ -218,7 +218,7 @@
        }
     }
     {
-      \PackageWarning { datatool-IE }
+      \datatool_locale_warn:n { datatool-IE }
        {
           No ~ support ~ for ~ date ~ style ~
           ` \l__datatool_IE_datestyle_tl '

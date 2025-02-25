@@ -192,7 +192,7 @@
        }
     }
     {
-      \PackageWarning { datatool-GB }
+      \datatool_locale_warn:n { datatool-GB }
        {
           No ~ support ~ for ~ date ~ style ~
           ` \l__datatool_GB_datestyle_tl '
@@ -257,7 +257,7 @@
        }
     }
     {
-      \PackageWarning { datatool-GB }
+      \datatool_locale_warn:n { datatool-GB }
        {
           No ~ support ~ for ~ date ~ style ~
           ` \l__datatool_GB_datestyle_tl '

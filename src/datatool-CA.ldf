@@ -26,7 +26,7 @@
     {
       \tl_if_empty:NTF \l_datatool_current_language_tl
        {
-          \PackageWarning { datatool-CA }
+          \datatool_locale_warn:n { datatool-CA }
            {
               No ~ current ~ language: ~ can't ~ set ~
               number ~ group ~ and ~ decimal ~ characters
@@ -36,7 +36,7 @@
          \cs_if_exist_use:cF
           { datatool \l_datatool_current_language_tl CASetNumberChars }
            {
-             \PackageWarning { datatool-CA }
+             \datatool_locale_warn:n { datatool-CA }
               {
                  No ~ support ~ for ~ locale ~
                  ` \l_datatool_current_language_tl - CA': ~ can't ~ set ~
@@ -167,7 +167,7 @@
               #1 { #2 } { #3 } { #4 }
           }
           {
-            \PackageWarning { datatool-CA }
+            \datatool_locale_warn:n { datatool-CA }
              {
               No ~ support ~ for ~ time ~ variant ~
               ` \l__datatool_CA_timevariant_tl '
@@ -176,7 +176,7 @@
           }
        }
        {
-         \PackageWarning { datatool-CA }
+         \datatool_locale_warn:n { datatool-CA }
           {
            No ~ support ~ for ~ date ~ style ~
            ` \l__datatool_CA_datestyle_tl ' ~ with ~
@@ -187,7 +187,7 @@
        }
     }
     {
-      \PackageWarning { datatool-CA }
+      \datatool_locale_warn:n { datatool-CA }
        {
           No ~ support ~ for ~ date ~ style ~
           ` \l__datatool_CA_datestyle_tl '
@@ -235,7 +235,7 @@
           #1 { #2 } { #3 } { #4 }
        }
        {
-         \PackageWarning { datatool-CA }
+         \datatool_locale_warn:n { datatool-CA }
           {
            No ~ support ~ for ~ date ~ style ~
            ` \l__datatool_CA_datestyle_tl ' ~ with ~
@@ -246,7 +246,7 @@
        }
     }
     {
-      \PackageWarning { datatool-CA }
+      \datatool_locale_warn:n { datatool-CA }
        {
           No ~ support ~ for ~ date ~ style ~
           ` \l__datatool_CA_datestyle_tl '
@@ -278,7 +278,7 @@
         #1 { #2 } { #3 } { #4 }
     }
     {
-      \PackageWarning { datatool-CA }
+      \datatool_locale_warn:n { datatool-CA }
        {
         No ~ support ~ for ~ time ~ variant ~
         ` \l__datatool_CA_timevariant_tl '
@@ -326,7 +326,7 @@
           { number-style = { #1 } }
        }
        {
-         \PackageWarning { datatool-CA }
+         \datatool_locale_warn:n { datatool-CA }
           {
             No ~ number-style ~ available ~ for ~ current ~ locale ~
             (additional ~ language ~ module ~ may ~ need ~ installing)

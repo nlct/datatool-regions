@@ -140,7 +140,7 @@
               #1 { #2 } { #3 } { #4 }
           }
           {
-            \PackageWarning { datatool-ZA }
+            \datatool_locale_warn:n { datatool-ZA }
              {
               No ~ support ~ for ~ time ~ variant ~
               ` \l__datatool_ZA_timevariant_tl '
@@ -149,7 +149,7 @@
           }
        }
        {
-         \PackageWarning { datatool-ZA }
+         \datatool_locale_warn:n { datatool-ZA }
           {
            No ~ support ~ for ~ date ~ style ~
            ` \l__datatool_ZA_datestyle_tl ' ~ with ~
@@ -160,7 +160,7 @@
        }
     }
     {
-      \PackageWarning { datatool-ZA }
+      \datatool_locale_warn:n { datatool-ZA }
        {
           No ~ support ~ for ~ date ~ style ~
           ` \l__datatool_ZA_datestyle_tl '
@@ -208,7 +208,7 @@
           #1 { #2 } { #3 } { #4 }
        }
        {
-         \PackageWarning { datatool-ZA }
+         \datatool_locale_warn:n { datatool-ZA }
           {
            No ~ support ~ for ~ date ~ style ~
            ` \l__datatool_ZA_datestyle_tl ' ~ with ~
@@ -219,7 +219,7 @@
        }
     }
     {
-      \PackageWarning { datatool-ZA }
+      \datatool_locale_warn:n { datatool-ZA }
        {
           No ~ support ~ for ~ date ~ style ~
           ` \l__datatool_ZA_datestyle_tl '
@@ -251,7 +251,7 @@
         #1 { #2 } { #3 } { #4 }
     }
     {
-      \PackageWarning { datatool-ZA }
+      \datatool_locale_warn:n { datatool-ZA }
        {
         No ~ support ~ for ~ time ~ variant ~
         ` \l__datatool_ZA_timevariant_tl '

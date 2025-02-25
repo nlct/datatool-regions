@@ -23,15 +23,27 @@ Currency: \DTLdecimaltocurrency{1234.56}{\result}\result.
 Currency: \DTLdecimaltocurrency{1234.56}{\result}\result.
 
 \DTLsetup{numeric={auto-reformat}}
-%\DTLsetLocaleOptions{GB,CA}{currency-symbol-prefix}
+\DTLsetLocaleOptions{GB,CA}{currency-symbol-prefix}
 
-%\DTLparse\result{£12}\result
+\DTLparse\result{£12}\result
 %\show\result
 
-%\DTLparse\result{\pounds12}\result
+\DTLparse\result{\pounds12}\result
 %\show\result
 
 \DTLparse\result{\$}\result
-\show\result
+%\show\result
+
+\DTLparse\result{CA\$123}\result
+%\show\result
+
+\DTLparse\result{GB£123}\result
+%\show\result
+
+\DTLparse\result{GB\pounds123}\result
+%\show\result
+
+\DTLparse\result{GB£123}\result
+%\show\result
 
 \end{document}

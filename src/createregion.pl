@@ -388,7 +388,7 @@ else
     {
       \\tl_if_empty:NTF \\l_datatool_current_language_tl
        {
-          \\PackageWarning { datatool-${region} }
+          \\datatool_locale_warn:n { datatool-${region} }
            {
               No ~ current ~ language: ~ can't ~ set ~
               number ~ group ~ and ~ decimal ~ characters
@@ -398,7 +398,7 @@ else
          \\cs_if_exist_use:cF
           { datatool \\l_datatool_current_language_tl ${region}SetNumberChars }
            {
-             \\PackageWarning { datatool-${region} }
+             \\datatool_locale_warn:n { datatool-${region} }
               {
                  No ~ support ~ for ~ locale ~
                  ` \\l_datatool_current_language_tl - ${region}': ~ can't ~ set ~
@@ -687,7 +687,7 @@ if ($hasDateFormat)
        }
     }
     {
-      \\PackageWarning { datatool-${region} }
+      \\datatool_locale_warn:n { datatool-${region} }
        {
           No ~ support ~ for ~ date ~ style ~
           ` \\l__datatool_${region}_datestyle_tl '
@@ -752,7 +752,7 @@ if ($hasDateFormat)
        }
     }
     {
-      \\PackageWarning { datatool-${region} }
+      \\datatool_locale_warn:n { datatool-${region} }
        {
           No ~ support ~ for ~ date ~ style ~
           ` \\l__datatool_${region}_datestyle_tl '
@@ -887,7 +887,7 @@ print $fh <<"_END";
           { number-style = { #1 } }
        }
        {
-         \\PackageWarning { datatool-${region} }
+         \\datatool_locale_warn:n { datatool-${region} }
           {
             No ~ number-style ~ available ~ for ~ current ~ locale ~
             (additional ~ language ~ module ~ may ~ need ~ installing)
