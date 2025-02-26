@@ -603,7 +603,7 @@ if ($hasDateFormat)
 %    \\end{macrocode}
 %\\subsubsection{Time Stamp Parsing}
 %Use command
-%\\cs{datatool\_}\\meta{date-style}\\verb|_hhmmss_tz_parse_timestamp:nnNnTF|
+%\\cs{datatool\\_}\\meta{date-style}\\verb|_hhmmss_tz_parse_timestamp:nnNnTF|
 %with date regular expression 
 %\\cs{c\\_datatool\\_}\\meta{date-variant}\\verb|_|\\meta{date-style}\\verb|_date_regex|
 %and time regular expression
