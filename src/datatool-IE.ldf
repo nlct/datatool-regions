@@ -60,12 +60,12 @@
 %
 % Provide a way to configure parsing style.
 %    \begin{macrocode}
-\tl_new:N __datatool_IE_datevariant_tl
-\tl_set:Nn __datatool_IE_datevariant_tl { slash }
-\tl_new:N __datatool_IE_datestyle_tl
-\tl_set:Nn __datatool_IE_datestyle_tl { ddmmyyyy }
-\tl_new:N __datatool_IE_timevariant_tl
-\tl_set:Nn __datatool_IE_timevariant_tl { colon }
+\tl_new:N \__datatool_IE_datevariant_tl
+\tl_set:Nn \__datatool_IE_datevariant_tl { slash }
+\tl_new:N \__datatool_IE_datestyle_tl
+\tl_set:Nn \__datatool_IE_datestyle_tl { ddmmyyyy }
+\tl_new:N \__datatool_IE_timevariant_tl
+\tl_set:Nn \__datatool_IE_timevariant_tl { colon }
 %    \end{macrocode}
 %\subsubsection{Time Stamp Parsing}
 %Use command

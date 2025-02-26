@@ -594,12 +594,12 @@ if ($hasDateFormat)
 %
 % Provide a way to configure parsing style.
 %    \\begin{macrocode}
-\\tl_new:N \l__datatool_${region}_datevariant_tl
-\\tl_set:Nn \l__datatool_${region}_datevariant_tl { $dateSep }
-\\tl_new:N \l__datatool_${region}_datestyle_tl
-\\tl_set:Nn \l__datatool_${region}_datestyle_tl { ${dateStyle} }
-\\tl_new:N \l__datatool_${region}_timevariant_tl
-\\tl_set:Nn \l__datatool_${region}_timevariant_tl { $timeSep }
+\\tl_new:N \\l__datatool_${region}_datevariant_tl
+\\tl_set:Nn \\l__datatool_${region}_datevariant_tl { $dateSep }
+\\tl_new:N \\l__datatool_${region}_datestyle_tl
+\\tl_set:Nn \\l__datatool_${region}_datestyle_tl { ${dateStyle} }
+\\tl_new:N \\l__datatool_${region}_timevariant_tl
+\\tl_set:Nn \\l__datatool_${region}_timevariant_tl { $timeSep }
 %    \\end{macrocode}
 %\\subsubsection{Time Stamp Parsing}
 %Use command
