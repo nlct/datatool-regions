@@ -40,7 +40,7 @@
 % Provide a command to set the currency for this region (for use
 % with any hook used when the locale changes).
 %    \begin{macrocode}
-\newcommand \datatoolIEsetcurrency
+\newcommand \datatoolIESetCurrency
 {
   \DTLsetdefaultcurrency { EUR }
 %    \end{macrocode}
@@ -417,7 +417,7 @@
     \datatool_default_date_fmt:nnnn
    \let
     \DTLCurrentLocaleFormatTime
-    \datatool_default_time_fmt:nn
+    \datatool_default_time_fmt:nnn
    \let
     \DTLCurrentLocaleFormatTimeZone
     \datatool_default_timezone_fmt:nn

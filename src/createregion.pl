@@ -85,6 +85,19 @@ my %currency = (
   'prefix' => ''
 );
 
+my $currfmt = 'dtlcurrprefixfmt';
+
+my @before_after = ('before', 'after');
+
+if (&choice_prompt(qr/^(?:before|after)$/,
+     @before_after,
+     "Does the currency symbol come before or after the number?",
+     "Enter 'before' if the symbol comes before the number or enter 'after' if the symbol comes after the number") 
+   eq 'after')
+{
+   $currfmt = 'dtlcurrsuffixfmt';
+}
+
 while ($currency{'symbol'} eq '')
 {
    my $currencySym = &any_prompt(
@@ -423,7 +436,7 @@ if ($currency{'code'} eq 'EUR')
 % Provide a command to set the currency for this region (for use
 % with any hook used when the locale changes).
 %    \\begin{macrocode}
-\\newcommand \\datatool${region}setcurrency
+\\newcommand \\datatool${region}SetCurrency
 {
   \\DTLsetdefaultcurrency { EUR }
 _END
@@ -438,6 +451,8 @@ _END
 _END
    }
 
+   print $fh "  \\renewcommand \\DTLdefaultEURcurrencyfmt { \\$currfmt }\n";
+
    print $fh <<"_END";
 }
 %    \\end{macrocode}
@@ -450,7 +465,7 @@ else
 %    \\begin{macrocode}
 \\newcommand \\datatool${region}currencyfmt [ 2 ]
  {
-   \\dtlcurrprefixfmt
+   \\$currfmt
     {
 _END
 
@@ -1049,7 +1064,7 @@ _END
     \\datatool_default_date_fmt:nnnn
    \\let
     \\DTLCurrentLocaleFormatTime
-    \\datatool_default_time_fmt:nn
+    \\datatool_default_time_fmt:nnn
    \\let
     \\DTLCurrentLocaleFormatTimeZone
     \\datatool_default_timezone_fmt:nn

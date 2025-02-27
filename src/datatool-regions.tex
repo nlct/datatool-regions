@@ -169,7 +169,18 @@ module. For example, \sty{datatool-english} provides
 \section{Region \qt{GB}}
 
 The \file{datatool-GB.ldf} file provides support for region \qt{GB}
-(United Kingdom).
+(United Kingdom). This defines the \qt{GBP} currency and sets it as
+the default currency. The default number group character is a
+comma, and the default decimal character is a dot.
+
+\section{Region \qt{IE}}
+
+The \file{datatool-IE.ldf} file provides support for region \qt{IE}
+(Republic of Ireland). This sets \qt{EUR} as the default currency.
+The format can be adjusted by redefining
+\cs{DTLdefaultEURcurrencyfmt} (provided by \sty{datatool-base}
+v3.0+). Note that this is general to all regions that use \qt{EUR}
+as the currency.
 
 \section{Region \qt{ZA}}
 

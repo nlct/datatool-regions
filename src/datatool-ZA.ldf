@@ -405,7 +405,7 @@
     \datatool_default_date_fmt:nnnn 
    \let
     \DTLCurrentLocaleFormatTime
-    \datatool_default_time_fmt:nn
+    \datatool_default_time_fmt:nnn
    \let
     \DTLCurrentLocaleFormatTimeZone
     \datatool_default_timezone_fmt:nn

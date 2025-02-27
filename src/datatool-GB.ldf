@@ -25,11 +25,17 @@
    \datatool_set_thinspace_group_decimal_char:n { . }
  }
 %    \end{macrocode}
-%Old style uses mid-dot as the decimal point.
+%Old style uses mid-dot as the decimal point but allows both middle
+%dot and low dot when parsing.
+%Note that this will require support for the middle dot character
+%(so either use a Unicode engine or set up the character
+%with \cs{DeclareUnicodeCharacter}).
 %    \begin{macrocode}
 \cs_new:Nn \datatool_GB_set_numberchars_old:
  {
-   \datatool_set_numberchars:nV { , } \l_datatool_middot_tl 
+   \datatool_set_numberchars_tl_regex:nVnn
+     { , }  \l_datatool_middot_tl
+     { , } { \x{2E} | \u{l_datatool_middot_tl} }
  }
 %    \end{macrocode}
 %Hook to set the number group and decimal characters for the region:
@@ -468,7 +474,7 @@
     \datatool_default_date_fmt:nnnn 
    \let
     \DTLCurrentLocaleFormatTime
-    \datatool_default_time_fmt:nn
+    \datatool_default_time_fmt:nnn
    \let
     \DTLCurrentLocaleFormatTimeZone
     \datatool_default_timezone_fmt:nn
