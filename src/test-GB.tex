@@ -7,6 +7,18 @@
 \usepackage{xcolor}
 \usepackage[locales={GB}]{datatool}
 
+\DTLsetup{
+  store-datum,
+  datetime={parse=auto-reformat}
+}
+
+\DTLread[
+  format=csv,
+  data-types = {string,datetime,string,integer,currency},
+  convert-numbers
+ ]
+{test-data}
+
 \begin{document}
 Currency code: \DTLCurrencyCode.
 Number:
@@ -23,4 +35,6 @@ Currency:
 \DTLparse\result{£12,345.678}\result. 
  (\DTLdatumtype{\result}; \DTLdatumvalue{\result};
 \DTLdatumcurrency{\result})
+
+\DTLaction{display}
 \end{document}
