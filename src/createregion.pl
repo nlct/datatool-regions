@@ -93,7 +93,7 @@ my @before_after = (
 );
 
 if (&choice_prompt(qr/^(?:before|after)$/,
-     @before_after,
+     \@before_after,
      "Does the currency symbol come before or after the number?",
      "Enter 'before' if the symbol comes before the number or enter 'after' if the symbol comes after the number") 
    eq 'after')
@@ -109,7 +109,7 @@ my @cur_sym_sep_choices = (
 );
 
 my $curr_sym_sep = &choice_prompt(qr/^(?:none|thin-space|space|nbsp)$/,
-   @cur_sym_sep_choices,
+   \@cur_sym_sep_choices,
   "What type of spacing should occur between the currency symbol (not the code) and number?",
   "Enter 'none' for no spacing."
  );
@@ -507,7 +507,7 @@ _END
 
    if ($currency{'prefix'})
    {
-      print $fh "\\datatool${region}symbolprefix { ${region} }\n";
+      print $fh "      \\datatool${region}symbolprefix { ${region} }\n";
    }
 
    print $fh <<"_END";
@@ -588,11 +588,11 @@ _END
 %    \\end{macrocode}
 %Number of digits that \\cs{DTLdecimaltocurrency} should round to:
 %    \\begin{macrocode}
-\\renewcommand \\DTLCurrentLocaleCurrencyDP { ${currencyDigits} }
+      \\renewcommand \\DTLCurrentLocaleCurrencyDP { ${currencyDigits} }
 _END
    }
 
-   print $fh "  \\renewcommand \\dtlcurrfmtsymsep { \\l_datatool_${region}_sym_sep_tl }\n";
+   print $fh "      \\renewcommand \\dtlcurrfmtsymsep { \\l_datatool_${region}_sym_sep_tl }\n";
 
       print $fh <<"_END";
     }
