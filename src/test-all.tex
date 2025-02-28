@@ -36,25 +36,10 @@
   \tl_put_right:Nn #1 { #3 { #2 } & \my_details:n { #2 } }
 }
 
-\cs_new:Nn \my_type_name:n
- {
-   \int_case:nnF { #1 }
-    {
-       { \c_datatool_string_int } { String }
-       { \c_datatool_integer_int } { Integer }
-       { \c_datatool_decimal_int } { Decimal }
-       { \c_datatool_currency_int } { Currency }
-       { \c_datatool_datetime_int } { Datetime }
-       { \c_datatool_date_int } { Date }
-       { \c_datatool_time_int } { Time }
-    }
-    { Unknown }
- }
-
 \cs_new:Nn \my_details:n
  {
    \DTLparse \l_tmpa_tl { #1 }
-   \my_type_name:n { \DTLdatumtype { \l_tmpa_tl } }
+   \DTLgetDataTypeName { \DTLdatumtype { \l_tmpa_tl } }
    . \c_space_tl
    \DTLifnumerical { \l_tmpa_tl }
     {
