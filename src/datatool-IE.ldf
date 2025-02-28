@@ -44,18 +44,27 @@
    \dtlcurrprefixfmt { #1 } { #2 }
  }
 %    \end{macrocode}
+%Separator between currency symbol and value.
+%    \begin{macrocode} 
+\tl_new:N \l_datatool_IE_sym_sep_tl
+%    \end{macrocode}
+%
 % Provide a command to set the currency for this region (for use
 % with any hook used when the locale changes).
 %    \begin{macrocode}
 \newcommand \datatoolIESetCurrency
-{
-  \DTLsetdefaultcurrency { EUR }
+ {
+   \bool_if:NT \l_datatool_region_set_currency_bool
+    {
+     \DTLsetdefaultcurrency { EUR }
 %    \end{macrocode}
 %Number of digits that \cs{DTLdecimaltocurrency} should round to:
 %    \begin{macrocode}
-  \renewcommand \DTLCurrentLocaleCurrencyDP { 2 }
-  \renewcommand \DTLdefaultEURcurrencyfmt { \datatool_IE_currency_position:nn }
-}
+     \renewcommand \DTLCurrentLocaleCurrencyDP { 2 }
+     \renewcommand \DTLdefaultEURcurrencyfmt { \datatool_IE_currency_position:nn }
+     \renewcommand \dtlcurrfmtsymsep { \l_datatool_IE_sym_sep_tl }
+    }
+ }
 %    \end{macrocode}
 %\subsection{Date and Time Parsing}
 % This defaults to day/month/year and should be changed as
@@ -312,6 +321,9 @@
          \datatoolIESetNumberChars
        }
     } ,
+%    \end{macrocode}
+% Currency symbol before or after value:
+%    \begin{macrocode}
    currency-symbol-position .choice: ,
    currency-symbol-position / before .code:n =
     {
@@ -321,6 +333,30 @@
     {
       \cs_set_eq:NN \datatool_IE_currency_position:nn \dtlcurrsuffixfmt
     } ,
+%    \end{macrocode}
+% Separator between currency symbol (not code) and value:
+%    \begin{macrocode}
+   currency-symbol-sep .choice: ,
+   currency-symbol-sep / none .code:n =
+    {
+      \tl_clear:N \l_datatool_IE_sym_sep_tl
+    } ,
+   currency-symbol-sep / thin-space .code:n =
+    {
+      \tl_set:Nn \l_datatool_IE_sym_sep_tl { \, }
+    } ,
+   currency-symbol-sep / space .code:n =
+    {
+      \tl_set:Nn \l_datatool_IE_sym_sep_tl { ~ }
+    } ,
+   currency-symbol-sep / nbsp .code:n =
+    {
+      \tl_set:Nn \l_datatool_IE_sym_sep_tl { \nobreakspace }
+    } ,
+   currency-symbol-sep .initial:n = { none } ,
+%    \end{macrocode}
+% Date and time styles:
+%    \begin{macrocode}
    date-style .choice: ,
    date-style / dmyyyy .code: n =
     {

@@ -188,6 +188,28 @@ As with \sty{datatool}, these supplementary packages internally load
 \sty{datatool-base} so if that has already been loaded, then the
 localisation support should already have been set.
 
+\section{Non-Region Specific Settings}
+
+Some settings are not specific to regions, such as
+\opt{currency-symbol-style}. These should be set in \cs{DTLsetup}.
+All settings relating to numbers and currency are set within the
+\opt{numeric} option and all settings relating to dates and times
+are set within the \opt{datetime} option. These settings are
+described in the \sty{datatool} user guide.
+
+For example:
+\begin{dispListing}
+\DTLsetup{
+ numeric = {
+    region-currency-prefix = smallcaps ,
+    currency-symbol-style = symbol
+  },
+ datetime = {
+   parse = auto-reformat
+ }
+}
+\end{dispListing}
+
 \chapter{Supported Regions}
 
 Only a limited number of regions are currently supported.
@@ -218,7 +240,7 @@ listed below.
 
 \begin{docKey}[CA]{currency-symbol-prefix}{=\meta{boolean}}{initially \opt{false}}
 If true, shows the region prefix before the currency symbol if
-\setbaseopt{ numeric = \brackets{ currency-symbol-style = symbol }}.
+the \opt{numeric} setting \opt{currency-symbol-style} is not set to \qt{iso}.
 The prefix font may be changed to smallcaps or smaller with
 the base \opt{numeric} option \opt{region-currency-prefix} setting.
 \end{docKey}
@@ -242,6 +264,18 @@ currency symbol is placed after the value.
 \DTLdecimaltocurrency{12345.678}{\result}\result
 \end{dispExample}
 
+\begin{docKey}[CA]{currency-symbol-sep}{=\meta{value}}{initially \opt{none}}
+Sets the separator to use between the currency symbol (not code) and the value.
+Permitted values: \docValue{none} (no space), \docValue{thin-space}
+(a thin space), \docValue{space} (a normal space), or
+\docValue{nbsp} (a non-breaking space).
+\end{docKey}
+
+\begin{dispExample}
+\DTLsetLocaleOptions{CA}{currency-symbol-sep=thin-space}
+\DTLdecimaltocurrency{12345.678}{\result}\result
+\end{dispExample}
+
 \begin{docKey}[CA]{number-style}{=\meta{style}}{}
 This option will attempt to set \opt{number-style}=\meta{style} for
 the module \meta{lang}-CA, if it's defined. Where \meta{lang} is the
@@ -259,12 +293,15 @@ is en-GB:
 
 The remaining options relate to dates and times, which are still
 experimental. You need to enable date and time parsing with
-\setbaseopt{datetime=\brackets{parse}}.
+\setbaseopt{ datetime = \brackets{parse} }.
 
 \begin{docKey}[CA]{date-style}{=\meta{style}}{initially \opt{yyyymd}}
 Sets the current date style. The value may be one of:
-\docValue{dmyyyy}, \docValue{mdyyyy}, \docValue{yyyymd},
-\docValue{dmyy}, \docValue{mdyy}, \docValue{yymd}.
+\docValue{dmyyyy} (day month year), \docValue{mdyyyy} (month day year),
+\docValue{yyyymd} (year month day),
+\docValue{dmyy} (day month 2-digit year),
+\docValue{mdyy} (month day 2-digit year), or
+\docValue{yymd} (2-digit year month day).
 \end{docKey}
 
 \begin{docKey}[CA]{date-variant}{=\meta{style}}{initially \opt{hyphen}}
@@ -281,6 +318,24 @@ Allowed values: \docValue{colon} (\code{:}), \docValue{dot} (\code{.}) or
 \docValue{dialect-colon} (if the language supports it), or
 \docValue{dialect-dot} (if the language supports it).
 \end{docKey}
+
+\begin{dispExample}
+\DTLsetup{datetime={parse}}
+\DTLsetLocaleOptions{CA}{
+ date-style=dmyyyy,
+ date-variant = dialect,
+ time-variant = dot
+}
+\DTLparse\result{Fri 28th Feb 2025 3.45pm PST}
+String: \result.
+Data type: \DTLgetDataTypeName{\DTLdatumtype{\result}}.
+Numeric value: \DTLdatumvalue{\result}.
+
+\ExplSyntaxOn
+\datatool_extract_timestamp:NN \result \l_tmpa_tl
+Time-stamp: ~ \l_tmpa_tl
+\ExplSyntaxOff
+\end{dispExample}
 
 \begin{docCommand}{datatoolCASetNumberChars}{}
 Hook to switch to CA number group and decimal characters but
@@ -320,9 +375,9 @@ listed below.
 
 \begin{docKey}[GB]{currency-symbol-prefix}{=\meta{boolean}}{initially \opt{false}}
 If true, shows the region prefix before the currency symbol if
-\setbaseopt{numeric=\brackets{currency-symbol-style = symbol}}.
+the \opt{numeric} setting \opt{currency-symbol-style} is not set to \qt{iso}.
 The prefix font may be changed to smallcaps or smaller with
-\setbaseopt{numeric=\brackets{region-currency-prefix=\meta{value}}}
+\setbaseopt{ numeric = \brackets{ region-currency-prefix = \meta{value} } }
 where \meta{value} is \opt{smallcaps} or \opt{smaller}.
 \end{docKey}
 
@@ -342,6 +397,18 @@ currency symbol is placed after the value.
 \begin{dispExample}
 \DTLsetup{numeric={currency-symbol-style=iso}}
 \DTLsetLocaleOptions{GB}{currency-symbol-position=after}
+\DTLdecimaltocurrency{12345.678}{\result}\result
+\end{dispExample}
+
+\begin{docKey}[GB]{currency-symbol-sep}{=\meta{value}}{initially \opt{none}}
+Sets the separator to use between the currency symbol (not code) and the value.
+Permitted values: \docValue{none} (no space), \docValue{thin-space}
+(a thin space), \docValue{space} (a normal space), or
+\docValue{nbsp} (a non-breaking space).
+\end{docKey}
+
+\begin{dispExample}
+\DTLsetLocaleOptions{GB}{currency-symbol-sep=thin-space}
 \DTLdecimaltocurrency{12345.678}{\result}\result
 \end{dispExample}
 
@@ -375,12 +442,15 @@ when parsing.
 
 The remaining options relate to dates and times, which are still
 experimental. You need to enable date and time parsing with
-\setbaseopt{datetime=\brackets{parse}}.
+\setbaseopt{ datetime = \brackets{parse} }.
 
 \begin{docKey}[GB]{date-style}{=\meta{style}}{initially \opt{dmyyyy}}
 Sets the current date style. The value may be one of:
-\docValue{dmyyyy}, \docValue{mdyyyy}, \docValue{yyyymd},
-\docValue{dmyy}, \docValue{mdyy}, \docValue{yymd}.
+\docValue{dmyyyy} (day month year), \docValue{mdyyyy} (month day year),
+\docValue{yyyymd} (year month day),
+\docValue{dmyy} (day month 2-digit year),
+\docValue{mdyy} (month day 2-digit year), or
+\docValue{yymd} (2-digit year month day).
 \end{docKey}
 
 \begin{docKey}[GB]{date-variant}{=\meta{style}}{initially \opt{slash}}
@@ -398,6 +468,23 @@ Allowed values: \docValue{colon} (\code{:}), \docValue{dot} (\code{.}) or
 \docValue{dialect-dot} (if the language supports it).
 \end{docKey}
 
+\begin{dispExample}
+\DTLsetup{datetime={parse}}
+\DTLsetLocaleOptions{GB}{
+ date-style=dmyyyy,
+ date-variant = dialect,
+ time-variant = dot
+}
+\DTLparse\result{Fri 28th Feb 2025 3.45pm GMT}
+String: \result.
+Data type: \DTLgetDataTypeName{\DTLdatumtype{\result}}.
+Numeric value: \DTLdatumvalue{\result}.
+
+\ExplSyntaxOn
+\datatool_extract_timestamp:NN \result \l_tmpa_tl
+Time-stamp: ~ \l_tmpa_tl
+\ExplSyntaxOff
+\end{dispExample}
 
 \begin{docCommand}{datatoolGBSetNumberChars}{}
 Hook to switch to GB number group and decimal characters.
@@ -444,6 +531,18 @@ currency symbol is placed after the value.
 \DTLdecimaltocurrency{12345.678}{\result}\result
 \end{dispExample}
 
+\begin{docKey}[IE]{currency-symbol-sep}{=\meta{value}}{initially \opt{none}}
+Sets the separator to use between the currency symbol (not code) and the value.
+Permitted values: \docValue{none} (no space), \docValue{thin-space}
+(a thin space), \docValue{space} (a normal space), or
+\docValue{nbsp} (a non-breaking space).
+\end{docKey}
+
+\begin{dispExample}
+\DTLsetLocaleOptions{IE}{currency-symbol-sep=thin-space}
+\DTLdecimaltocurrency{12345.678}{\result}\result
+\end{dispExample}
+
 \begin{docKey}[IE]{number-style}{=\meta{setting}}{initially \opt{official}}
 Sets the number group and decimal characters. The value may be one
 of: \docValue{official} (comma number group and decimal point) or
@@ -464,12 +563,15 @@ when parsing.
 
 The remaining options relate to dates and times, which are still
 experimental. You need to enable date and time parsing with
-\setbaseopt{datetime=\brackets{parse}}.
+\setbaseopt{ datetime = \brackets{ parse } }.
 
 \begin{docKey}[IE]{date-style}{=\meta{style}}{initially \opt{dmyyyy}}
 Sets the current date style. The value may be one of:
-\docValue{dmyyyy}, \docValue{mdyyyy}, \docValue{yyyymd},
-\docValue{dmyy}, \docValue{mdyy}, \docValue{yymd}.
+\docValue{dmyyyy} (day month year), \docValue{mdyyyy} (month day year),
+\docValue{yyyymd} (year month day),
+\docValue{dmyy} (day month 2-digit year),
+\docValue{mdyy} (month day 2-digit year), or
+\docValue{yymd} (2-digit year month day).
 \end{docKey}
 
 \begin{docKey}[IE]{date-variant}{=\meta{style}}{initially \opt{slash}}
@@ -487,6 +589,23 @@ Allowed values: \docValue{colon} (\code{:}), \docValue{dot} (\code{.}) or
 \docValue{dialect-dot} (if the language supports it).
 \end{docKey}
 
+\begin{dispExample}
+\DTLsetup{datetime={parse}}
+\DTLsetLocaleOptions{IE}{
+ date-style=dmyyyy,
+ date-variant = dialect,
+ time-variant = dot
+}
+\DTLparse\result{1st June 2025 3.45pm IST}
+String: \result.
+Data type: \DTLgetDataTypeName{\DTLdatumtype{\result}}.
+Numeric value: \DTLdatumvalue{\result}.
+
+\ExplSyntaxOn
+\datatool_extract_timestamp:NN \result \l_tmpa_tl
+Time-stamp: ~ \l_tmpa_tl
+\ExplSyntaxOff
+\end{dispExample}
 
 \begin{docCommand}{datatoolIESetNumberChars}{}
 Hook to switch to IE number group and decimal characters.
@@ -540,6 +659,18 @@ currency symbol is placed after the value.
 \DTLdecimaltocurrency{12345.678}{\result}\result
 \end{dispExample}
 
+\begin{docKey}[ZA]{currency-symbol-sep}{=\meta{value}}{initially \opt{none}}
+Sets the separator to use between the currency symbol (not code) and the value.
+Permitted values: \docValue{none} (no space), \docValue{thin-space}
+(a thin space), \docValue{space} (a normal space), or
+\docValue{nbsp} (a non-breaking space).
+\end{docKey}
+
+\begin{dispExample}
+\DTLsetLocaleOptions{ZA}{currency-symbol-sep=thin-space}
+\DTLdecimaltocurrency{12345.678}{\result}\result
+\end{dispExample}
+
 \begin{docKey}[ZA]{number-style}{=\meta{style}}{initially \opt{official}}
 Sets the number group and decimal characters. The value may be one
 of: \docValue{official} (dot number group and decimal comma) or
@@ -561,12 +692,15 @@ English:
 
 The remaining options relate to dates and times, which are still
 experimental. You need to enable date and time parsing with
-\setbaseopt{datetime=\brackets{parse}}.
+\setbaseopt{ datetime = \brackets{parse} }.
 
 \begin{docKey}[ZA]{date-style}{=\meta{style}}{initially \opt{yyyymd}}
 Sets the current date style. The value may be one of:
-\docValue{dmyyyy}, \docValue{mdyyyy}, \docValue{yyyymd},
-\docValue{dmyy}, \docValue{mdyy}, \docValue{yymd}.
+\docValue{dmyyyy} (day month year), \docValue{mdyyyy} (month day year),
+\docValue{yyyymd} (year month day),
+\docValue{dmyy} (day month 2-digit year),
+\docValue{mdyy} (month day 2-digit year), or
+\docValue{yymd} (2-digit year month day).
 \end{docKey}
 
 \begin{docKey}[ZA]{date-variant}{=\meta{style}}{initially \opt{hyphen}}
@@ -584,6 +718,23 @@ Allowed values: \docValue{colon} (\code{:}), \docValue{dot} (\code{.}) or
 \docValue{dialect-dot} (if the language supports it).
 \end{docKey}
 
+\begin{dispExample}
+\DTLsetup{datetime={parse}}
+\DTLsetLocaleOptions{ZA}{
+ date-style=mdyyyy,
+ date-variant = dialect,
+ time-variant = dot
+}
+\DTLparse\result{June 1, 2025 3.45pm SAST}
+String: \result.
+Data type: \DTLgetDataTypeName{\DTLdatumtype{\result}}.
+Numeric value: \DTLdatumvalue{\result}.
+
+\ExplSyntaxOn
+\datatool_extract_timestamp:NN \result \l_tmpa_tl
+Time-stamp: ~ \l_tmpa_tl
+\ExplSyntaxOff
+\end{dispExample}
 \begin{docCommand}{datatoolZASetNumberChars}{}
 Hook to switch to ZA number group and decimal characters.
 \end{docCommand}

@@ -54,6 +54,11 @@
    \dtlcurrprefixfmt { #1 } { #2 }
  }
 %    \end{macrocode}
+%Separator between currency symbol and value.
+%    \begin{macrocode} 
+\tl_new:N \l_datatool_CA_sym_sep_tl
+%    \end{macrocode}
+%
 % Set the currency format for this region.
 %    \begin{macrocode} 
 \newcommand \datatoolCAcurrencyfmt [ 2 ]
@@ -96,6 +101,7 @@
 %Number of digits that \cs{DTLdecimaltocurrency} should round to:
 %    \begin{macrocode}
       \renewcommand \DTLCurrentLocaleCurrencyDP { 2 }
+      \renewcommand \dtlcurrfmtsymsep { \l_datatool_CA_sym_sep_tl }
     }
  }
 %    \end{macrocode}
@@ -340,6 +346,9 @@
           }
        }
     } ,
+%    \end{macrocode}
+% Currency symbol before or after value:
+%    \begin{macrocode}
    currency-symbol-position .choice: ,
    currency-symbol-position / before .code:n = 
     {
@@ -349,6 +358,9 @@
     {
       \cs_set_eq:NN \datatool_CA_currency_position:nn \dtlcurrsuffixfmt
     } ,
+%    \end{macrocode}
+% Should the currency symbol be prefixed with the region code:
+%    \begin{macrocode}
    currency-symbol-prefix .choice: ,
    currency-symbol-prefix / false .code:n = 
     {
@@ -361,6 +373,30 @@
         \datatool_currency_symbol_region_prefix:n
     } ,
    currency-symbol-prefix .default:n = { true } ,
+%    \end{macrocode}
+% Separator between currency symbol (not code) and value:
+%    \begin{macrocode}
+   currency-symbol-sep .choice: ,
+   currency-symbol-sep / none .code:n = 
+    {
+      \tl_clear:N \l_datatool_CA_sym_sep_tl
+    } ,
+   currency-symbol-sep / thin-space .code:n = 
+    {
+      \tl_set:Nn \l_datatool_CA_sym_sep_tl { \, }
+    } ,
+   currency-symbol-sep / space .code:n = 
+    {
+      \tl_set:Nn \l_datatool_CA_sym_sep_tl { ~ }
+    } ,
+   currency-symbol-sep / nbsp .code:n = 
+    {
+      \tl_set:Nn \l_datatool_CA_sym_sep_tl { \nobreakspace }
+    } ,
+   currency-symbol-sep .initial:n = { none } ,
+%    \end{macrocode}
+% Date and time styles:
+%    \begin{macrocode}
    date-style .choice: ,
    date-style / dmyyyy .code: n =
     {

@@ -87,7 +87,10 @@ my %currency = (
 
 my $currfmt = 'dtlcurrprefixfmt';
 
-my @before_after = ('before', 'after');
+my @before_after = (
+ 'before) symbol before number',
+ 'after) symbol after number'
+);
 
 if (&choice_prompt(qr/^(?:before|after)$/,
      @before_after,
@@ -97,6 +100,20 @@ if (&choice_prompt(qr/^(?:before|after)$/,
 {
    $currfmt = 'dtlcurrsuffixfmt';
 }
+
+my @cur_sym_sep_choices = (
+  'none) no spacing',
+  'thin-space) thin space',
+  'space) normal space',
+  'nbsp) non-breaking space'
+);
+
+my $curr_sym_sep = &choice_prompt(qr/^(?:none|thin-space|space|nbsp)$/,
+   @cur_sym_sep_choices,
+  "What type of spacing should occur between the currency symbol (not the code) and number?",
+  "Enter 'none' for no spacing."
+ );
+
 
 while ($currency{'symbol'} eq '')
 {
@@ -433,6 +450,10 @@ print $fh <<"_END";
    \\${currfmt} { #1 } { #2 }
  }
 %    \\end{macrocode}
+%Separator between currency symbol and value.
+%    \\begin{macrocode} 
+\\tl_new:N \\l_datatool_${region}_sym_sep_tl
+%    \\end{macrocode}
 _END
 
 if ($currency{'code'} eq 'EUR')
@@ -447,8 +468,10 @@ if ($currency{'code'} eq 'EUR')
 % with any hook used when the locale changes).
 %    \\begin{macrocode}
 \\newcommand \\datatool${region}SetCurrency
-{
-  \\DTLsetdefaultcurrency { EUR }
+ {
+   \\bool_if:NT \l_datatool_region_set_currency_bool
+    {
+      \\DTLsetdefaultcurrency { EUR }
 _END
 
    unless ($currencyDigits eq '')
@@ -457,14 +480,17 @@ _END
 %    \\end{macrocode}
 %Number of digits that \\cs{DTLdecimaltocurrency} should round to:
 %    \\begin{macrocode}
-  \\renewcommand \\DTLCurrentLocaleCurrencyDP { ${currencyDigits} }
+      \\renewcommand \\DTLCurrentLocaleCurrencyDP { ${currencyDigits} }
 _END
    }
 
-   print $fh "  \\renewcommand \\DTLdefaultEURcurrencyfmt { \\datatool_${region}_currency_position:nn }\n";
+   print $fh "      \\renewcommand \\DTLdefaultEURcurrencyfmt { \\datatool_${region}_currency_position:nn }\n";
+
+   print $fh "      \\renewcommand \\dtlcurrfmtsymsep { \\l_datatool_${region}_sym_sep_tl }\n";
 
    print $fh <<"_END";
-}
+    }
+ }
 %    \\end{macrocode}
 _END
 }
@@ -565,6 +591,8 @@ _END
 \\renewcommand \\DTLCurrentLocaleCurrencyDP { ${currencyDigits} }
 _END
    }
+
+   print $fh "  \\renewcommand \\dtlcurrfmtsymsep { \\l_datatool_${region}_sym_sep_tl }\n";
 
       print $fh <<"_END";
     }
@@ -923,6 +951,9 @@ _END
 }
 
 print $fh <<"_END";
+%    \\end{macrocode}
+% Currency symbol before or after value:
+%    \\begin{macrocode}
    currency-symbol-position .choice: ,
    currency-symbol-position / before .code:n = 
     {
@@ -937,6 +968,9 @@ _END
 if ($currency{'prefix'})
 {
    print $fh <<"_END";
+%    \\end{macrocode}
+% Should the currency symbol be prefixed with the region code:
+%    \\begin{macrocode}
    currency-symbol-prefix .choice: ,
    currency-symbol-prefix / false .code:n =
     {
@@ -952,10 +986,36 @@ if ($currency{'prefix'})
 _END
 }
 
+print $fh <<"_END";
+%    \\end{macrocode}
+% Separator between currency symbol (not code) and value:
+%    \\begin{macrocode}
+   currency-symbol-sep .choice: ,
+   currency-symbol-sep / none .code:n = 
+    {
+      \\tl_clear:N \\l_datatool_${region}_sym_sep_tl
+    } ,
+   currency-symbol-sep / thin-space .code:n = 
+    {
+      \\tl_set:Nn \\l_datatool_${region}_sym_sep_tl { \\, }
+    } ,
+   currency-symbol-sep / space .code:n = 
+    {
+      \\tl_set:Nn \\l_datatool_${region}_sym_sep_tl { ~ }
+    } ,
+   currency-symbol-sep / nbsp .code:n =
+    {
+      \\tl_set:Nn \\l_datatool_${region}_sym_sep_tl { \\nobreakspace }
+    } ,
+   currency-symbol-sep . initial:n = { $curr_sym_sep } ,
+_END
+
 if ($hasDateFormat)
 {
 print $fh <<"_END";
-
+%    \\end{macrocode}
+% Date and time styles:
+%    \\begin{macrocode}
    date-style .choice: ,
    date-style / dmyyyy .code: n =
     {

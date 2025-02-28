@@ -43,6 +43,11 @@
    \dtlcurrprefixfmt { #1 } { #2 }
  }
 %    \end{macrocode}
+%Separator between currency symbol and value.
+%    \begin{macrocode} 
+\tl_new:N \l_datatool_ZA_sym_sep_tl
+%    \end{macrocode}
+%
 % Set the currency format for this region.
 %    \begin{macrocode} 
 \newcommand \datatoolZAcurrencyfmt { \datatool_ZA_currency_position:nn }
@@ -71,6 +76,7 @@
 %Number of digits that \cs{DTLdecimaltocurrency} should round to:
 %    \begin{macrocode}
       \renewcommand \DTLCurrentLocaleCurrencyDP { 2 }
+      \renewcommand \dtlcurrfmtsymsep { \l_datatool_ZA_sym_sep_tl }
     }
  }
 %    \end{macrocode}
@@ -301,6 +307,9 @@
          \datatoolZASetNumberChars
        }
     } ,
+%    \end{macrocode}
+% Currency symbol before or after value:
+%    \begin{macrocode}
    currency-symbol-position .choice: ,
    currency-symbol-position / before .code:n =
     {
@@ -310,6 +319,30 @@
     {
       \cs_set_eq:NN \datatool_ZA_currency_position:nn \dtlcurrsuffixfmt
     } ,
+%    \end{macrocode}
+% Separator between currency symbol (not code) and value:
+%    \begin{macrocode}
+   currency-symbol-sep .choice: ,
+   currency-symbol-sep / none .code:n =
+    {
+      \tl_clear:N \l_datatool_ZA_sym_sep_tl
+    } ,
+   currency-symbol-sep / thin-space .code:n =
+    {
+      \tl_set:Nn \l_datatool_ZA_sym_sep_tl { \, }
+    } ,
+   currency-symbol-sep / space .code:n =
+    {
+      \tl_set:Nn \l_datatool_ZA_sym_sep_tl { ~ }
+    } ,
+   currency-symbol-sep / nbsp .code:n =
+    {   
+      \tl_set:Nn \l_datatool_ZA_sym_sep_tl { \nobreakspace }
+    } ,
+   currency-symbol-sep .initial:n = { none } ,
+%    \end{macrocode}
+% Date and time styles:
+%    \begin{macrocode}
    date-style .choice: ,
    date-style / dmyyyy .code: n =
     {
@@ -351,7 +384,7 @@
    date-variant / dialect .code:n =
     {
       \tl_set:Nn \l__datatool_ZA_datevariant_tl
-        { \CurrentTrackedLanguage }
+        { \l_datatool_current_language_tl }
     } ,
    time-variant .choice: ,
    time-variant / colon .code:n =
@@ -367,26 +400,27 @@
       \tl_if_eq:NnTF \l__datatool_ZA_timevariant_tl { dot }
        {
          \tl_set:Nn \l__datatool_ZA_timevariant_tl
-          { \CurrentTrackedLanguage _dot }
+          { \l_datatool_current_language_tl _dot }
        }
        {
          \tl_if_in:NnF
-           \l__datatool_ZA_timevariant_tl { \CurrentTrackedLanguage }
+           \l__datatool_ZA_timevariant_tl
+           { \l_datatool_current_language_tl }
           {
             \tl_set:Nn \l__datatool_ZA_timevariant_tl
-             { \CurrentTrackedLanguage _colon }
+             { \l_datatool_current_language_tl _colon }
           }
        }
     } ,
    time-variant / dialect-colon .code:n =
     {
       \tl_set:Nn \l__datatool_ZA_timevariant_tl
-        { \CurrentTrackedLanguage _colon }
+        { \l_datatool_current_language_tl _colon }
     } ,
    time-variant / dialect-dot .code:n =
     {
       \tl_set:Nn \l__datatool_ZA_timevariant_tl
-        { \CurrentTrackedLanguage _dot }
+        { \l_datatool_current_language_tl _dot }
     } ,
  }
 %    \end{macrocode}

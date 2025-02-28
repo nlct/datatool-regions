@@ -20,7 +20,30 @@ region: \TrackedIsoCodeFromLanguage{\TwoLetterIsoCountryCode}{\thisdialect}.
 \selectlanguage{afrikaans}
 Currency: \DTLdecimaltocurrency{1234.56}{\result}\result.
 
+\DTLsetup{datetime={parse}}
+\DTLsetLocaleOptions{ZA}{
+ date-style=dmyyyy,
+ date-variant = slash,
+ time-variant = colon
+}
+\DTLparse\result{1/2/2025 11:45 SAST}
+String: \result.
+Data type: \DTLgetDataTypeName{\DTLdatumtype{\result}}.
+Numeric value: \DTLdatumvalue{\result}.
+
+
 \selectlanguage{english}
 Currency: \DTLdecimaltocurrency{1234.56}{\result}\result.
+
+\DTLsetup{datetime={parse}}
+\DTLsetLocaleOptions{ZA}{
+ date-style=dmyyyy,
+ date-variant = dialect,
+ time-variant = colon
+}
+\DTLparse\result{1 June 2025}
+String: \result.
+Data type: \DTLgetDataTypeName{\DTLdatumtype{\result}}.
+Numeric value: \DTLdatumvalue{\result}.
 
 \end{document}
