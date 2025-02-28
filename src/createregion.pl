@@ -401,7 +401,7 @@ else
     {
       \\tl_if_empty:NTF \\l_datatool_current_language_tl
        {
-          \\datatool_locale_warn:n { datatool-${region} }
+          \\datatool_locale_warn:nn { datatool-${region} }
            {
               No ~ current ~ language: ~ can't ~ set ~
               number ~ group ~ and ~ decimal ~ characters
@@ -411,7 +411,7 @@ else
          \\cs_if_exist_use:cF
           { datatool \\l_datatool_current_language_tl ${region}SetNumberChars }
            {
-             \\datatool_locale_warn:n { datatool-${region} }
+             \\datatool_locale_warn:nn { datatool-${region} }
               {
                  No ~ support ~ for ~ locale ~
                  ` \\l_datatool_current_language_tl - ${region}': ~ can't ~ set ~
@@ -424,6 +424,16 @@ else
 %    \\end{macrocode}
 _END
 }
+
+print $fh <<"_END";
+%How to format the position of the currency symbol in relation to the value.
+%    \\begin{macrocode}
+\\cs_new:Nn \\datatool_${region}_currency_position:nn
+ {
+   \\${currfmt} { #1 } { #2 }
+ }
+%    \\end{macrocode}
+_END
 
 if ($currency{'code'} eq 'EUR')
 {
@@ -451,7 +461,7 @@ _END
 _END
    }
 
-   print $fh "  \\renewcommand \\DTLdefaultEURcurrencyfmt { \\$currfmt }\n";
+   print $fh "  \\renewcommand \\DTLdefaultEURcurrencyfmt { \\datatool_${region}_currency_position:nn }\n";
 
    print $fh <<"_END";
 }
@@ -465,7 +475,7 @@ else
 %    \\begin{macrocode}
 \\newcommand \\datatool${region}currencyfmt [ 2 ]
  {
-   \\$currfmt
+   \\datatool_${region}_currency_position:nn
     {
 _END
 
@@ -702,7 +712,7 @@ if ($hasDateFormat)
        }
     }
     {
-      \\datatool_locale_warn:n { datatool-${region} }
+      \\datatool_locale_warn:nn { datatool-${region} }
        {
           No ~ support ~ for ~ date ~ style ~
           ` \\l__datatool_${region}_datestyle_tl '
@@ -767,7 +777,7 @@ if ($hasDateFormat)
        }
     }
     {
-      \\datatool_locale_warn:n { datatool-${region} }
+      \\datatool_locale_warn:nn { datatool-${region} }
        {
           No ~ support ~ for ~ date ~ style ~
           ` \\l__datatool_${region}_datestyle_tl '
@@ -902,7 +912,7 @@ print $fh <<"_END";
           { number-style = { #1 } }
        }
        {
-         \\datatool_locale_warn:n { datatool-${region} }
+         \\datatool_locale_warn:nn { datatool-${region} }
           {
             No ~ number-style ~ available ~ for ~ current ~ locale ~
             (additional ~ language ~ module ~ may ~ need ~ installing)
@@ -912,9 +922,21 @@ print $fh <<"_END";
 _END
 }
 
+print $fh <<"_END";
+   currency-symbol-position .choice: ,
+   currency-symbol-position / before .code:n = 
+    {
+      \\cs_set_eq:NN \\datatool_${region}_currency_position:nn \\dtlcurrprefixfmt
+    } ,
+   currency-symbol-position / after .code:n =
+    {
+      \\cs_set_eq:NN \\datatool_${region}_currency_position:nn \\dtlcurrsuffixfmt
+    } ,
+_END
+
 if ($currency{'prefix'})
 {
-print $fh <<"_END";
+   print $fh <<"_END";
    currency-symbol-prefix .choice: ,
    currency-symbol-prefix / false .code:n =
     {

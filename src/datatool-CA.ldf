@@ -26,7 +26,7 @@
     {
       \tl_if_empty:NTF \l_datatool_current_language_tl
        {
-          \datatool_locale_warn:n { datatool-CA }
+          \datatool_locale_warn:nn { datatool-CA }
            {
               No ~ current ~ language: ~ can't ~ set ~
               number ~ group ~ and ~ decimal ~ characters
@@ -36,7 +36,7 @@
          \cs_if_exist_use:cF
           { datatool \l_datatool_current_language_tl CASetNumberChars }
            {
-             \datatool_locale_warn:n { datatool-CA }
+             \datatool_locale_warn:nn { datatool-CA }
               {
                  No ~ support ~ for ~ locale ~
                  ` \l_datatool_current_language_tl - CA': ~ can't ~ set ~
@@ -47,12 +47,18 @@
     }
  }
 %    \end{macrocode}
-%
+%How to format the position of the currency symbol in relation to the value.
+%    \begin{macrocode} 
+\cs_new:Nn \datatool_CA_currency_position:nn
+ {
+   \dtlcurrprefixfmt { #1 } { #2 }
+ }
+%    \end{macrocode}
 % Set the currency format for this region.
 %    \begin{macrocode} 
 \newcommand \datatoolCAcurrencyfmt [ 2 ]
  { 
-   \dtlcurrprefixfmt
+   \datatool_CA_currency_position:nn
     {
       \datatoolCAsymbolprefix { CA }
       #1
@@ -167,7 +173,7 @@
               #1 { #2 } { #3 } { #4 }
           }
           {
-            \datatool_locale_warn:n { datatool-CA }
+            \datatool_locale_warn:nn { datatool-CA }
              {
               No ~ support ~ for ~ time ~ variant ~
               ` \l__datatool_CA_timevariant_tl '
@@ -176,7 +182,7 @@
           }
        }
        {
-         \datatool_locale_warn:n { datatool-CA }
+         \datatool_locale_warn:nn { datatool-CA }
           {
            No ~ support ~ for ~ date ~ style ~
            ` \l__datatool_CA_datestyle_tl ' ~ with ~
@@ -187,7 +193,7 @@
        }
     }
     {
-      \datatool_locale_warn:n { datatool-CA }
+      \datatool_locale_warn:nn { datatool-CA }
        {
           No ~ support ~ for ~ date ~ style ~
           ` \l__datatool_CA_datestyle_tl '
@@ -235,7 +241,7 @@
           #1 { #2 } { #3 } { #4 }
        }
        {
-         \datatool_locale_warn:n { datatool-CA }
+         \datatool_locale_warn:nn { datatool-CA }
           {
            No ~ support ~ for ~ date ~ style ~
            ` \l__datatool_CA_datestyle_tl ' ~ with ~
@@ -246,7 +252,7 @@
        }
     }
     {
-      \datatool_locale_warn:n { datatool-CA }
+      \datatool_locale_warn:nn { datatool-CA }
        {
           No ~ support ~ for ~ date ~ style ~
           ` \l__datatool_CA_datestyle_tl '
@@ -278,7 +284,7 @@
         #1 { #2 } { #3 } { #4 }
     }
     {
-      \datatool_locale_warn:n { datatool-CA }
+      \datatool_locale_warn:nn { datatool-CA }
        {
         No ~ support ~ for ~ time ~ variant ~
         ` \l__datatool_CA_timevariant_tl '
@@ -317,21 +323,31 @@
  {
    number-style .code:n =
     {
-      \keys_if_exist:nnTF
+      \exp_args:Ne \keys_if_exist:nnTF
          { datatool / locale / \l_datatool_current_language_tl - CA }
          { number-style }
        {
-         \keys_set:nn 
+         \exp_args:Ne \keys_set:nn 
           { datatool / locale / \l_datatool_current_language_tl - CA }
           { number-style = { #1 } }
        }
        {
-         \datatool_locale_warn:n { datatool-CA }
+         \datatool_locale_warn:nn { datatool-CA }
           {
-            No ~ number-style ~ available ~ for ~ current ~ locale ~
+            No ~ number-style ~ available ~ for ~ current ~ language ~
+            ` \l_datatool_current_language_tl ' ~
             (additional ~ language ~ module ~ may ~ need ~ installing)
           }
        }
+    } ,
+   currency-symbol-position .choice: ,
+   currency-symbol-position / before .code:n = 
+    {
+      \cs_set_eq:NN \datatool_CA_currency_position:nn \dtlcurrprefixfmt
+    } ,
+   currency-symbol-position / after .code:n = 
+    {
+      \cs_set_eq:NN \datatool_CA_currency_position:nn \dtlcurrsuffixfmt
     } ,
    currency-symbol-prefix .choice: ,
    currency-symbol-prefix / false .code:n = 

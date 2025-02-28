@@ -9,12 +9,12 @@ datatool-regions.zip	: datatool-regions.dtx datatool-regions.ins \
 	zip --exclude="*.swp" -r datatool-regions.zip datatool-regions
 
 datatool-regions.pdf	: datatool-regions.dtx datatool-GB.ldf
-	pdflatex datatool-regions.dtx
+	lualatex datatool-regions.dtx
 	makeindex datatool-regions.idx
-	pdflatex datatool-regions.dtx
+	lualatex datatool-regions.dtx
 	makeindex datatool-regions.idx
-	pdflatex datatool-regions.dtx
-	pdflatex datatool-regions.dtx
+	lualatex datatool-regions.dtx
+	lualatex datatool-regions.dtx
 
 datatool-GB.ldf	: datatool-regions.dtx datatool-regions.ins
 	latex datatool-regions.ins
@@ -30,5 +30,5 @@ README.md	: ../src/README.md
 	cp2dist -f ../src/version.txt ../src/README.md .
 
 clean	:
-	\rm -f *.ldf *.out *.log *.aux *.pdf *.dtx *.ins *.ind *.idx *.ilg *.glo *.gls *.glg *.hd README.md
+	\rm -f  *.out *.log *.aux *.pdf *.dtx *.ins *.ind *.idx *.ilg *.glo *.gls *.glg *.hd README.md
 	\rm -f datatool-regions.zip

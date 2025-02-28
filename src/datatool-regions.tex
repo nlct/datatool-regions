@@ -1,17 +1,36 @@
 % arara: lualatex
 % arara: makeindex
 % arara: lualatex
+\listfiles
 \documentclass[titlepage=false]{scrreport}
 \usepackage[noprint]{doc}% command names are too long
 
-\usepackage[T1]{fontenc}
+\usepackage{fontspec}
 \usepackage{tcolorbox}
 \usepackage[left=2.5cm,right=2.5cm]{geometry}
+
+\usepackage
+ [
+   locales=
+   {
+     en-CA,
+     en-GB,
+     en-IE,
+     en-ZA
+   },
+   verbose
+ ]
+ {datatool-base}
+
+\setromanfont{Noto Serif}
+\setsansfont{Noto Sans}
+\setmonofont{Noto Sans Mono}
 
 \CheckSum{0}
 
 \newcommand*{\sty}[1]{\textsf{#1}}
 \newcommand*{\file}[1]{\texorpdfstring{\nolinkurl{#1}}{#1}}
+\newcommand*{\ldf}[1]{\file{datatool-#1.ldf}}
 \newcommand*{\filemeta}[3]{%
  \texorpdfstring
   {\nolinkurl{#1}\meta{#2}\nolinkurl{#3}}%
@@ -24,10 +43,19 @@
 }
 \newcommand*{\opt}[1]{\textsf{#1}}
 \newcommand*{\qt}[1]{“#1”}
+\newcommand*{\setbaseopt}[1]{%
+ \cs{DTLsetup}\allowbreak
+ \texttt{\brackets{\allowbreak#1}}%
+}
 \newcommand*{\setlocaleopts}[1]{%
  \cs{DTLsetLocaleOptions}\allowbreak
  \texttt{\brackets{\strong{#1}}}\allowbreak
  \marg{key=val list}%
+}
+
+\newcommand*{\setlocaleopt}[2]{%
+ \cs{DTLsetLocaleOptions}\allowbreak
+ \texttt{\brackets{#1}\allowbreak\brackets{\allowbreak#2}}%
 }
 
 \definecolor{defbackground}{rgb}{1,1,0.75}
@@ -113,6 +141,13 @@ This is equivalent to:
 will add the region \opt{ZA} to \opt{afrikaans} and \opt{english}
 dialects.
 
+If the language already has a region, or if there are multiple
+regions for a particular language, then you will need to 
+include the language in the tag. For example:
+\begin{dispListing}
+\usepackage[locales={en-GB,en-IE}]{datatool-base}
+\end{dispListing}
+
 \begin{important}
 Bear in mind that if \sty{tracklang} can't determine the
 applicable dialect label for the captions hook, the settings may not
@@ -158,6 +193,9 @@ localisation support should already have been set.
 Only a limited number of regions are currently supported.
 
 \section{Region \qt{CA}}
+\DTLenLocaleHook
+\DTLenCALocaleHook
+\DTLCALocaleHook
 
 The \file{datatool-CA.ldf} file provides support for region \qt{CA}
 (Canada). This supplies the currency (CAD) but number formatting
@@ -166,23 +204,309 @@ region files, which should be provided by the applicable language
 module. For example, \sty{datatool-english} provides
 \file{datatool-en-CA.ldf}.
 
+If there's no caption hook and you have multiple locales, you will
+need to set both the language and region hooks. For example, this
+document has:
+\begin{dispListing}
+\DTLenLocaleHook
+\DTLenCALocaleHook
+\DTLCALocaleHook
+\end{dispListing}
+
+Options may be set with \setlocaleopts{CA}. Available options are
+listed below.
+
+\begin{docKey}[CA]{currency-symbol-prefix}{=\meta{boolean}}{initially \opt{false}}
+If true, shows the region prefix before the currency symbol if
+\setbaseopt{ numeric = \brackets{ currency-symbol-style = symbol }}.
+The prefix font may be changed to smallcaps or smaller with
+the base \opt{numeric} option \opt{region-currency-prefix} setting.
+\end{docKey}
+
+For example:
+\begin{dispExample}
+\DTLsetup{numeric={region-currency-prefix=smallcaps}}
+\DTLsetLocaleOptions{CA}{currency-symbol-prefix}
+\DTLdecimaltocurrency{12345.678}{\result}\result
+\end{dispExample}
+
+\begin{docKey}[CA]{currency-symbol-position}{=\meta{value}}{initially \opt{before}}
+Adjusts the formatting currency style. If \docValue{before}, the
+currency symbol is placed before the value. If \docValue{after}, the
+currency symbol is placed after the value.
+\end{docKey}
+
+\begin{dispExample}
+\DTLsetup{numeric={currency-symbol-style=iso}}
+\DTLsetLocaleOptions{CA}{currency-symbol-position=after}
+\DTLdecimaltocurrency{12345.678}{\result}\result
+\end{dispExample}
+
+\begin{docKey}[CA]{number-style}{=\meta{style}}{}
+This option will attempt to set \opt{number-style}=\meta{style} for
+the module \meta{lang}-CA, if it's defined. Where \meta{lang} is the
+current language tag. For example, if the current language tag is
+\qt{en}, then this will be equivalent to 
+\setlocaleopt{en-CA}{number-style=\meta{style}}.
+\end{docKey}
+
+For example, if \ldf{en-CA} has been loaded and the current locale
+is en-GB:
+\begin{dispExample}
+\DTLsetLocaleOptions{CA}{number-style=unofficial}
+\DTLdecimaltocurrency{12345.678}{\result}\result
+\end{dispExample}
+
+The remaining options relate to dates and times, which are still
+experimental. You need to enable date and time parsing with
+\setbaseopt{datetime=\brackets{parse}}.
+
+\begin{docKey}[CA]{date-style}{=\meta{style}}{initially \opt{yyyymd}}
+Sets the current date style. The value may be one of:
+\docValue{dmyyyy}, \docValue{mdyyyy}, \docValue{yyyymd},
+\docValue{dmyy}, \docValue{mdyy}, \docValue{yymd}.
+\end{docKey}
+
+\begin{docKey}[CA]{date-variant}{=\meta{style}}{initially \opt{hyphen}}
+Sets the current numeric date separator.
+Allowed values: \docValue{slash} (\code{/}), \docValue{hyphen}
+(\code{-}), \docValue{dot} (\code{.}) or
+\docValue{dialect} (if the language supports it).
+\end{docKey}
+
+\begin{docKey}[CA]{time-variant}{=\meta{style}}{initially \opt{colon}}
+Sets the current numeric time separator.
+Allowed values: \docValue{colon} (\code{:}), \docValue{dot} (\code{.}) or
+\docValue{dialect} (if the language supports it),
+\docValue{dialect-colon} (if the language supports it), or
+\docValue{dialect-dot} (if the language supports it).
+\end{docKey}
+
+\begin{docCommand}{datatoolCASetNumberChars}{}
+Hook to switch to CA number group and decimal characters but
+requires language support to be enabled as well otherwise it will
+simply trigger a warning.
+\end{docCommand}
+
+\begin{docCommand}{datatoolCAcurrencyfmt}{}
+Used to format the CAD currency. This supports the currency symbol
+prefix.
+\end{docCommand}
+
+\begin{docCommand}{DTLCALocaleHook}{}
+Hook to switch to CA settings. This may be added to the captions
+hook by \sty{datatool-base}, depending on the settings. Otherwise
+it can be explicitly used to switch to this region.
+\end{docCommand}
+
 \section{Region \qt{GB}}
+\DTLGBLocaleHook
 
 The \file{datatool-GB.ldf} file provides support for region \qt{GB}
 (United Kingdom). This defines the \qt{GBP} currency and sets it as
 the default currency. The default number group character is a
 comma, and the default decimal character is a dot.
 
+If there's no caption hook and you have multiple locales, you will
+need to set both the language and region hooks. For example, this
+document has:
+\begin{dispListing}
+\DTLenLocaleHook
+\DTLGBLocaleHook
+\end{dispListing}
+
+Options may be set with \setlocaleopts{GB}. Available options are
+listed below.
+
+\begin{docKey}[GB]{currency-symbol-prefix}{=\meta{boolean}}{initially \opt{false}}
+If true, shows the region prefix before the currency symbol if
+\setbaseopt{numeric=\brackets{currency-symbol-style = symbol}}.
+The prefix font may be changed to smallcaps or smaller with
+\setbaseopt{numeric=\brackets{region-currency-prefix=\meta{value}}}
+where \meta{value} is \opt{smallcaps} or \opt{smaller}.
+\end{docKey}
+
+\begin{dispExample}
+\DTLsetup{numeric={region-currency-prefix=smallcaps}}
+\DTLsetLocaleOptions{GB}{currency-symbol-prefix}
+\DTLdecimaltocurrency{12345.678}{\result}\result
+\end{dispExample}
+
+
+\begin{docKey}[GB]{currency-symbol-position}{=\meta{value}}{initially \opt{before}}
+Adjusts the formatting currency style. If \docValue{before}, the
+currency symbol is placed before the value. If \docValue{after}, the
+currency symbol is placed after the value.
+\end{docKey}
+
+\begin{dispExample}
+\DTLsetup{numeric={currency-symbol-style=iso}}
+\DTLsetLocaleOptions{GB}{currency-symbol-position=after}
+\DTLdecimaltocurrency{12345.678}{\result}\result
+\end{dispExample}
+
+\begin{docKey}[GB]{number-style}{=\meta{setting}}{initially \opt{official}}
+Sets the number group and decimal characters. The value may be one
+of: \docValue{official} (comma number group and decimal point),
+\docValue{education} (thin space number group and decimal point), or
+\docValue{old} (comma number group and mid dot decimal).
+In the case of \docValue{education}, a normal space may also be used
+when parsing.
+In the case of \docValue{old}, a normal dot may also be used
+when parsing.
+\end{docKey}
+
+\begin{dispExample}
+\DTLsetup{numeric={auto-reformat}}
+\DTLsetLocaleOptions{GB}{number-style=education}
+\DTLdecimaltocurrency{12345.678}{\result}\result.
+(Value: \DTLdatumvalue{\result}.)
+
+\DTLparse{\result}{£12 345.678}\result.
+(Value: \DTLdatumvalue{\result}.)
+
+\DTLsetLocaleOptions{GB}{number-style=old}
+\DTLdecimaltocurrency{12345.678}{\result}\result.
+(Value: \DTLdatumvalue{\result}.)
+
+\DTLparse{\result}{£12,345.678}\result.
+(Value: \DTLdatumvalue{\result}.)
+\end{dispExample}
+
+The remaining options relate to dates and times, which are still
+experimental. You need to enable date and time parsing with
+\setbaseopt{datetime=\brackets{parse}}.
+
+\begin{docKey}[GB]{date-style}{=\meta{style}}{initially \opt{dmyyyy}}
+Sets the current date style. The value may be one of:
+\docValue{dmyyyy}, \docValue{mdyyyy}, \docValue{yyyymd},
+\docValue{dmyy}, \docValue{mdyy}, \docValue{yymd}.
+\end{docKey}
+
+\begin{docKey}[GB]{date-variant}{=\meta{style}}{initially \opt{slash}}
+Sets the current numeric date separator.
+Allowed values: \docValue{slash} (\code{/}), \docValue{hyphen}
+(\code{-}), \docValue{dot} (\code{.}) or
+\docValue{dialect} (if the language supports it).
+\end{docKey}
+
+\begin{docKey}[GB]{time-variant}{=\meta{style}}{initially \opt{colon}}
+Sets the current numeric time separator.
+Allowed values: \docValue{colon} (\code{:}), \docValue{dot} (\code{.}) or
+\docValue{dialect} (if the language supports it),
+\docValue{dialect-colon} (if the language supports it), or
+\docValue{dialect-dot} (if the language supports it).
+\end{docKey}
+
+
+\begin{docCommand}{datatoolGBSetNumberChars}{}
+Hook to switch to GB number group and decimal characters.
+\end{docCommand}
+
+\begin{docCommand}{datatoolGBcurrencyfmt}{}
+Used to format the GBP currency. This supports the currency symbol
+prefix.
+\end{docCommand}
+
+\begin{docCommand}{DTLGBLocaleHook}{}
+Hook to switch to GB settings. This may be added to the captions
+hook by \sty{datatool-base}, depending on the settings. Otherwise
+it can be explicitly used to switch to this region.
+\end{docCommand}
+
 \section{Region \qt{IE}}
+\DTLIELocaleHook
 
 The \file{datatool-IE.ldf} file provides support for region \qt{IE}
 (Republic of Ireland). This sets \qt{EUR} as the default currency.
-The format can be adjusted by redefining
-\cs{DTLdefaultEURcurrencyfmt} (provided by \sty{datatool-base}
-v3.0+). Note that this is general to all regions that use \qt{EUR}
-as the currency.
+
+If there's no caption hook and you have multiple locales, you will
+need to set both the language and region hooks. For example, this
+document has:
+\begin{dispListing}
+\DTLenLocaleHook
+\DTLIELocaleHook
+\end{dispListing}
+
+
+Options may be set with \setlocaleopts{IE}. Available options are
+listed below.
+
+\begin{docKey}[IE]{currency-symbol-position}{=\meta{value}}{initially \opt{before}}
+Adjusts the formatting currency style. If \docValue{before}, the
+currency symbol is placed before the value. If \docValue{after}, the
+currency symbol is placed after the value.
+\end{docKey}
+
+\begin{dispExample}
+\DTLsetup{numeric={currency-symbol-style=iso}}
+\DTLsetLocaleOptions{IE}{currency-symbol-position=after}
+\DTLdecimaltocurrency{12345.678}{\result}\result
+\end{dispExample}
+
+\begin{docKey}[IE]{number-style}{=\meta{setting}}{initially \opt{official}}
+Sets the number group and decimal characters. The value may be one
+of: \docValue{official} (comma number group and decimal point) or
+\docValue{unofficial} (thin space number group and decimal point).
+In the case of \docValue{unofficial}, a normal space may also be used
+when parsing.
+\end{docKey}
+
+\begin{dispExample}
+\DTLsetup{numeric={auto-reformat}}
+\DTLsetLocaleOptions{IE}{number-style=unofficial}
+\DTLdecimaltocurrency{12345.678}{\result}\result.
+(Value: \DTLdatumvalue{\result}.)
+
+\DTLparse{\result}{€12 345.678}\result.
+(Value: \DTLdatumvalue{\result}.)
+\end{dispExample}
+
+The remaining options relate to dates and times, which are still
+experimental. You need to enable date and time parsing with
+\setbaseopt{datetime=\brackets{parse}}.
+
+\begin{docKey}[IE]{date-style}{=\meta{style}}{initially \opt{dmyyyy}}
+Sets the current date style. The value may be one of:
+\docValue{dmyyyy}, \docValue{mdyyyy}, \docValue{yyyymd},
+\docValue{dmyy}, \docValue{mdyy}, \docValue{yymd}.
+\end{docKey}
+
+\begin{docKey}[IE]{date-variant}{=\meta{style}}{initially \opt{slash}}
+Sets the current numeric date separator.
+Allowed values: \docValue{slash} (\code{/}), \docValue{hyphen}
+(\code{-}), \docValue{dot} (\code{.}) or
+\docValue{dialect} (if the language supports it).
+\end{docKey}
+
+\begin{docKey}[IE]{time-variant}{=\meta{style}}{initially \opt{colon}}
+Sets the current numeric time separator.
+Allowed values: \docValue{colon} (\code{:}), \docValue{dot} (\code{.}) or
+\docValue{dialect} (if the language supports it),
+\docValue{dialect-colon} (if the language supports it), or
+\docValue{dialect-dot} (if the language supports it).
+\end{docKey}
+
+
+\begin{docCommand}{datatoolIESetNumberChars}{}
+Hook to switch to IE number group and decimal characters.
+\end{docCommand}
+
+\begin{docCommand}{datatoolIESetCurrency}{}
+Hook to switch to the EUR currency, rounding to 2 decimal places,
+and redefines \cs{DTLdefaultEURcurrencyfmt} to reflect the 
+\opt{currency-symbol-position} setting.
+\end{docCommand}
+
+\begin{docCommand}{DTLIELocaleHook}{}
+Hook to switch to IE settings. This may be added to the captions
+hook by \sty{datatool-base}, depending on the settings. Otherwise
+it can be explicitly used to switch to this region.
+\end{docCommand}
 
 \section{Region \qt{ZA}}
+\DTLenZALocaleHook
+\DTLZALocaleHook
 
 The \file{datatool-ZA.ldf} file provides support for region \qt{ZA}
 (South Africa). This supplies the currency (ZAR) but number formatting
@@ -190,6 +514,89 @@ depends on the language, so this requires specific language \&
 region files, which should be provided by the applicable language
 module. For example, \sty{datatool-english} provides
 \file{datatool-en-ZA.ldf}.
+
+If there's no caption hook and you have multiple locales, you will
+need to set both the language and region hooks. For example, this
+document has:
+\begin{dispListing}
+\DTLenLocaleHook
+\DTLenZALocaleHook
+\DTLZALocaleHook
+\end{dispListing}
+
+
+Options may be set with \setlocaleopts{ZA}. Available options are
+listed below.
+
+\begin{docKey}[ZA]{currency-symbol-position}{=\meta{value}}{initially \opt{before}}
+Adjusts the formatting currency style. If \docValue{before}, the
+currency symbol is placed before the value. If \docValue{after}, the
+currency symbol is placed after the value.
+\end{docKey}
+
+\begin{dispExample}
+\DTLsetup{numeric={currency-symbol-style=iso}}
+\DTLsetLocaleOptions{ZA}{currency-symbol-position=after}
+\DTLdecimaltocurrency{12345.678}{\result}\result
+\end{dispExample}
+
+\begin{docKey}[ZA]{number-style}{=\meta{style}}{initially \opt{official}}
+Sets the number group and decimal characters. The value may be one
+of: \docValue{official} (dot number group and decimal comma) or
+\docValue{dialect} (attempt to use the number style for
+the module \meta{lang}-ZA, if it's defined, where \meta{lang} is the
+current language tag).
+\end{docKey}
+
+\begin{dispExample}
+\DTLsetLocaleOptions{ZA}{number-style=official}
+\DTLdecimaltocurrency{12345.678}{\result}\result
+\end{dispExample}
+Or if \ldf{en-ZA} has been loaded and the current language is
+English:
+\begin{dispExample}
+\DTLsetLocaleOptions{ZA}{number-style=dialect}
+\DTLdecimaltocurrency{12345.678}{\result}\result
+\end{dispExample}
+
+The remaining options relate to dates and times, which are still
+experimental. You need to enable date and time parsing with
+\setbaseopt{datetime=\brackets{parse}}.
+
+\begin{docKey}[ZA]{date-style}{=\meta{style}}{initially \opt{yyyymd}}
+Sets the current date style. The value may be one of:
+\docValue{dmyyyy}, \docValue{mdyyyy}, \docValue{yyyymd},
+\docValue{dmyy}, \docValue{mdyy}, \docValue{yymd}.
+\end{docKey}
+
+\begin{docKey}[ZA]{date-variant}{=\meta{style}}{initially \opt{hyphen}}
+Sets the current numeric date separator.
+Allowed values: \docValue{slash} (\code{/}), \docValue{hyphen}
+(\code{-}), \docValue{dot} (\code{.}) or
+\docValue{dialect} (if the language supports it).
+\end{docKey}
+
+\begin{docKey}[ZA]{time-variant}{=\meta{style}}{initially \opt{colon}}
+Sets the current numeric time separator.
+Allowed values: \docValue{colon} (\code{:}), \docValue{dot} (\code{.}) or
+\docValue{dialect} (if the language supports it),
+\docValue{dialect-colon} (if the language supports it), or
+\docValue{dialect-dot} (if the language supports it).
+\end{docKey}
+
+\begin{docCommand}{datatoolZASetNumberChars}{}
+Hook to switch to ZA number group and decimal characters.
+\end{docCommand}
+
+\begin{docCommand}{datatoolZAcurrencyfmt}{}
+Used to format the ZAR currency.
+\end{docCommand}
+
+\begin{docCommand}{DTLZALocaleHook}{}
+Hook to switch to ZA settings. This may be added to the captions
+hook by \sty{datatool-base}, depending on the settings. Otherwise
+it can be explicitly used to switch to this region.
+\end{docCommand}
 
 \StopEventually{%
   \PrintChanges

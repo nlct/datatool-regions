@@ -36,9 +36,16 @@
     }
  }
 %    \end{macrocode}
+%How to format the position of the currency symbol in relation to the value.
+%    \begin{macrocode} 
+\cs_new:Nn \datatool_ZA_currency_position:nn
+ {
+   \dtlcurrprefixfmt { #1 } { #2 }
+ }
+%    \end{macrocode}
 % Set the currency format for this region.
 %    \begin{macrocode} 
-\newcommand \datatoolZAcurrencyfmt { \dtlcurrdefaultfmt }
+\newcommand \datatoolZAcurrencyfmt { \datatool_ZA_currency_position:nn }
 %    \end{macrocode}
 % Define the currency symbols for this region.
 %    \begin{macrocode}
@@ -73,7 +80,7 @@
 % The default is year-month-day but may be changed with
 % \cs{DTLsetLocaleOptions}. For example:
 %\begin{dispListing}
-%\DTLsetLocaleOptions{ZA/parse}{date-style=dmyyyy, date-variant=slash}
+%\DTLsetLocaleOptions{ZA}{date-style=dmyyyy, date-variant=slash}
 %\end{dispListing}
 %An appropriate language file will need to also be installed to
 %parse dates containing month names or day of week names.
@@ -140,7 +147,7 @@
               #1 { #2 } { #3 } { #4 }
           }
           {
-            \datatool_locale_warn:n { datatool-ZA }
+            \datatool_locale_warn:nn { datatool-ZA }
              {
               No ~ support ~ for ~ time ~ variant ~
               ` \l__datatool_ZA_timevariant_tl '
@@ -149,7 +156,7 @@
           }
        }
        {
-         \datatool_locale_warn:n { datatool-ZA }
+         \datatool_locale_warn:nn { datatool-ZA }
           {
            No ~ support ~ for ~ date ~ style ~
            ` \l__datatool_ZA_datestyle_tl ' ~ with ~
@@ -160,7 +167,7 @@
        }
     }
     {
-      \datatool_locale_warn:n { datatool-ZA }
+      \datatool_locale_warn:nn { datatool-ZA }
        {
           No ~ support ~ for ~ date ~ style ~
           ` \l__datatool_ZA_datestyle_tl '
@@ -208,7 +215,7 @@
           #1 { #2 } { #3 } { #4 }
        }
        {
-         \datatool_locale_warn:n { datatool-ZA }
+         \datatool_locale_warn:nn { datatool-ZA }
           {
            No ~ support ~ for ~ date ~ style ~
            ` \l__datatool_ZA_datestyle_tl ' ~ with ~
@@ -219,7 +226,7 @@
        }
     }
     {
-      \datatool_locale_warn:n { datatool-ZA }
+      \datatool_locale_warn:nn { datatool-ZA }
        {
           No ~ support ~ for ~ date ~ style ~
           ` \l__datatool_ZA_datestyle_tl '
@@ -251,7 +258,7 @@
         #1 { #2 } { #3 } { #4 }
     }
     {
-      \datatool_locale_warn:n { datatool-ZA }
+      \datatool_locale_warn:nn { datatool-ZA }
        {
         No ~ support ~ for ~ time ~ variant ~
         ` \l__datatool_ZA_timevariant_tl '
@@ -293,6 +300,15 @@
        {
          \datatoolZASetNumberChars
        }
+    } ,
+   currency-symbol-position .choice: ,
+   currency-symbol-position / before .code:n =
+    {
+      \cs_set_eq:NN \datatool_ZA_currency_position:nn \dtlcurrprefixfmt
+    } ,
+   currency-symbol-position / after .code:n =
+    {
+      \cs_set_eq:NN \datatool_ZA_currency_position:nn \dtlcurrsuffixfmt
     } ,
    date-style .choice: ,
    date-style / dmyyyy .code: n =

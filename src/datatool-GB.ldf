@@ -48,11 +48,18 @@
     }
  }
 %    \end{macrocode}
+%How to format the position of the currency symbol in relation to the value.
+%    \begin{macrocode} 
+\cs_new:Nn \datatool_GB_currency_position:nn
+ {
+   \dtlcurrprefixfmt { #1 } { #2 }
+ }
+%    \end{macrocode}
 % Set the currency format for this region.
 %    \begin{macrocode}
 \newcommand \datatoolGBcurrencyfmt [ 2 ]
  {
-   \dtlcurrprefixfmt
+   \datatool_GB_currency_position:nn
     {
       \datatoolGBsymbolprefix { GB }
       #1
@@ -198,7 +205,7 @@
        }
     }
     {
-      \datatool_locale_warn:n { datatool-GB }
+      \datatool_locale_warn:nn { datatool-GB }
        {
           No ~ support ~ for ~ date ~ style ~
           ` \l__datatool_GB_datestyle_tl '
@@ -263,7 +270,7 @@
        }
     }
     {
-      \datatool_locale_warn:n { datatool-GB }
+      \datatool_locale_warn:nn { datatool-GB }
        {
           No ~ support ~ for ~ date ~ style ~
           ` \l__datatool_GB_datestyle_tl '
@@ -349,6 +356,15 @@
          \datatoolGBSetNumberChars
        }
     } , 
+   currency-symbol-position .choice: ,
+   currency-symbol-position / before .code:n = 
+    {
+      \cs_set_eq:NN \datatool_GB_currency_position:nn \dtlcurrprefixfmt
+    } ,
+   currency-symbol-position / after .code:n =
+    {
+      \cs_set_eq:NN \datatool_GB_currency_position:nn \dtlcurrsuffixfmt
+    } ,
    currency-symbol-prefix .choice: ,
    currency-symbol-prefix / false .code:n =
     {
