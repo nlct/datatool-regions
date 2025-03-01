@@ -7,6 +7,7 @@
 %    \begin{macrocode}
 \ExplSyntaxOn 
 %    \end{macrocode}
+%
 %\subsection{Numbers and Currency}
 %Set the number group and decimal symbols for this region.
 %    \begin{macrocode}
@@ -61,14 +62,21 @@
 %Number of digits that \cs{DTLdecimaltocurrency} should round to:
 %    \begin{macrocode}
      \renewcommand \DTLCurrentLocaleCurrencyDP { 2 }
-     \renewcommand \DTLdefaultEURcurrencyfmt { \datatool_IE_currency_position:nn }
+%    \end{macrocode}
+%Update EUR format to reflect current region style:
+%    \begin{macrocode}
+     \renewcommand \DTLdefaultEURcurrencyfmt
+       { \datatool_IE_currency_position:nn }
+%    \end{macrocode}
+%Separator between symbol and value:
+%    \begin{macrocode}
      \renewcommand \dtlcurrfmtsymsep { \l_datatool_IE_sym_sep_tl }
     }
  }
 %    \end{macrocode}
+%
 %\subsection{Date and Time Parsing}
-% This defaults to day/month/year and should be changed as
-% appropriate using \cs{DTLsetLocaleOptions}. For example:
+% This defaults to day/month/year but may be changed with \cs{DTLsetLocaleOptions}. For example:
 %\begin{dispListing}
 %\DTLsetLocaleOptions{IE}{date-style=dmyyyy, date-variant=slash}
 %\end{dispListing}
@@ -79,18 +87,36 @@
 %    \begin{macrocode}
 \tl_new:N \__datatool_IE_datevariant_tl
 \tl_set:Nn \__datatool_IE_datevariant_tl { slash }
+%    \end{macrocode}
+%NB These token lists are used to form command names. The following is not 
+%a format string.
+%    \begin{macrocode}
 \tl_new:N \__datatool_IE_datestyle_tl
 \tl_set:Nn \__datatool_IE_datestyle_tl { ddmmyyyy }
 \tl_new:N \__datatool_IE_timevariant_tl
 \tl_set:Nn \__datatool_IE_timevariant_tl { colon }
 %    \end{macrocode}
+%
+%Each parsing command defined below has final \marg{true} and \marg{false}
+%arguments (\code{TF}). These are used if parsing was successful (true) or if
+%parsing failed (false). The internal commands used by
+%\sty{datatool-base} have no need for solo branches (only \code{T} or only
+%\code{F}) so these commands are simply defined with \verb|\cs_new:Nn|
+%not as conditionals.
+%
 %\subsubsection{Time Stamp Parsing}
 %Use command
+%\begin{definition}
 %\cs{datatool\_}\meta{date-style}\verb|_hhmmss_tz_parse_timestamp:nnNnTF|
+%\end{definition}
 %with date regular expression 
+%\begin{definition}
 %\cs{c\_datatool\_}\meta{date-variant}\verb|_|\meta{date-style}\verb|_date_regex|
+%\end{definition}
 %and time regular expression
+%\begin{definition}
 %\cs{c\_datatool\_}\meta{time-variant}\verb|_hhmmss_time_regex|
+%\end{definition}
 %    \begin{macrocode}
 \cs_new:Nn \datatool_IE_parse_timestamp:NnTF
  {
@@ -179,10 +205,13 @@
     }
  }
 %    \end{macrocode}
+%
 %\subsubsection{Date Parsing}
 %Use command \cs{datatool\_}\meta{style}\verb|_parse_date:NNnTF|
 %with regular expression 
+%\begin{definition}
 %\cs{c\_datatool\_}\meta{variant}\verb|_anchored_|\meta{style}\verb|_date_regex|
+%\end{definition}
 %    \begin{macrocode}
 \cs_new:Nn \datatool_IE_parse_date:NnTF
  {
@@ -244,10 +273,13 @@
     }
  }
 %    \end{macrocode}
+%
 %\subsubsection{Time Parsing}
 %Use command \cs{datatool\_}\meta{style}\verb|_parse_time:NNnTF|
 %with regular expression 
+%\begin{definition}
 %\cs{c\_datatool\_}\meta{variant}\verb|_anchored_|\meta{style}\verb|_time_regex|
+%\end{definition}
 %    \begin{macrocode}
 \cs_new:Nn \datatool_IE_parse_time:NnTF
  {
@@ -303,7 +335,6 @@
 %    \begin{macrocode}
 \datatool_locale_define_keys:nn { IE }
  {
-
    number-style .choices:nn =
     { official, unofficial }
     {
@@ -485,7 +516,6 @@
 %
 
 %Command to update currency and temporal parsing commands for this region:
-%\begin{macro}{\DTLIELocaleHook}
 %    \begin{macrocode}
 \newcommand \DTLIELocaleHook
  {
@@ -499,7 +529,6 @@
   \tl_set:Nn \l_datatool_current_region_tl { IE }
  }
 %    \end{macrocode}
-%\end{macro}
 %
 % Finished with \LaTeX3 syntax.
 %    \begin{macrocode}
