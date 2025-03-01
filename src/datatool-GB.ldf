@@ -27,15 +27,12 @@
 %    \end{macrocode}
 %Old style uses mid-dot as the decimal point but allows both middle
 %dot and low dot when parsing.
-%Note that this will require support for the middle dot character
-%(so either use a Unicode engine or set up the character
-%with \cs{DeclareUnicodeCharacter}).
 %    \begin{macrocode}
 \cs_new:Nn \datatool_GB_set_numberchars_old:
  {
-   \datatool_set_numberchars_tl_regex:nVnn
-     { , }  \l_datatool_middot_tl
-     { , } { \x{2E} | \u{l_datatool_middot_tl} }
+   \datatool_set_numberchars_tl_regex:nnnn
+     { , } { \textperiodcentered }
+     { , } { \x{2E} | \u{l_datatool_middot_tl} | \c{textperiodcentered} }
  }
 %    \end{macrocode}
 %Hook to set the number group and decimal characters for the region:
