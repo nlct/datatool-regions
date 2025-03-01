@@ -7,6 +7,7 @@
 
 \usepackage{fontspec}
 \usepackage{tcolorbox}
+\usepackage{siunitx}
 \usepackage[left=2.5cm,right=2.5cm]{geometry}
 
 \usepackage
@@ -219,6 +220,15 @@ For example:
 }
 \end{dispListing}
 
+Note that scientific notation isn't governed by regional styles, but
+the value can be encapsulated with \cs{si} (if
+\sty{siunitx} has been loaded) with the \opt{auto-reformat} numeric option.
+\begin{dispExample}
+\DTLsetup{numeric={auto-reformat}}
+\DTLparse{\result}{1.5e+3}\result.
+(Value: \DTLdatumvalue{\result}.)
+\end{dispExample}
+
 \chapter{Supported Regions}
 
 Only a limited number of regions are currently supported.
@@ -239,6 +249,31 @@ document has:
 \DTLenLocaleHook
 \DTLAULocaleHook
 \end{dispListing}
+
+\begin{dispExample*}{title={Default Numeric Styles}}
+\DTLdecimaltolocale{12345}{\result}\result.
+(Value: \DTLdatumvalue{\result}.)
+
+\DTLdecimaltolocale{12345.678}{\result}\result.
+(Value: \DTLdatumvalue{\result}.)
+
+\DTLdecimaltocurrency{-12345.678}{\result}\result.
+(Value: \DTLdatumvalue{\result}.)
+\end{dispExample*}
+Remember that date-time parsing needs to be enabled, if required.
+\begin{dispExample*}{title={Default Date-Time Styles}}
+\DTLsetup{datetime={parse}}
+\DTLparse\result{28/2/2025 15:45 AEDT}
+String: \result.
+Data type: \DTLgetDataTypeName{\DTLdatumtype{\result}}.
+Numeric value: \DTLdatumvalue{\result}.
+
+\ExplSyntaxOn
+\datatool_extract_timestamp:NN \result \l_tmpa_tl
+Time-stamp: ~ \l_tmpa_tl
+\ExplSyntaxOff
+\end{dispExample*}
+
 
 Options may be set with \setlocaleopts{AU}. Available options are
 listed below.
@@ -382,6 +417,31 @@ document has:
 \DTLCALocaleHook
 \end{dispListing}
 
+\begin{dispExample*}{title={Default Numeric Styles (with English)}}
+\DTLdecimaltolocale{12345}{\result}\result.
+(Value: \DTLdatumvalue{\result}.)
+
+\DTLdecimaltolocale{12345.678}{\result}\result.
+(Value: \DTLdatumvalue{\result}.)
+
+\DTLdecimaltocurrency{-12345.678}{\result}\result.
+(Value: \DTLdatumvalue{\result}.)
+\end{dispExample*}
+Remember that date-time parsing needs to be enabled, if required.
+\begin{dispExample*}{title={Default Date-Time Styles}}
+\DTLsetup{datetime={parse}}
+\DTLparse\result{28/2/2025 15:45 PST}
+String: \result.
+Data type: \DTLgetDataTypeName{\DTLdatumtype{\result}}.
+Numeric value: \DTLdatumvalue{\result}.
+
+\ExplSyntaxOn
+\datatool_extract_timestamp:NN \result \l_tmpa_tl
+Time-stamp: ~ \l_tmpa_tl
+\ExplSyntaxOff
+\end{dispExample*}
+
+
 Options may be set with \setlocaleopts{CA}. Available options are
 listed below.
 
@@ -517,6 +577,30 @@ document has:
 \DTLenLocaleHook
 \DTLFKLocaleHook
 \end{dispListing}
+
+\begin{dispExample*}{title={Default Numeric Styles}}
+\DTLdecimaltolocale{12345}{\result}\result.
+(Value: \DTLdatumvalue{\result}.)
+
+\DTLdecimaltolocale{12345.678}{\result}\result.
+(Value: \DTLdatumvalue{\result}.)
+
+\DTLdecimaltocurrency{-12345.678}{\result}\result.
+(Value: \DTLdatumvalue{\result}.)
+\end{dispExample*}
+Remember that date-time parsing needs to be enabled, if required.
+\begin{dispExample*}{title={Default Date-Time Styles}}
+\DTLsetup{datetime={parse}}
+\DTLparse\result{28/2/2025 15:45 PST}
+String: \result.
+Data type: \DTLgetDataTypeName{\DTLdatumtype{\result}}.
+Numeric value: \DTLdatumvalue{\result}.
+
+\ExplSyntaxOn
+\datatool_extract_timestamp:NN \result \l_tmpa_tl
+Time-stamp: ~ \l_tmpa_tl
+\ExplSyntaxOff
+\end{dispExample*}
 
 Options may be set with \setlocaleopts{FK}. Available options are
 listed below.
@@ -655,6 +739,30 @@ document has:
 \DTLenLocaleHook
 \DTLGBLocaleHook
 \end{dispListing}
+
+\begin{dispExample*}{title={Default Numeric Styles}}
+\DTLdecimaltolocale{12345}{\result}\result.
+(Value: \DTLdatumvalue{\result}.)
+
+\DTLdecimaltolocale{12345.678}{\result}\result.
+(Value: \DTLdatumvalue{\result}.)
+
+\DTLdecimaltocurrency{-12345.678}{\result}\result.
+(Value: \DTLdatumvalue{\result}.)
+\end{dispExample*}
+Remember that date-time parsing needs to be enabled, if required.
+\begin{dispExample*}{title={Default Date-Time Styles}}
+\DTLsetup{datetime={parse}}
+\DTLparse\result{28/2/2025 15:45 GMT}
+String: \result.
+Data type: \DTLgetDataTypeName{\DTLdatumtype{\result}}.
+Numeric value: \DTLdatumvalue{\result}.
+
+\ExplSyntaxOn
+\datatool_extract_timestamp:NN \result \l_tmpa_tl
+Time-stamp: ~ \l_tmpa_tl
+\ExplSyntaxOff
+\end{dispExample*}
 
 Options may be set with \setlocaleopts{GB}. Available options are
 listed below.
@@ -804,6 +912,30 @@ document has:
 \DTLGGLocaleHook
 \end{dispListing}
 
+\begin{dispExample*}{title={Default Numeric Styles}}
+\DTLdecimaltolocale{12345}{\result}\result.
+(Value: \DTLdatumvalue{\result}.)
+
+\DTLdecimaltolocale{12345.678}{\result}\result.
+(Value: \DTLdatumvalue{\result}.)
+
+\DTLdecimaltocurrency{-12345.678}{\result}\result.
+(Value: \DTLdatumvalue{\result}.)
+\end{dispExample*}
+Remember that date-time parsing needs to be enabled, if required.
+\begin{dispExample*}{title={Default Date-Time Styles}}
+\DTLsetup{datetime={parse}}
+\DTLparse\result{28/2/2025 15:45 GMT}
+String: \result.
+Data type: \DTLgetDataTypeName{\DTLdatumtype{\result}}.
+Numeric value: \DTLdatumvalue{\result}.
+
+\ExplSyntaxOn
+\datatool_extract_timestamp:NN \result \l_tmpa_tl
+Time-stamp: ~ \l_tmpa_tl
+\ExplSyntaxOff
+\end{dispExample*}
+
 Options may be set with \setlocaleopts{GG}. Available options are
 listed below.
 
@@ -942,6 +1074,30 @@ document has:
 \DTLGILocaleHook
 \end{dispListing}
 
+\begin{dispExample*}{title={Default Numeric Styles}}
+\DTLdecimaltolocale{12345}{\result}\result.
+(Value: \DTLdatumvalue{\result}.)
+
+\DTLdecimaltolocale{12345.678}{\result}\result.
+(Value: \DTLdatumvalue{\result}.)
+
+\DTLdecimaltocurrency{-12345.678}{\result}\result.
+(Value: \DTLdatumvalue{\result}.)
+\end{dispExample*}
+Remember that date-time parsing needs to be enabled, if required.
+\begin{dispExample*}{title={Default Date-Time Styles}}
+\DTLsetup{datetime={parse}}
+\DTLparse\result{28/2/2025 15:45 GMT}
+String: \result.
+Data type: \DTLgetDataTypeName{\DTLdatumtype{\result}}.
+Numeric value: \DTLdatumvalue{\result}.
+
+\ExplSyntaxOn
+\datatool_extract_timestamp:NN \result \l_tmpa_tl
+Time-stamp: ~ \l_tmpa_tl
+\ExplSyntaxOff
+\end{dispExample*}
+
 Options may be set with \setlocaleopts{GI}. Available options are
 listed below.
 
@@ -1078,6 +1234,30 @@ document has:
 \DTLIELocaleHook
 \end{dispListing}
 
+\begin{dispExample*}{title={Default Numeric Styles}}
+\DTLdecimaltolocale{12345}{\result}\result.
+(Value: \DTLdatumvalue{\result}.)
+
+\DTLdecimaltolocale{12345.678}{\result}\result.
+(Value: \DTLdatumvalue{\result}.)
+
+\DTLdecimaltocurrency{-12345.678}{\result}\result.
+(Value: \DTLdatumvalue{\result}.)
+\end{dispExample*}
+Remember that date-time parsing needs to be enabled, if required.
+\begin{dispExample*}{title={Default Date-Time Styles}}
+\DTLsetup{datetime={parse}}
+\DTLparse\result{1/6/2025 15:45 IST}
+String: \result.
+Data type: \DTLgetDataTypeName{\DTLdatumtype{\result}}.
+Numeric value: \DTLdatumvalue{\result}.
+
+\ExplSyntaxOn
+\datatool_extract_timestamp:NN \result \l_tmpa_tl
+Time-stamp: ~ \l_tmpa_tl
+\ExplSyntaxOff
+\end{dispExample*}
+
 
 Options may be set with \setlocaleopts{IE}. Available options are
 listed below.
@@ -1202,6 +1382,30 @@ document has:
 \DTLenLocaleHook
 \DTLIMLocaleHook
 \end{dispListing}
+
+\begin{dispExample*}{title={Default Numeric Styles}}
+\DTLdecimaltolocale{12345}{\result}\result.
+(Value: \DTLdatumvalue{\result}.)
+
+\DTLdecimaltolocale{12345.678}{\result}\result.
+(Value: \DTLdatumvalue{\result}.)
+
+\DTLdecimaltocurrency{-12345.678}{\result}\result.
+(Value: \DTLdatumvalue{\result}.)
+\end{dispExample*}
+Remember that date-time parsing needs to be enabled, if required.
+\begin{dispExample*}{title={Default Date-Time Styles}}
+\DTLsetup{datetime={parse}}
+\DTLparse\result{28/2/2025 15:45 GMT}
+String: \result.
+Data type: \DTLgetDataTypeName{\DTLdatumtype{\result}}.
+Numeric value: \DTLdatumvalue{\result}.
+
+\ExplSyntaxOn
+\datatool_extract_timestamp:NN \result \l_tmpa_tl
+Time-stamp: ~ \l_tmpa_tl
+\ExplSyntaxOff
+\end{dispExample*}
 
 Options may be set with \setlocaleopts{IM}. Available options are
 listed below.
@@ -1341,6 +1545,31 @@ document has:
 \DTLJELocaleHook
 \end{dispListing}
 
+\begin{dispExample*}{title={Default Numeric Styles}}
+\DTLdecimaltolocale{12345}{\result}\result.
+(Value: \DTLdatumvalue{\result}.)
+
+\DTLdecimaltolocale{12345.678}{\result}\result.
+(Value: \DTLdatumvalue{\result}.)
+
+\DTLdecimaltocurrency{-12345.678}{\result}\result.
+(Value: \DTLdatumvalue{\result}.)
+\end{dispExample*}
+Remember that date-time parsing needs to be enabled, if required.
+\begin{dispExample*}{title={Default Date-Time Styles}}
+\DTLsetup{datetime={parse}}
+\DTLparse\result{28/2/2025 15:45 GMT}
+String: \result.
+Data type: \DTLgetDataTypeName{\DTLdatumtype{\result}}.
+Numeric value: \DTLdatumvalue{\result}.
+
+\ExplSyntaxOn
+\datatool_extract_timestamp:NN \result \l_tmpa_tl
+Time-stamp: ~ \l_tmpa_tl
+\ExplSyntaxOff
+\end{dispExample*}
+
+
 Options may be set with \setlocaleopts{JE}. Available options are
 listed below.
 
@@ -1478,6 +1707,30 @@ document has:
 \DTLenLocaleHook
 \DTLUSLocaleHook
 \end{dispListing}
+
+\begin{dispExample*}{title={Default Styles}}
+\DTLdecimaltolocale{12345}{\result}\result.
+(Value: \DTLdatumvalue{\result}.)
+
+\DTLdecimaltolocale{12345.678}{\result}\result.
+(Value: \DTLdatumvalue{\result}.)
+
+\DTLdecimaltocurrency{-12345.678}{\result}\result.
+(Value: \DTLdatumvalue{\result}.)
+\end{dispExample*}
+Remember that date-time parsing needs to be enabled, if required.
+\begin{dispExample*}{title={Default Date-Time Styles}}
+\DTLsetup{datetime={parse}}
+\DTLparse\result{2/28/2025 15:45 PST}
+String: \result.
+Data type: \DTLgetDataTypeName{\DTLdatumtype{\result}}.
+Numeric value: \DTLdatumvalue{\result}.
+
+\ExplSyntaxOn
+\datatool_extract_timestamp:NN \result \l_tmpa_tl
+Time-stamp: ~ \l_tmpa_tl
+\ExplSyntaxOff
+\end{dispExample*}
 
 Options may be set with \setlocaleopts{US}. Available options are
 listed below.
@@ -1621,6 +1874,29 @@ document has:
 \DTLZALocaleHook
 \end{dispListing}
 
+\begin{dispExample*}{title={Default Styles (with English)}}
+\DTLdecimaltolocale{12345}{\result}\result.
+(Value: \DTLdatumvalue{\result}.)
+
+\DTLdecimaltolocale{12345.678}{\result}\result.
+(Value: \DTLdatumvalue{\result}.)
+
+\DTLdecimaltocurrency{-12345.678}{\result}\result.
+(Value: \DTLdatumvalue{\result}.)
+\end{dispExample*}
+Remember that date-time parsing needs to be enabled, if required.
+\begin{dispExample*}{title={Default Date-Time Styles}}
+\DTLsetup{datetime={parse}}
+\DTLparse\result{282//2025 15:45 SAST}
+String: \result.
+Data type: \DTLgetDataTypeName{\DTLdatumtype{\result}}.
+Numeric value: \DTLdatumvalue{\result}.
+
+\ExplSyntaxOn
+\datatool_extract_timestamp:NN \result \l_tmpa_tl
+Time-stamp: ~ \l_tmpa_tl
+\ExplSyntaxOff
+\end{dispExample*}
 
 Options may be set with \setlocaleopts{ZA}. Available options are
 listed below.
