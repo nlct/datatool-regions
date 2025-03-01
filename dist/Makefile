@@ -1,5 +1,7 @@
 ldfs=../src/datatool-CA.ldf \
 ../src/datatool-GB.ldf \
+../src/datatool-IE.ldf \
+../src/datatool-US.ldf \
 ../src/datatool-ZA.ldf
 
 datatool-regions.zip	: datatool-regions.dtx datatool-regions.ins \
