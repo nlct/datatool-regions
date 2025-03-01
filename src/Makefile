@@ -1,5 +1,6 @@
 ldfs=datatool-AU.ldf \
 datatool-CA.ldf \
+datatool-FK.ldf \
 datatool-GB.ldf \
 datatool-IE.ldf \
 datatool-US.ldf \

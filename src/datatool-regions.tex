@@ -15,6 +15,7 @@
    {
      en-AU,
      en-CA,
+     en-FK,
      en-GB,
      en-IE,
      en-US,
@@ -492,6 +493,144 @@ prefix.
 
 \begin{docCommand}{DTLCALocaleHook}{}
 Hook to switch to CA settings. This may be added to the captions
+hook by \sty{datatool-base}, depending on the settings. Otherwise
+it can be explicitly used to switch to this region.
+\end{docCommand}
+
+\section{Region \qt{FK}}
+\DTLenLocaleHook
+\DTLFKLocaleHook
+
+The \file{datatool-FK.ldf} file provides support for region \qt{FK}
+(Falkland Islands). This defines the \qt{FKP} currency and sets it as
+the default currency. The default number group character is a
+comma, and the default decimal character is a dot.
+
+If there's no caption hook and you have multiple locales, you will
+need to set both the language and region hooks. For example, this
+document has:
+\begin{dispListing}
+\DTLenLocaleHook
+\DTLFKLocaleHook
+\end{dispListing}
+
+Options may be set with \setlocaleopts{FK}. Available options are
+listed below.
+
+\begin{docKey}[FK]{currency-symbol-prefix}{=\meta{boolean}}{initially \opt{false}}
+If true, shows the region prefix before the currency symbol if
+the \opt{numeric} setting \opt{currency-symbol-style} is not set to \qt{iso}.
+The prefix font may be changed to smallcaps or smaller with
+\setbaseopt{ numeric = \brackets{ region-currency-prefix = \meta{value} } }
+where \meta{value} is \opt{smallcaps} or \opt{smaller}.
+\end{docKey}
+
+\begin{dispExample}
+\DTLsetup{numeric={region-currency-prefix=smallcaps}}
+\DTLsetLocaleOptions{FK}{currency-symbol-prefix}
+\DTLdecimaltocurrency{12345.678}{\result}\result
+\end{dispExample}
+
+
+\begin{docKey}[FK]{currency-symbol-position}{=\meta{value}}{initially \opt{before}}
+Adjusts the formatting currency style. If \docValue{before}, the
+currency symbol is placed before the value. If \docValue{after}, the
+currency symbol is placed after the value.
+\end{docKey}
+
+\begin{dispExample}
+\DTLsetup{numeric={currency-symbol-style=iso}}
+\DTLsetLocaleOptions{FK}{currency-symbol-position=after}
+\DTLdecimaltocurrency{12345.678}{\result}\result
+\end{dispExample}
+
+\begin{docKey}[FK]{currency-symbol-sep}{=\meta{value}}{initially \opt{none}}
+Sets the separator to use between the currency symbol (not code) and the value.
+Permitted values: \docValue{none} (no space), \docValue{thin-space}
+(a thin space), \docValue{space} (a normal space), or
+\docValue{nbsp} (a non-breaking space).
+\end{docKey}
+
+\begin{dispExample}
+\DTLsetLocaleOptions{FK}{currency-symbol-sep=thin-space}
+\DTLdecimaltocurrency{12345.678}{\result}\result
+\end{dispExample}
+
+\begin{docKey}[FK]{number-style}{=\meta{setting}}{initially \opt{official}}
+Sets the number group and decimal characters. The value may be one
+of: \docValue{official} (comma number group and decimal point) or
+\docValue{unofficial} (thin space number group and decimal point).
+In the case of \docValue{unofficial}, a normal space may also be used
+when parsing.
+\end{docKey}
+
+\begin{dispExample}
+\DTLsetup{numeric={auto-reformat}}
+\DTLsetLocaleOptions{FK}{number-style=unofficial}
+\DTLdecimaltocurrency{12345.678}{\result}\result.
+(Value: \DTLdatumvalue{\result}.)
+
+\DTLparse{\result}{£12 345.678}\result.
+(Value: \DTLdatumvalue{\result}.)
+\end{dispExample}
+
+The remaining options relate to dates and times, which are still
+experimental. You need to enable date and time parsing with
+\setbaseopt{ datetime = \brackets{parse} }.
+
+\begin{docKey}[FK]{date-style}{=\meta{style}}{initially \opt{dmyyyy}}
+Sets the current date style. The value may be one of:
+\docValue{dmyyyy} (day month year), \docValue{mdyyyy} (month day year),
+\docValue{yyyymd} (year month day),
+\docValue{dmyy} (day month 2-digit year),
+\docValue{mdyy} (month day 2-digit year), or
+\docValue{yymd} (2-digit year month day).
+\end{docKey}
+
+\begin{docKey}[FK]{date-variant}{=\meta{style}}{initially \opt{slash}}
+Sets the current numeric date separator.
+Allowed values: \docValue{slash} (\code{/}), \docValue{hyphen}
+(\code{-}), \docValue{dot} (\code{.}) or
+\docValue{dialect} (if the language supports it).
+\end{docKey}
+
+\begin{docKey}[FK]{time-variant}{=\meta{style}}{initially \opt{colon}}
+Sets the current numeric time separator.
+Allowed values: \docValue{colon} (\code{:}), \docValue{dot} (\code{.}) or
+\docValue{dialect} (if the language supports it),
+\docValue{dialect-colon} (if the language supports it), or
+\docValue{dialect-dot} (if the language supports it).
+\end{docKey}
+
+\begin{dispExample}
+\DTLsetup{datetime={parse}}
+\DTLsetLocaleOptions{FK}{
+ date-style=dmyyyy,
+ date-variant = dialect,
+ time-variant = dot
+}
+\DTLparse\result{Fri 28th Feb 2025 3.45pm FKST}
+String: \result.
+Data type: \DTLgetDataTypeName{\DTLdatumtype{\result}}.
+Numeric value: \DTLdatumvalue{\result}.
+
+\ExplSyntaxOn
+\datatool_extract_timestamp:NN \result \l_tmpa_tl
+Time-stamp: ~ \l_tmpa_tl
+\ExplSyntaxOff
+\end{dispExample}
+
+\begin{docCommand}{datatoolFKSetNumberChars}{}
+Hook to switch to FK number group and decimal characters.
+\end{docCommand}
+
+\begin{docCommand}{datatoolFKcurrencyfmt}{}
+Used to format the FKP currency. This supports the currency symbol
+prefix.
+\end{docCommand}
+
+\begin{docCommand}{DTLFKLocaleHook}{}
+Hook to switch to FK settings. This may be added to the captions
 hook by \sty{datatool-base}, depending on the settings. Otherwise
 it can be explicitly used to switch to this region.
 \end{docCommand}
