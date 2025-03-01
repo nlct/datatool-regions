@@ -484,11 +484,16 @@ _END
 _END
    }
 
-   print $fh "      \\renewcommand \\DTLdefaultEURcurrencyfmt { \\datatool_${region}_currency_position:nn }\n";
-
-   print $fh "      \\renewcommand \\dtlcurrfmtsymsep { \\l_datatool_${region}_sym_sep_tl }\n";
-
    print $fh <<"_END";
+%    \\end{macrocode}
+%Update EUR format to reflect current region style:
+%    \\begin{macrocode}
+      \\renewcommand \\DTLdefaultEURcurrencyfmt
+         { \\datatool_${region}_currency_position:nn }
+%    \\end{macrocode}
+%Separator between symbol and value:
+%    \\begin{macrocode}
+      \\renewcommand \\dtlcurrfmtsymsep { \\l_datatool_${region}_sym_sep_tl }
     }
  }
 %    \\end{macrocode}
@@ -579,7 +584,7 @@ _END
  {
    \\bool_if:NT \\l_datatool_region_set_currency_bool
     {
-      \\DTLsetdefaultcurrency { ${region} }
+      \\DTLsetdefaultcurrency { $currency{code} }
 _END
 
    unless ($currencyDigits eq '')
@@ -592,9 +597,11 @@ _END
 _END
    }
 
-   print $fh "      \\renewcommand \\dtlcurrfmtsymsep { \\l_datatool_${region}_sym_sep_tl }\n";
-
       print $fh <<"_END";
+%    \\end{macrocode}
+%Separator between symbol and value:
+%    \\begin{macrocode}
+      \\renewcommand \\dtlcurrfmtsymsep { \\l_datatool_${region}_sym_sep_tl }
     }
  }
 %    \\end{macrocode}
@@ -637,30 +644,47 @@ if ($hasDateFormat)
    $dateStyle =~s/d/dd/;
 
    print $fh <<"_END";
-% This defaults to $dateInfo and should be changed as
-% appropriate using \\cs{DTLsetLocaleOptions}. For example:
+% This defaults to $dateInfo but may be changed with \\cs{DTLsetLocaleOptions}. For example:
 %\\begin{dispListing}
 %\\DTLsetLocaleOptions{${region}}{date-style=dmyyyy, date-variant=slash}
 %\\end{dispListing}
 %An appropriate language file will need to also be installed to
 %parse dates containing month names or day of week names.
 %
-% Provide a way to configure parsing style.
+%Provide a way to configure parsing style.
 %    \\begin{macrocode}
 \\tl_new:N \\l__datatool_${region}_datevariant_tl
 \\tl_set:Nn \\l__datatool_${region}_datevariant_tl { $dateSep }
+%    \\end{macrocode}
+%NB These token lists are used to form command names. The following is not 
+%a format string.
+%    \\begin{macrocode}
 \\tl_new:N \\l__datatool_${region}_datestyle_tl
 \\tl_set:Nn \\l__datatool_${region}_datestyle_tl { ${dateStyle} }
 \\tl_new:N \\l__datatool_${region}_timevariant_tl
 \\tl_set:Nn \\l__datatool_${region}_timevariant_tl { $timeSep }
 %    \\end{macrocode}
+%
+%Each parsing command defined below has final \\marg{true} and \\marg{false}
+%arguments (\\code{TF}). These are used if parsing was successful (true) or if
+%parsing failed (false). The internal commands used by
+%\\sty{datatool-base} have no need for solo branches (only \\code{T} or only
+%\\code{F}) so these commands are simply defined with \\verb|\\cs_new:Nn|
+%not as conditionals.
+%
 %\\subsubsection{Time Stamp Parsing}
 %Use command
+%\\begin{definition}
 %\\cs{datatool\\_}\\meta{date-style}\\verb|_hhmmss_tz_parse_timestamp:nnNnTF|
+%\\end{definition}
 %with date regular expression 
+%\\begin{definition}
 %\\cs{c\\_datatool\\_}\\meta{date-variant}\\verb|_|\\meta{date-style}\\verb|_date_regex|
+%\\end{definition}
 %and time regular expression
+%\\begin{definition}
 %\\cs{c\\_datatool\\_}\\meta{time-variant}\\verb|_hhmmss_time_regex|
+%\\end{definition}
 %    \\begin{macrocode}
 \\cs_new:Nn \\datatool_${region}_parse_timestamp:NnTF
  {
@@ -749,10 +773,13 @@ if ($hasDateFormat)
     }
  }
 %    \\end{macrocode}
+%
 %\\subsubsection{Date Parsing}
 %Use command \\cs{datatool\\_}\\meta{style}\\verb|_parse_date:NNnTF|
 %with regular expression 
+%\\begin{definition}
 %\\cs{c\\_datatool\\_}\\meta{variant}\\verb|_anchored_|\\meta{style}\\verb|_date_regex|
+%\\end{definition}
 %    \\begin{macrocode}
 \\cs_new:Nn \\datatool_${region}_parse_date:NnTF
  {
@@ -814,10 +841,13 @@ if ($hasDateFormat)
     }
  }
 %    \\end{macrocode}
+%
 %\\subsubsection{Time Parsing}
 %Use command \\cs{datatool\\_}\\meta{style}\\verb|_parse_time:NNnTF|
 %with regular expression 
+%\\begin{definition}
 %\\cs{c\\_datatool\\_}\\meta{variant}\\verb|_anchored_|\\meta{style}\\verb|_time_regex|
+%\\end{definition}
 %    \\begin{macrocode}
 \\cs_new:Nn \\datatool_${region}_parse_time:NnTF
  {
@@ -888,12 +918,12 @@ else
 }
 
 print $fh <<"_END";
+%
 %\\subsection{Options}
 %Define options for this region:
 %    \\begin{macrocode}
 \\datatool_locale_define_keys:nn { ${region} }
  {
-
 _END
 
 if ($hasNumChars)
@@ -1101,6 +1131,7 @@ _END
 print $fh <<"_END";
  }
 %    \\end{macrocode}
+%
 %\\subsection{Hooks}
 _END
 
@@ -1160,13 +1191,12 @@ _END
  }
 %    \\end{macrocode}
 %
-
 _END
 }
 
 print $fh <<"_END";
+%
 %Command to update currency and temporal parsing commands for this region:
-%\\begin{macro}{\\DTL${region}LocaleHook}
 %    \\begin{macrocode}
 \\newcommand \\DTL${region}LocaleHook
  {
@@ -1196,7 +1226,6 @@ print $fh <<"_END";
   \\tl_set:Nn \\l_datatool_current_region_tl { ${region} }
  }
 %    \\end{macrocode}
-%\\end{macro}
 %
 % Finished with \\LaTeX3 syntax.
 %    \\begin{macrocode}
@@ -1207,6 +1236,8 @@ print $fh <<"_END";
 _END
 
 close $fh;
+
+print "Created file '$ldf'. Please check it and make any necessary modifications.\n";
 
 sub get_variant{
    my ($option) = @_;
