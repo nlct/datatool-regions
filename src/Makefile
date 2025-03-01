@@ -7,6 +7,7 @@ datatool-GI.ldf \
 datatool-IE.ldf \
 datatool-IM.ldf \
 datatool-JE.ldf \
+datatool-NZ.ldf \
 datatool-US.ldf \
 datatool-ZA.ldf
 

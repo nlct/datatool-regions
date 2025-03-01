@@ -7,6 +7,7 @@ ldfs=../src/datatool-AU.ldf \
 ../src/datatool-IE.ldf \
 ../src/datatool-IM.ldf \
 ../src/datatool-JE.ldf \
+../src/datatool-NZ.ldf \
 ../src/datatool-US.ldf \
 ../src/datatool-ZA.ldf
 
