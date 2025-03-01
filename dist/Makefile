@@ -2,6 +2,7 @@ ldfs=../src/datatool-AU.ldf \
 ../src/datatool-CA.ldf \
 ../src/datatool-FK.ldf \
 ../src/datatool-GB.ldf \
+../src/datatool-GG.ldf \
 ../src/datatool-IE.ldf \
 ../src/datatool-US.ldf \
 ../src/datatool-ZA.ldf

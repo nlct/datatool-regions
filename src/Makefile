@@ -2,6 +2,7 @@ ldfs=datatool-AU.ldf \
 datatool-CA.ldf \
 datatool-FK.ldf \
 datatool-GB.ldf \
+datatool-GG.ldf \
 datatool-IE.ldf \
 datatool-US.ldf \
 datatool-ZA.ldf
