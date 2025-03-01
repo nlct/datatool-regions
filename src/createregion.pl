@@ -117,31 +117,54 @@ my $curr_sym_sep = &choice_prompt(qr/^(?:none|thin-space|space|nbsp)$/,
 
 while ($currency{'symbol'} eq '')
 {
-   my $currencySym = &any_prompt(
-     "What is the currency symbol? Type in the actual Unicode character or U+<hex> where <hex> is the hexadecimal code point.",
-     "Enter the currency symbol (for example, \$ or £ ) or the codepoint. Type 'x' to exit.");
+   my $currencySym = '';
+   my $currencySymCp=0;
 
-   my $currencySymCp='';
-
-   if ($currencySym=~/^U\+([0-9A-Ea-e]+)$/)
+   if (&yes_no_prompt("Can the currency symbol be represented by a single Unicode character (not including '${region}' region prefix)?",
+      "Enter 'Y' if the currency symbol is a single character (e.g. '\$' or '€'), otherwise (e.g. 'kr') enter 'n'."))
    {
-      $currencySymCp=hex($1);
-      $currency{'symbol'} = chr($currencySymCp);
+      $currencySym = &any_prompt(
+        "What is the currency symbol? Type in the actual Unicode character or U+<hex> where <hex> is the hexadecimal code point.",
+        "Enter the currency symbol (for example, \$ or £ ) or the codepoint. Type 'x' to exit.");
+
+      if ($currencySym=~/^U\+([0-9A-Ea-e]+)$/)
+      {
+         $currencySymCp=hex($1);
+         $currency{'symbol'} = chr($currencySymCp);
+      }
+      else
+      {
+         $currencySymCp=ord($currencySym);
+         $currency{'symbol'} = $currencySym;
+      }
+
+      &lookup_currency($currencySymCp, \%currency);
+
+      printf("Currency symbol '%s' (U+%X)\n", $currency{'symbol'}, $currencySymCp);
    }
    else
    {
-      $currencySymCp=ord($currencySym);
-      $currency{'symbol'} = $currencySym;
+      $currencySym = &any_prompt(
+        "Enter the currency symbol.",
+        "Enter the currency symbol (for example, 'kr' ). Type 'x' to exit.");
+
    }
-
-   &lookup_currency($currencySymCp, \%currency);
-
-   printf("Currency symbol '%s' (U+%X)\n", $currency{'symbol'}, $currencySymCp);
 
    if ($currency{'label'} eq '')
    {
+      my $currInfo;
+
+      if ($currencySymCp)
+      {
+         $currInfo = sprintf("'%s' (U+%X)", $currency{'symbol'}, $currencySymCp);
+      }
+      else
+      {
+         $currInfo = sprintf("'%s'", $currency{'symbol'});
+      }
+
       unless (&yes_no_prompt(
-       sprintf("I don't recognise currency '%s' (U+%X). Do you still want to proceed?", $currency{'symbol'}, $currencySymCp),
+        "I don't recognise currency $currInfo. Do you still want to proceed?",
         "If the currency symbol is correct, you will be prompted for further information. Otherwise enter 'n' to try again."))
       {
          $currency{'symbol'} = '';
@@ -157,9 +180,13 @@ while ($currency{'symbol'} eq '')
    {
       my $chr = 'X';
 
-      unless ($currency{'label'} eq '')
+      if ($currency{'label'} ne '')
       {
          $chr = uc(substr($currency{'label'}, 0, 1));
+      }
+      elsif ($currency{'symbol'}=~/^([A-Za-z])/)
+      {
+         $chr = uc($1);
       }
 
       $currency{'code'} = &regex_prompt(qr/^[A-Z]{3}$/,
@@ -556,9 +583,9 @@ _END
    }
    else
    {
-      if ($currency{'strval'} eq '')
+      if ($currency{'strvar'} eq '')
       {
-          $currency{'strval'} = "\\l_datatool_$currency{label}_tl";
+          $currency{'strvar'} = "\\l_datatool_$currency{label}_tl";
       }
 
       print $fh <<"_END";
@@ -566,7 +593,7 @@ _END
  { \\datatool${region}currencyfmt }
  { $currency{code} }
  { $currency{command} }
- $currency{strval}
+ $currency{strvar}
 _END
    }
 
@@ -1450,7 +1477,7 @@ sub lookup_currency{
    {
       $currency->{'label'} = 'dollar';
       $currency->{'command'} = '\\$';
-      $currency->{'strval'} = '\\c_dollar_str';
+      $currency->{'strvar'} = '\\c_dollar_str';
    }
    elsif ($cp == 0xA3)
    {
