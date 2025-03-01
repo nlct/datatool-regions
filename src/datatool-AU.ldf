@@ -1,0 +1,582 @@
+%\section{datatool-AU.ldf}\label{sec:datatool-AU}
+% Support for region AU.
+%    \begin{macrocode}
+\TrackLangProvidesResource{AU}%%FILEVERSION%%
+%    \end{macrocode}
+% Switch on \LaTeX3 syntax:
+%    \begin{macrocode}
+\ExplSyntaxOn 
+%    \end{macrocode}
+%
+%\subsection{Numbers and Currency}
+%Set the number group and decimal symbols for this region.
+%    \begin{macrocode}
+\cs_new:Nn \datatool_AU_set_numberchars_official:
+ {  
+  \datatool_set_numberchars:nn { , } { . }
+ }
+%    \end{macrocode}
+%Unofficial style.
+%    \begin{macrocode}
+\cs_new:Nn \datatool_AU_set_numberchars_unofficial:
+ {  
+  \datatool_set_thinspace_group_decimal_char:n { . }
+ }
+%    \end{macrocode}
+%Hook to set the number group and decimal characters for the region:
+%    \begin{macrocode}
+\newcommand \datatoolAUSetNumberChars
+ {
+   \bool_if:NT \l_datatool_region_set_numberchars_bool
+    {
+      \datatool_AU_set_numberchars_official:
+    }
+ }
+%    \end{macrocode}
+%How to format the position of the currency symbol in relation to the value.
+%    \begin{macrocode}
+\cs_new:Nn \datatool_AU_currency_position:nn
+ {
+   \dtlcurrprefixfmt { #1 } { #2 }
+ }
+%    \end{macrocode}
+%Separator between currency symbol and value.
+%    \begin{macrocode} 
+\tl_new:N \l_datatool_AU_sym_sep_tl
+%    \end{macrocode}
+% Set the currency format for this region.
+%    \begin{macrocode}
+\newcommand \datatoolAUcurrencyfmt [ 2 ]
+ {
+   \datatool_AU_currency_position:nn
+    {
+      \datatoolAUsymbolprefix { AU }
+      #1
+    }
+    { #2 }
+ }
+%    \end{macrocode}
+%Prefix for symbol, if required.
+%    \begin{macrocode}
+\newcommand \datatoolAUsymbolprefix [ 1 ] { }
+%    \end{macrocode}
+% Define the currency symbols for this region.
+%    \begin{macrocode}
+\datatool_def_currency:nnnV
+ { \datatoolAUcurrencyfmt }
+ { AUD }
+ { \$ }
+ \c_dollar_str
+%    \end{macrocode}
+% Register the currency code with this region:
+%    \begin{macrocode}
+\datatool_register_regional_currency_code:nn { AU } { AUD }
+%    \end{macrocode}
+% Provide a command to set the currency for this region (for use
+% with any hook used when the locale changes).
+% NB this should do nothing with
+% \verb|\DTLsetup{region-currency=false}|
+%    \begin{macrocode}
+\newcommand \datatoolAUSetCurrency
+ {
+   \bool_if:NT \l_datatool_region_set_currency_bool
+    {
+      \DTLsetdefaultcurrency { AUD }
+%    \end{macrocode}
+%Number of digits that \cs{DTLdecimaltocurrency} should round to:
+%    \begin{macrocode}
+      \renewcommand \DTLCurrentLocaleCurrencyDP { 2 }
+%    \end{macrocode}
+%Separator between symbol and value:
+%    \begin{macrocode}
+      \renewcommand \dtlcurrfmtsymsep { \l_datatool_AU_sym_sep_tl }
+    }
+ }
+%    \end{macrocode}
+%
+%\subsection{Date and Time Parsing}
+% This defaults to day/month/year but may be changed with \cs{DTLsetLocaleOptions}. For example:
+%\begin{dispListing}
+%\DTLsetLocaleOptions{AU}{date-style=dmyyyy, date-variant=slash}
+%\end{dispListing}
+%An appropriate language file will need to also be installed to
+%parse dates containing month names or day of week names.
+%
+%Provide a way to configure parsing style.
+%    \begin{macrocode}
+\tl_new:N \l__datatool_AU_datevariant_tl
+\tl_set:Nn \l__datatool_AU_datevariant_tl { slash }
+%    \end{macrocode}
+%NB These token lists are used to form command names. The following is not 
+%a format string.
+%    \begin{macrocode}
+\tl_new:N \l__datatool_AU_datestyle_tl
+\tl_set:Nn \l__datatool_AU_datestyle_tl { ddmmyyyy }
+\tl_new:N \l__datatool_AU_timevariant_tl
+\tl_set:Nn \l__datatool_AU_timevariant_tl { colon }
+%    \end{macrocode}
+%
+%Each parsing command defined below has final \marg{true} and \marg{false}
+%arguments (\code{TF}). These are used if parsing was successful (true) or if
+%parsing failed (false). The internal commands used by
+%\sty{datatool-base} have no need for solo branches (only \code{T} or only
+%\code{F}) so these commands are simply defined with \verb|\cs_new:Nn|
+%not as conditionals.
+%
+%\subsubsection{Time Stamp Parsing}
+%Use command
+%\begin{definition}
+%\cs{datatool\_}\meta{date-style}\verb|_hhmmss_tz_parse_timestamp:nnNnTF|
+%\end{definition}
+%with date regular expression 
+%\begin{definition}
+%\cs{c\_datatool\_}\meta{date-variant}\verb|_|\meta{date-style}\verb|_date_regex|
+%\end{definition}
+%and time regular expression
+%\begin{definition}
+%\cs{c\_datatool\_}\meta{time-variant}\verb|_hhmmss_time_regex|
+%\end{definition}
+%    \begin{macrocode}
+\cs_new:Nn \datatool_AU_parse_timestamp:NnTF
+ {
+   \cs_if_exist:cTF
+     {
+       datatool_
+       \l__datatool_AU_datestyle_tl
+       _hhmmss_tz_parse_timestamp:ccNnTF
+     }
+    {
+      \cs_if_exist:cTF
+       {
+          c_datatool_
+          \l__datatool_AU_datevariant_tl
+          _
+          \l__datatool_AU_datestyle_tl
+          _date_regex
+       }
+       {
+         \cs_if_exist:cTF
+          {
+            c_datatool_
+            \l__datatool_AU_timevariant_tl
+            _hhmmss_time_regex
+          }
+          {
+            \use:c
+             {
+               datatool_
+              \l__datatool_AU_datestyle_tl
+              _hhmmss_tz_parse_timestamp:ccNnTF
+             }
+             {
+               c_datatool_
+               \l__datatool_AU_datevariant_tl
+               _
+               \l__datatool_AU_datestyle_tl
+               _date_regex
+             }
+             {
+               c_datatool_
+               \l__datatool_AU_timevariant_tl
+               _hhmmss_time_regex
+             }
+              #1 { #2 } { #3 } { #4 }
+          }
+          {
+            \datatool_warn_check_head_language_empty:Vnnn
+             \l__datatool_AU_timevariant_tl
+             { datatool-AU }
+             {
+               No ~ language ~ support ~ for ~ time ~ variant ~
+               ` \exp_args:Ne \tl_tail:n { \l__datatool_AU_timevariant_tl } '
+             }
+             {
+              No ~ support ~ for ~ time ~ variant ~
+              ` \l__datatool_AU_timevariant_tl '
+             }
+            #4
+          }
+       }
+       {
+         \datatool_warn_check_head_language_empty:Vnnn
+           \l__datatool_AU_datevariant_tl
+           { datatool-AU }
+           {
+             No ~ language ~ support ~ for ~ date ~ style ~
+              ` \l__datatool_AU_datestyle_tl '
+           }
+           {
+             No ~ support ~ for ~ date ~ style ~
+             ` \l__datatool_AU_datestyle_tl ' ~ with ~
+             variant ~
+             ` \l__datatool_AU_datevariant_tl '
+           }
+         #4
+       }
+    }
+    {
+      \datatool_locale_warn:nn { datatool-AU }
+       {
+          No ~ support ~ for ~ date ~ style ~
+          ` \l__datatool_AU_datestyle_tl '
+       }
+      #4
+    }
+ }
+%    \end{macrocode}
+%
+%\subsubsection{Date Parsing}
+%Use command \cs{datatool\_}\meta{style}\verb|_parse_date:NNnTF|
+%with regular expression 
+%\begin{definition}
+%\cs{c\_datatool\_}\meta{variant}\verb|_anchored_|\meta{style}\verb|_date_regex|
+%\end{definition}
+%    \begin{macrocode}
+\cs_new:Nn \datatool_AU_parse_date:NnTF
+ {
+   \cs_if_exist:cTF
+     {
+       datatool_
+       \l__datatool_AU_datestyle_tl
+       _parse_date:NNnTF
+     }
+    {
+      \cs_if_exist:cTF
+       {
+         c_datatool_
+         \l__datatool_AU_datevariant_tl
+         _anchored_
+         \l__datatool_AU_datestyle_tl
+         _date_regex
+       }
+       {
+         \exp_args:cc
+         {
+           datatool_
+           \l__datatool_AU_datestyle_tl
+           _parse_date:NNnTF
+         }
+         {
+           c_datatool_
+           \l__datatool_AU_datevariant_tl
+           _anchored_
+           \l__datatool_AU_datestyle_tl
+           _date_regex
+         }
+          #1 { #2 } { #3 } { #4 }
+       }
+       {
+         \datatool_warn_check_head_language_empty:Vnnn
+          \l__datatool_AU_datevariant_tl 
+          { datatool-AU }
+          {
+            No ~ language ~ support ~ for ~ date ~ style ~
+             ` \l__datatool_AU_datestyle_tl '
+          }
+          {
+             No ~ support ~ for ~ date ~ style ~
+             ` \l__datatool_AU_datestyle_tl ' ~ with ~
+             variant ~
+             ` \l__datatool_AU_datevariant_tl '
+          }
+         #4
+       }
+    }
+    {
+      \datatool_locale_warn:nn { datatool-AU }
+       {
+          No ~ support ~ for ~ date ~ style ~
+          ` \l__datatool_AU_datestyle_tl '
+       }
+      #4
+    }
+ }
+%    \end{macrocode}
+%
+%\subsubsection{Time Parsing}
+%Use command \cs{datatool\_}\meta{style}\verb|_parse_time:NNnTF|
+%with regular expression 
+%\begin{definition}
+%\cs{c\_datatool\_}\meta{variant}\verb|_anchored_|\meta{style}\verb|_time_regex|
+%\end{definition}
+%    \begin{macrocode}
+\cs_new:Nn \datatool_AU_parse_time:NnTF
+ {
+   \cs_if_exist:cTF
+    {
+      c_datatool_
+      \l__datatool_AU_timevariant_tl
+      _anchored_hhmmss_time_regex
+    }
+    {
+      \datatool_hhmmss_parse_time:cNnTF
+       {
+        c_datatool_
+        \l__datatool_AU_timevariant_tl
+        _anchored_hhmmss_time_regex
+       }
+        #1 { #2 } { #3 } { #4 }
+    }
+    {
+      \datatool_warn_check_head_language_empty:Vnnn
+        \l__datatool_AU_timevariant_tl 
+        { datatool-AU }
+        {
+           No ~ language ~ support ~ for ~ time ~ variant ~
+           ` \exp_args:Ne \tl_tail:n { \l__datatool_AU_timevariant_tl } '
+        }
+        {
+           No ~ support ~ for ~ time ~ variant ~
+           ` \l__datatool_AU_timevariant_tl '
+        }
+      #4
+    }
+ }
+%    \end{macrocode}
+%
+%\subsubsection{Time Zone Mappings}
+%Define time zone mapping command for this region:
+%    \begin{macrocode}
+\cs_new:Nn \datatool_AU_get_timezone_map:n
+ {
+   \datatool_region_get_timezone_map:n { AU / #1 }
+ }
+%    \end{macrocode}
+%Define time zone IDs for this region (one-way map from ID to offset):
+%    \begin{macrocode}
+\datatool_region_set_timezone_map:nn { AU / ACST } { +09:30 }
+\datatool_region_set_timezone_map:nn { AU / ACDT } { +10:30 }
+\datatool_region_set_timezone_map:nn { AU / ACWST } { +08:45 }
+\datatool_region_set_timezone_map:nn { AU / ACWDT } { +09:00 }
+\datatool_region_set_timezone_map:nn { AU / AEST } { +10:00 }
+\datatool_region_set_timezone_map:nn { AU / AEDT } { +11:00 }
+\datatool_region_set_timezone_map:nn { AU / CXT } { +07:00 }
+\datatool_region_set_timezone_map:nn { AU / NFT } { +11:00 }
+\datatool_region_set_timezone_map:nn { AU / NFDT } { +12:00 }
+\datatool_region_set_timezone_map:nn { AU / LHST } { +10:30 }
+\datatool_region_set_timezone_map:nn { AU / LHDT } { +11:00 }
+\datatool_region_set_timezone_map:nn { AU / CCT } { +06:30 }
+%    \end{macrocode}
+%
+%\subsection{Options}
+%Define options for this region:
+%    \begin{macrocode}
+\datatool_locale_define_keys:nn { AU }
+ {
+   number-style .choices:nn =
+    { official, unofficial }
+    {
+      \exp_args:NNe \renewcommand
+        \datatoolAUSetNumberChars
+         {
+           \exp_not:N \bool_if:NT
+            \exp_not:N \l_datatool_region_set_numberchars_bool
+             {
+               \exp_not:c { datatool_AU_set_numberchars_ \l_keys_choice_tl : }
+             }
+         }
+      \tl_if_eq:NnT \l_datatool_current_region_tl { AU }
+       {
+         \datatoolAUSetNumberChars
+       }
+    } ,
+%    \end{macrocode}
+% Currency symbol before or after value:
+%    \begin{macrocode}
+   currency-symbol-position .choice: ,
+   currency-symbol-position / before .code:n = 
+    {
+      \cs_set_eq:NN \datatool_AU_currency_position:nn \dtlcurrprefixfmt
+    } ,
+   currency-symbol-position / after .code:n =
+    {
+      \cs_set_eq:NN \datatool_AU_currency_position:nn \dtlcurrsuffixfmt
+    } ,
+%    \end{macrocode}
+% Should the currency symbol be prefixed with the region code:
+%    \begin{macrocode}
+   currency-symbol-prefix .choice: ,
+   currency-symbol-prefix / false .code:n =
+    {
+      \cs_set_eq:NN \datatoolAUsymbolprefix \use_none:n
+    } ,
+   currency-symbol-prefix / true .code:n =
+    {
+      \cs_set_eq:NN
+       \datatoolAUsymbolprefix
+       \datatool_currency_symbol_region_prefix:n
+    } ,
+   currency-symbol-prefix .default:n = { true } ,
+%    \end{macrocode}
+% Separator between currency symbol (not code) and value:
+%    \begin{macrocode}
+   currency-symbol-sep .choice: ,
+   currency-symbol-sep / none .code:n = 
+    {
+      \tl_clear:N \l_datatool_AU_sym_sep_tl
+    } ,
+   currency-symbol-sep / thin-space .code:n = 
+    {
+      \tl_set:Nn \l_datatool_AU_sym_sep_tl { \, }
+    } ,
+   currency-symbol-sep / space .code:n = 
+    {
+      \tl_set:Nn \l_datatool_AU_sym_sep_tl { ~ }
+    } ,
+   currency-symbol-sep / nbsp .code:n =
+    {
+      \tl_set:Nn \l_datatool_AU_sym_sep_tl { \nobreakspace }
+    } ,
+   currency-symbol-sep . initial:n = { none } ,
+%    \end{macrocode}
+% Date and time styles:
+%    \begin{macrocode}
+   date-style .choice: ,
+   date-style / dmyyyy .code: n =
+    {
+      \tl_set:Nn \l__datatool_AU_datestyle_tl { ddmmyyyy }
+    } ,
+   date-style / mdyyyy .code: n =
+    {
+      \tl_set:Nn \l__datatool_AU_datestyle_tl { mmddyyyy }
+    } ,
+   date-style / yyyymd .code: n =
+    {
+      \tl_set:Nn \l__datatool_AU_datestyle_tl { yyyymmdd }
+    } ,
+   date-style / dmyy .code: n =
+    {
+      \tl_set:Nn \l__datatool_AU_datestyle_tl { ddmmyy }
+    } ,
+   date-style / mdyy .code: n =
+    {
+      \tl_set:Nn \l__datatool_AU_datestyle_tl { mmddyy }
+    } ,
+   date-style / yymd .code: n =
+    {
+      \tl_set:Nn \l__datatool_AU_datestyle_tl { yymmdd }
+    } ,
+   date-variant .choice: ,
+   date-variant / slash .code:n =
+    {
+      \tl_set:Nn \l__datatool_AU_datevariant_tl { slash }
+    } ,
+   date-variant / hyphen .code:n =
+    {
+      \tl_set:Nn \l__datatool_AU_datevariant_tl { hyphen }
+    } ,
+   date-variant / dot .code:n =
+    {
+      \tl_set:Nn \l__datatool_AU_datevariant_tl { dot }
+    } ,
+   date-variant / dialect .code:n =
+    {
+      \tl_set:Nn \l__datatool_AU_datevariant_tl
+        { \l_datatool_current_language_tl }
+    } ,
+   time-variant .choice: ,
+   time-variant / colon .code:n =
+    {
+      \tl_set:Nn \l__datatool_AU_timevariant_tl { colon }
+    } ,
+   time-variant / dot .code:n =
+    {
+      \tl_set:Nn \l__datatool_AU_timevariant_tl { dot }
+    } ,
+   time-variant / dialect .code:n =
+    {
+      \tl_if_eq:NnTF \l__datatool_AU_timevariant_tl { dot }
+       {
+         \tl_set:Nn \l__datatool_AU_timevariant_tl
+          { \l_datatool_current_language_tl _dot }
+       }
+       {
+         \tl_if_in:NnF
+           \l__datatool_AU_timevariant_tl
+            { \l_datatool_current_language_tl }
+          {
+            \tl_set:Nn \l__datatool_AU_timevariant_tl
+             { \l_datatool_current_language_tl _colon }
+          }
+       }
+    } ,
+   time-variant / dialect-colon .code:n =
+    {
+      \tl_set:Nn \l__datatool_AU_timevariant_tl
+        { \l_datatool_current_language_tl _colon }
+    } ,
+   time-variant / dialect-dot .code:n =
+    {
+      \tl_set:Nn \l__datatool_AU_timevariant_tl
+        { \l_datatool_current_language_tl _dot }
+    } ,
+ }
+%    \end{macrocode}
+%
+%\subsection{Hooks}
+%Command to update temporal parsing commands for this region:
+%    \begin{macrocode}
+\newcommand \datatoolAUSetTemporalParsers
+ {
+   \renewcommand \DTLCurrentLocaleParseTimeStamp
+    { \datatool_AU_parse_timestamp:NnTF }
+   \renewcommand \DTLCurrentLocaleParseDate
+    { \datatool_AU_parse_date:NnTF }
+   \renewcommand \DTLCurrentLocaleParseTime 
+    { \datatool_AU_parse_time:NnTF }
+   \let
+    \DTLCurrentLocaleGetTimeZoneMap
+    \datatool_AU_get_timezone_map:n
+ }
+%    \end{macrocode}
+%Set temporal formatting commands for this region. Currently this
+%just resets to the default, but may change in future.
+%Note that the defaults test if the applicable \sty{datetime2}
+%command is available and will fallback on ISO if not defined.
+%Bear in mind that the default style for \sty{datetime2} is
+%\texttt{iso} so there won't be a noticeable difference unless the
+%\sty{datetime2} regional setting is on.
+%    \begin{macrocode}
+\newcommand \datatoolAUSetTemporalFormatters
+ {
+   \let
+    \DTLCurrentLocaleFormatDate
+    \datatool_default_date_fmt:nnnn
+   \let
+    \DTLCurrentLocaleFormatTime
+    \datatool_default_time_fmt:nnn
+   \let
+    \DTLCurrentLocaleFormatTimeZone
+    \datatool_default_timezone_fmt:nn
+   \let
+    \DTLCurrentLocaleFormatTimeStampNoZone
+    \datatool_default_timestamp_fmt:nnnnnnn
+   \let
+    \DTLCurrentLocaleFormatTimeStampWithZone
+    \datatool_default_timestamp_fmt:nnnnnnnnn
+   \renewcommand \DTLCurrentLocaleTimeStampFmtSep { ~ }
+ }
+%    \end{macrocode}
+%
+%
+%Command to update currency and temporal parsing commands for this region:
+%    \begin{macrocode}
+\newcommand \DTLAULocaleHook
+ {
+  \datatoolAUSetNumberChars
+  \datatoolAUSetCurrency
+  \datatoolAUSetTemporalParsers
+  \datatoolAUSetTemporalFormatters
+%    \end{macrocode}
+%Allow language files to reference the region:
+%    \begin{macrocode}
+  \tl_set:Nn \l_datatool_current_region_tl { AU }
+ }
+%    \end{macrocode}
+%
+% Finished with \LaTeX3 syntax.
+%    \begin{macrocode}
+\ExplSyntaxOff
+%    \end{macrocode}
+%Note that the hook is added to the captions by \sty{datatool-base}
+%not by the region file.

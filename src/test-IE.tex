@@ -1,0 +1,25 @@
+% arara: pdflatex
+% arara: pdflatex
+\documentclass[10pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[locales={IE}]{datatool}
+
+\begin{document}
+Currency code: \DTLCurrencyCode.
+Number:
+\DTLdecimaltolocale{12345.6789}{\result}\result.
+Currency:
+\DTLdecimaltocurrency{12345.6789}{\result}\result.
+
+\DTLparse\result{12,345}\result. 
+ (\DTLdatumtype{\result}; \DTLdatumvalue{\result})
+
+\DTLparse\result{12,345.678}\result. 
+ (\DTLdatumtype{\result}; \DTLdatumvalue{\result})
+
+\DTLparse\result{€12,345.678}\result. 
+ (\DTLdatumtype{\result}; \DTLdatumvalue{\result};
+\DTLdatumcurrency{\result})
+\end{document}

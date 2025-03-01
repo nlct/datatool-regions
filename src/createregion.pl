@@ -283,6 +283,7 @@ print $fh <<"_END";
 %    \\begin{macrocode}
 \\ExplSyntaxOn 
 %    \\end{macrocode}
+%
 %\\subsection{Numbers and Currency}
 _END
 
@@ -608,7 +609,7 @@ _END
 _END
 }
 
-print $fh "%\\subsection{Date and Time Parsing}\n";
+print $fh "%\n%\\subsection{Date and Time Parsing}\n";
 
 if ($hasDateFormat)
 {
@@ -1237,7 +1238,7 @@ _END
 
 close $fh;
 
-print "Created file '$ldf'. Please check it and make any necessary modifications.\n";
+print "Please check '$ldf' and make any necessary modifications.\n";
 
 sub get_variant{
    my ($option) = @_;
