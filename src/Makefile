@@ -3,6 +3,7 @@ datatool-CA.ldf \
 datatool-FK.ldf \
 datatool-GB.ldf \
 datatool-GG.ldf \
+datatool-GI.ldf \
 datatool-IE.ldf \
 datatool-US.ldf \
 datatool-ZA.ldf
