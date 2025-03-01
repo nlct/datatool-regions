@@ -15,6 +15,7 @@
    locales=
    {
      en-AU,
+     en-BE,
      en-CA,
      en-FK,
      en-GB,
@@ -40,6 +41,7 @@
 \newcommand*{\sty}[1]{\textsf{#1}}
 \newcommand*{\file}[1]{\texorpdfstring{\nolinkurl{#1}}{#1}}
 \newcommand*{\ldf}[1]{\file{datatool-#1.ldf}}
+\newcommand*{\csmeta}[3]{\texttt{\cs{#1}}\meta{#2}\texttt{#3}}
 \newcommand*{\filemeta}[3]{%
  \texorpdfstring
   {\nolinkurl{#1}\meta{#2}\nolinkurl{#3}}%
@@ -79,7 +81,7 @@
 
 \appto\MacroFont{\footnotesize}
 
-\title{Regions Support for \sty{datatool} Package}
+\title{Region (Numeric) Support for \sty{datatool} v3.0+ Package}
 \author{Nicola L. C. Talbot}
 %%DATECMD%%
 
@@ -87,10 +89,10 @@
 \maketitle
 
 \begin{abstract}
-This is the regions support for the \sty{datatool}
-package (version 3.0+). This needs to be installed in addition to
-\sty{datatool}. To ensure language support, you will also need to
-install the applicable language module (for example,
+This is the region (numeric) support for the \sty{datatool} package (version
+3.0+). The supplied \file{ldf} files need to be installed in
+addition to \sty{datatool}. To ensure language support, you will
+also need to install the applicable language module (for example,
 \sty{datatool-english}).
 \end{abstract}
 
@@ -396,6 +398,160 @@ prefix.
 
 \begin{docCommand}{DTLAULocaleHook}{}
 Hook to switch to AU settings. This may be added to the captions
+hook by \sty{datatool-base}, depending on the settings. Otherwise
+it can be explicitly used to switch to this region.
+\end{docCommand}
+
+\section{Region \qt{BE}}
+\DTLenLocaleHook
+\DTLBELocaleHook
+
+The \file{datatool-BE.ldf} file provides support for region \qt{BE}
+(Belgium).  This sets \qt{EUR} as the default currency, but number
+formatting depends on the language. If no command called
+\csmeta{datatool}{lang}{BESetNumberChars} is defined (the applicable
+language module would need to provide
+\filemeta{datatool-}{lang}{-BE.ldf} that defines this), this will default to a dot
+number group separator and a decimal comma.
+
+For example, a French module would need to include the file
+\file{datatool-fr-BE.ldf} which defines
+\cs{datatoolfrBESetNumberChars}.
+(You can use \file{datatool-en-ZA.ldf} provided with
+\sty{datatool-english} as an example.)
+
+If there's no caption hook and you have multiple locales, you will
+need to set the region hook. For example, this document has:
+\begin{dispListing}
+\DTLBELocaleHook
+\end{dispListing}
+
+\begin{dispExample*}{title={Default Styles}}
+\DTLdecimaltolocale{12345}{\result}\result.
+(Value: \DTLdatumvalue{\result}.)
+
+\DTLdecimaltolocale{12345.678}{\result}\result.
+(Value: \DTLdatumvalue{\result}.)
+
+\DTLdecimaltocurrency{-12345.678}{\result}\result.
+(Value: \DTLdatumvalue{\result}.)
+
+\DTLmul\result{\result}{0,5}\result.
+(Value: \DTLdatumvalue{\result}.)
+\end{dispExample*}
+Remember that date-time parsing needs to be enabled, if required.
+\begin{dispExample*}{title={Default Date-Time Styles}}
+\DTLsetup{datetime={parse}}
+\DTLparse\result{28.02.2025 15:45 CET}
+String: \result.
+Data type: \DTLgetDataTypeName{\DTLdatumtype{\result}}.
+Numeric value: \DTLdatumvalue{\result}.
+
+\ExplSyntaxOn
+\datatool_extract_timestamp:NN \result \l_tmpa_tl
+Time-stamp: ~ \l_tmpa_tl
+\ExplSyntaxOff
+\end{dispExample*}
+
+Options may be set with \setlocaleopts{BE}. Available options are
+listed below.
+
+\begin{docKey}[BE]{currency-symbol-position}{=\meta{value}}{initially \opt{after}}
+Adjusts the formatting currency style. If \docValue{before}, the
+currency symbol is placed before the value. If \docValue{after}, the
+currency symbol is placed after the value.
+\end{docKey}
+
+\begin{dispExample}
+\DTLsetup{numeric={currency-symbol-style=iso}}
+\DTLsetLocaleOptions{BE}{currency-symbol-position=before}
+\DTLdecimaltocurrency{12345.678}{\result}\result
+\end{dispExample}
+
+\begin{docKey}[BE]{currency-symbol-sep}{=\meta{value}}{initially \opt{none}}
+Sets the separator to use between the currency symbol (not code) and the value.
+Permitted values: \docValue{none} (no space), \docValue{thin-space}
+(a thin space), \docValue{space} (a normal space), or
+\docValue{nbsp} (a non-breaking space).
+\end{docKey}
+
+\begin{dispExample}
+\DTLsetLocaleOptions{BE}{currency-symbol-sep=thin-space}
+\DTLdecimaltocurrency{12345.678}{\result}\result
+\end{dispExample}
+
+\begin{docKey}[BE]{number-style}{=\meta{style}}{initially \opt{dialect}}
+Sets the number group and decimal characters. The value may be one
+of: \docValue{default} (dot number group and decimal comma),
+\docValue{dialect} (attempt to use the number style for
+the module \meta{lang}-BE, if it's defined, where \meta{lang} is the
+current language tag, or fallback on \docValue{default}), or
+\docValue{thinspace}  (thin space number group and decimal point).
+In the case of \docValue{thinspace}, a normal space may also be used
+when parsing.
+\end{docKey}
+
+\begin{dispExample}
+\DTLsetLocaleOptions{BE}{number-style=thinspace}
+\DTLdecimaltocurrency{12345.678}{\result}\result
+\end{dispExample}
+
+The remaining options relate to dates and times, which are still
+experimental. You need to enable date and time parsing with
+\setbaseopt{ datetime = \brackets{parse} }.
+
+\begin{docKey}[BE]{date-style}{=\meta{style}}{initially \opt{dmyyyy}}
+Sets the current date style. The value may be one of:
+\docValue{dmyyyy} (day month year), \docValue{mdyyyy} (month day year),
+\docValue{yyyymd} (year month day),
+\docValue{dmyy} (day month 2-digit year),
+\docValue{mdyy} (month day 2-digit year), or
+\docValue{yymd} (2-digit year month day).
+\end{docKey}
+
+\begin{docKey}[BE]{date-variant}{=\meta{style}}{initially \opt{dot}}
+Sets the current numeric date separator.
+Allowed values: \docValue{slash} (\code{/}), \docValue{hyphen}
+(\code{-}), \docValue{dot} (\code{.}) or
+\docValue{dialect} (if the language supports it).
+\end{docKey}
+
+\begin{docKey}[BE]{time-variant}{=\meta{style}}{initially \opt{colon}}
+Sets the current numeric time separator.
+Allowed values: \docValue{colon} (\code{:}), \docValue{dot} (\code{.}) or
+\docValue{dialect} (if the language supports it),
+\docValue{dialect-colon} (if the language supports it), or
+\docValue{dialect-dot} (if the language supports it).
+\end{docKey}
+
+\begin{dispExample}
+\DTLsetup{datetime={parse}}
+\DTLsetLocaleOptions{BE}{
+ date-style=yyyymd,
+ date-variant = hyphen
+}
+\DTLparse\result{2025-06-01 15:45 CEST}
+String: \result.
+Data type: \DTLgetDataTypeName{\DTLdatumtype{\result}}.
+Numeric value: \DTLdatumvalue{\result}.
+
+\ExplSyntaxOn
+\datatool_extract_timestamp:NN \result \l_tmpa_tl
+Time-stamp: ~ \l_tmpa_tl
+\ExplSyntaxOff
+\end{dispExample}
+\begin{docCommand}{datatoolBESetNumberChars}{}
+Hook to switch to BE number group and decimal characters.
+\end{docCommand}
+
+\begin{docCommand}{datatoolBESetCurrency}{}
+Hook to switch to the EUR currency, rounding to 2 decimal places,
+and redefines \cs{DTLdefaultEURcurrencyfmt} to reflect the 
+\opt{currency-symbol-position} setting.
+\end{docCommand}
+
+\begin{docCommand}{DTLBELocaleHook}{}
+Hook to switch to BE settings. This may be added to the captions
 hook by \sty{datatool-base}, depending on the settings. Otherwise
 it can be explicitly used to switch to this region.
 \end{docCommand}

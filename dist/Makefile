@@ -1,4 +1,5 @@
 ldfs=../src/datatool-AU.ldf \
+../src/datatool-BE.ldf \
 ../src/datatool-CA.ldf \
 ../src/datatool-FK.ldf \
 ../src/datatool-GB.ldf \

@@ -7,10 +7,13 @@ The `datatool-regions` bundle provides the language-independent
 region ldf files.
 
 The region files deal with defining (if applicable) the currency
-symbol and switching to the region's currency in the captions hook.
+symbol and switching to the region's currency in the region's hook.
 Region files may additionally (if not dependent on the language) set
-the number group and decimal characters and parsing numeric dates
-and times.
+the number group and decimal characters, and provide functions for
+parsing numeric dates and times.
+
+Note that `datatool-base.sty` deals with appending the region's hook to 
+the applicable language captions hook, if available.
 
 The language support is distributed separately (except for
 `datatool-undetermined.ldf` which is supplied with `datatool` v3.0+). Any setting that
