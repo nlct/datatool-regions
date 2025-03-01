@@ -85,16 +85,16 @@
 %
 % Provide a way to configure parsing style.
 %    \begin{macrocode}
-\tl_new:N \__datatool_IE_datevariant_tl
-\tl_set:Nn \__datatool_IE_datevariant_tl { slash }
+\tl_new:N \l__datatool_IE_datevariant_tl
+\tl_set:Nn \l__datatool_IE_datevariant_tl { slash }
 %    \end{macrocode}
 %NB These token lists are used to form command names. The following is not 
 %a format string.
 %    \begin{macrocode}
-\tl_new:N \__datatool_IE_datestyle_tl
-\tl_set:Nn \__datatool_IE_datestyle_tl { ddmmyyyy }
-\tl_new:N \__datatool_IE_timevariant_tl
-\tl_set:Nn \__datatool_IE_timevariant_tl { colon }
+\tl_new:N \l__datatool_IE_datestyle_tl
+\tl_set:Nn \l__datatool_IE_datestyle_tl { ddmmyyyy }
+\tl_new:N \l__datatool_IE_timevariant_tl
+\tl_set:Nn \l__datatool_IE_timevariant_tl { colon }
 %    \end{macrocode}
 %
 %Each parsing command defined below has final \marg{true} and \marg{false}
