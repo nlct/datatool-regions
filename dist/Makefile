@@ -23,6 +23,7 @@ datatool-regions.pdf	: datatool-regions.dtx datatool-GB.ldf
 	makeindex datatool-regions.idx
 	lualatex datatool-regions.dtx
 	lualatex datatool-regions.dtx
+	grep Warning datatool-regions.log
 
 datatool-GB.ldf	: datatool-regions.dtx datatool-regions.ins
 	latex datatool-regions.ins
