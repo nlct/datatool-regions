@@ -5,6 +5,7 @@ datatool-GB.ldf \
 datatool-GG.ldf \
 datatool-GI.ldf \
 datatool-IE.ldf \
+datatool-IM.ldf \
 datatool-US.ldf \
 datatool-ZA.ldf
 
