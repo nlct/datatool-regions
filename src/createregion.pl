@@ -23,7 +23,7 @@ if (-e $ldf)
 
 my $hasNumChars = &yes_no_prompt(
  "Is the number formatting in $region consistent across the region? (That is, either the region only has one official language, or the number group and decimal characters do not depend on the language.)",
- "Enter Y if the number formatting for region ${region} does not depend on the language, otherwise enter n.");
+ "Enter 'Y' if the number formatting for region ${region} does not depend on the language, otherwise enter 'n'.");
 
 my $numGroupChar = '';
 my $decimalChar = '';
@@ -31,49 +31,50 @@ my $decimalChar = '';
 my $numGroupChar2 = '';
 my $decimalChar2 = '';
 
+my $numGroupCharDefault = '';
+my $decimalCharDefault = '';
+
+my @numGroupCharPrompts = (
+  "comma)\t\ta comma separator (e.g. 1,234,567)",
+  "dot)\t\ta period separator (e.g. 1.234.567)",
+  "space)\t\ta space separator (e.g. 1 234 567)",
+  "thinspace)\ta thin-space separator for formatting, normal space allowed when parsing",
+  "apos)\t\tan apostrophe separator (e.g. 1'234'567)",
+  "underscore)\tan underscore separator (e.g. 1_234_567)",
+  "middot)\t\ta mid-dot separator (e.g. 1·234·567)"
+);
+
+my @decimalCharPrompts = (
+ "comma)\ta comma (e.g. 1,23)",
+ "dot)\ta baseline dot (e.g. 1.23)",
+ "middot)\ta mid-dot (e.g. 1·23)"
+);
+
 if ($hasNumChars)
 {
    print "An 'official' number style will be created. You may also add an unofficial style later.\n";
 
-   my @numGroupCharPrompts = (
-    "comma)\t\ta comma separator (e.g. 1,234,567)",
-    "dot)\t\ta period separator (e.g. 1.234.567)",
-    "space)\t\ta space separator (e.g. 1 234 567)",
-    "thinspace)\ta thin-space separator for formatting, normal space allowed when parsing",
-    "apos)\t\tan apostrophe separator (e.g. 1'234'567)",
-    "underscore)\tan underscore separator (e.g. 1_234_567)",
-    "middot)\t\ta mid-dot separator (e.g. 1·234·567)"
-   );
+   $numGroupChar = &number_sep_prompt('official');
 
-   $numGroupChar = &choice_prompt(qw/^(?:comma|dot|space|thinspace|apos|underscore|middot)$/,
-     \@numGroupCharPrompts,
-    "For the official style, what symbol is used for the number group separator?",
-    "Enter the punctuation character used to separate number groups. For example, a comma, period or space character.");
-
-   my @decimalCharPrompts = (
-    "comma)\ta comma (e.g. 1,23)",
-    "dot)\ta baseline dot (e.g. 1.23)",
-    "middot)\ta mid-dot (e.g. 1·23)"
-   );
-
-   $decimalChar = &choice_prompt(qw/^(comma|dot|middot)$/,
-     \@decimalCharPrompts,
-    "For the official style, what symbol is used for the decimal character?",
-    "Enter the type of punctuation character used to for the decimal character. For example, a c'omma' for a comma or 'dot' for a period.");
+   $decimalChar = &decimal_sep_prompt('official');
 
    if (&yes_no_prompt("Would you also like to create an unoffical style?",
         "Enter 'Y' if you want to add an 'unofficial' option, otherwise enter 'n'."))
    {
-      $numGroupChar2 = &choice_prompt(qw/^(?:comma|dot|space|thinspace|apos|underscore|middot)$/,
-        \@numGroupCharPrompts,
-       "For the unofficial style, what symbol is used for the number group separator?",
-       "Enter the punctuation character used to separate number groups. For example, a comma, period or space character.");
+      $numGroupChar2 = &number_sep_prompt('unofficial');
 
-      $decimalChar2 = &choice_prompt(qw/^(comma|dot|middot)$/,
-        \@decimalCharPrompts,
-       "For the unofficial style, what symbol is used for the decimal character?",
-       "Enter the type of punctuation character used to for the decimal character. For example, a c'omma' for a comma or 'dot' for a period.");
+      $decimalChar2 = &decimal_sep_prompt('unofficial');
    }
+}
+elsif (&yes_no_prompt(
+   "Is there a default to fallback on if the language is not supported?",
+   "Enter 'Y' if you want to provide a default for the 'dialect' setting, otherwise enter 'n'."))
+{
+   $numGroupCharDefault = &number_sep_prompt('default fallback');
+
+   $decimalCharDefault = &decimal_sep_prompt('default fallback');
+
+   $hasNumChars = 1;
 }
 
 my %currency = (
@@ -82,14 +83,15 @@ my %currency = (
   'label' => '',
   'command' => '',
   'strvar' => '',
+  'string' => '',
   'prefix' => ''
 );
 
 my $currfmt = 'dtlcurrprefixfmt';
 
 my @before_after = (
- 'before) symbol before number',
- 'after) symbol after number'
+ 'before) symbol before number (e.g. ¤123)',
+ 'after) symbol after number (e.g. 123¤)'
 );
 
 if (&choice_prompt(qr/^(?:before|after)$/,
@@ -111,7 +113,7 @@ my @cur_sym_sep_choices = (
 my $curr_sym_sep = &choice_prompt(qr/^(?:none|thin-space|space|nbsp)$/,
    \@cur_sym_sep_choices,
   "What type of spacing should occur between the currency symbol (not the code) and number?",
-  "Enter 'none' for no spacing."
+  "Enter the style of spacing between the currency symbol and the value, such as 'thin-space' for a thin space or 'none' for no spacing."
  );
 
 
@@ -125,7 +127,7 @@ while ($currency{'symbol'} eq '')
    {
       $currencySym = &any_prompt(
         "What is the currency symbol? Type in the actual Unicode character or U+<hex> where <hex> is the hexadecimal code point.",
-        "Enter the currency symbol (for example, \$ or £ ) or the codepoint. Type 'x' to exit.");
+        "Enter the currency symbol (for example, '\$' or '£' or '€') or the codepoint (for example, 'U+24' or 'U+A3' or 'U+20AC').");
 
       if ($currencySym=~/^U\+([0-9A-Ea-e]+)$/)
       {
@@ -148,9 +150,152 @@ while ($currency{'symbol'} eq '')
         "Enter the currency symbol.",
         "Enter the currency symbol (for example, 'kr' ). Type 'x' to exit.");
 
+      $currency{'symbol'} = $currencySym;
+
+      if (length($currencySym) == 1)
+      {
+         $currencySymCp=ord($currencySym);
+
+         &lookup_currency($currencySymCp, \%currency);
+
+         printf("Currency symbol '%s' (U+%X)\n", $currency{'symbol'}, $currencySymCp);
+      }
+
+      if ($currency{'label'} eq '')
+      {
+         $currency{'string'} = $currencySym;
+
+         unless ($currency{'string'}=~/^[A-Za-z\.]+$/)
+         {
+            if ($currency{'string'}=~s/\$/\\c_dollar_str /g)
+            {
+               $currency{'label'} = 'dollar';
+            }
+            elsif ($currency{'string'}=~s/£/\\l_datatool_pound_tl /g)
+            {
+               $currency{'label'} = 'pound';
+            }
+            elsif ($currency{'string'}=~s/¥/\\l_datatool_yen_tl /g)
+            {
+               $currency{'label'} = 'yen';
+            }
+            elsif ($currency{'string'}=~s/฿/\\l_datatool_baht_tl /g)
+            {
+               $currency{'label'} = 'baht';
+            }
+            elsif ($currency{'string'}=~s/₡/\\l_datatool_colonsign_tl /g)
+            {
+               $currency{'label'} = 'colonsign';
+            }
+            elsif ($currency{'string'}=~s/₡/\\l_datatool_cruzerio_tl /g)
+            {
+               $currency{'label'} = 'cruzerio';
+            }
+            elsif ($currency{'string'}=~s/₤/\\l_datatool_lira_tl /g)
+            {
+               $currency{'label'} = 'lira';
+            }
+            elsif ($currency{'string'}=~s/₥/\\l_datatool_mill_tl /g)
+            {
+               $currency{'label'} = 'mill';
+            }
+            elsif ($currency{'string'}=~s/₦/\\l_datatool_naira_tl /g)
+            {
+               $currency{'label'} = 'naira';
+            }
+            elsif ($currency{'string'}=~s/₧/\\l_datatool_peseta_tl /g)
+            {
+               $currency{'label'} = 'peseta';
+            }
+            elsif ($currency{'string'}=~s/₨ /\\l_datatool_rupee_tl /g)
+            {
+               $currency{'label'} = 'rupee';
+            }
+            elsif ($currency{'string'}=~s/₩/\\l_datatool_won_tl /g)
+            {
+               $currency{'label'} = 'won';
+            }
+            elsif ($currency{'string'}=~s/₪/\\l_datatool_shekel_tl /g)
+            {
+               $currency{'label'} = 'shekel';
+            }
+            elsif ($currency{'string'}=~s/₫/\\l_datatool_dong_tl /g)
+            {
+               $currency{'label'} = 'dong';
+            }
+            elsif ($currency{'string'}=~s/€/\\l_datatool_euro_tl /g)
+            {
+               $currency{'label'} = 'euro';
+            }
+            elsif ($currency{'string'}=~s/₭/\\l_datatool_kip_tl /g)
+            {
+               $currency{'label'} = 'kip';
+            }
+            elsif ($currency{'string'}=~s/₮/\\l_datatool_tugrik_tl /g)
+            {
+               $currency{'label'} = 'tugrik';
+            }
+            elsif ($currency{'string'}=~s/₯/\\l_datatool_drachma_tl /g)
+            {
+               $currency{'label'} = 'drachma';
+            }
+            elsif ($currency{'string'}=~s/₱/\\l_datatool_peso_tl /g)
+            {
+               $currency{'label'} = 'peso';
+            }
+            elsif ($currency{'string'}=~s/₲/\\l_datatool_guarani_tl /g)
+            {
+               $currency{'label'} = 'guarani';
+            }
+            elsif ($currency{'string'}=~s/₳/\\l_datatool_austral_tl /g)
+            {
+               $currency{'label'} = 'austral';
+            }
+            elsif ($currency{'string'}=~s/₴/\\l_datatool_hryvnia_tl /g)
+            {
+               $currency{'label'} = 'hryvnia';
+            }
+            elsif ($currency{'string'}=~s/₵/\\l_datatool_cedi_tl /g)
+            {
+               $currency{'label'} = 'cedi';
+            }
+            elsif ($currency{'string'}=~s/Sm/\\l_datatool_spesmilo_tl /g)
+            {
+               $currency{'label'} = 'spesmilo';
+            }
+            elsif ($currency{'string'}=~s/₸/\\l_datatool_tenge_tl /g)
+            {
+               $currency{'label'} = 'tenge';
+            }
+            elsif ($currency{'string'}=~s/₹/\\l_datatool_indianrupee_tl /g)
+            {
+               $currency{'label'} = 'indianrupee';
+            }
+            elsif ($currency{'string'}=~s/₺/\\l_datatool_turkishlira_tl /g)
+            {
+               $currency{'label'} = 'turkishlira';
+            }
+            elsif ($currency{'string'}=~s/₼/\\l_datatool_manat_tl /g)
+            {
+               $currency{'label'} = 'manat';
+            }
+            elsif ($currency{'string'}=~s/₽/\\l_datatool_ruble_tl /g)
+            {
+               $currency{'label'} = 'ruble';
+            }
+            elsif ($currency{'string'}=~s/₾/\\l_datatool_lari_tl /g)
+            {
+               $currency{'label'} = 'lari';
+            }
+            elsif ($currency{'string'}=~s/⃀/\\l_datatool_som_tl /g)
+            {
+               $currency{'label'} = 'som';
+            }
+         }
+      }
    }
 
-   if ($currency{'label'} eq '')
+   if ($currency{'label'} eq '' and $currency{'string'} eq '')
    {
       my $currInfo;
 
@@ -314,7 +459,55 @@ print $fh <<"_END";
 %\\subsection{Numbers and Currency}
 _END
 
-if ($hasNumChars)
+if ($decimalCharDefault ne '')
+{
+   print $fh <<"_END";
+%The default style will be used as the fallback if no language support is provided
+%for this region. Any language module that wishes to support this region should
+%include a file called \\filemeta{datatool-}{lang}{-${region}.ldf}, where
+%\\meta{lang} is the language code. That file should define a command
+%called \\csmeta{datatool}{lang}{${region}SetNumberChars} to set the number
+%group and decimal separator for that dialect.
+%(See \\file{datatool-en-ZA.ldf} provided with \\sty{datatool-english} as an example.)
+%    \\begin{macrocode} 
+\\cs_new:Nn \\datatool_${region}_set_numberchars_default:
+ {
+_END
+      &write_numberchars($numGroupCharDefault, $decimalCharDefault);
+   print $fh <<"_END";
+ }
+%    \\end{macrocode}
+%Check if the dialect has provided a style. If so, use that,
+%otherwise use the default.
+%    \\begin{macrocode} 
+\\cs_new:Nn \\datatool_${region}_set_numberchars_dialect:
+ {
+   \\tl_if_empty:NTF \\l_datatool_current_language_tl
+    {
+      \\datatool_${region}_set_numberchars_default:
+    }
+    {
+      \\cs_if_exist_use:cF
+       { datatool \\l_datatool_current_language_tl ${region}SetNumberChars }
+       {
+         \\datatool_${region}_set_numberchars_default:
+       }
+    }
+ }
+%    \\end{macrocode}
+%Hook to set the number group and decimal characters for the region:
+%    \\begin{macrocode}
+\\newcommand \\datatool${region}SetNumberChars
+ {
+   \\bool_if:NT \\l_datatool_region_set_numberchars_bool
+    {
+      \\datatool_${region}_set_numberchars_dialect:
+    }
+ }
+%    \\end{macrocode}
+_END
+}
+elsif ($hasNumChars)
 {
       print $fh <<"_END";
 %Set the number group and decimal symbols for this region.
@@ -323,42 +516,8 @@ if ($hasNumChars)
  {  
 _END
 
-   print $fh '  ';
+   &write_numberchars($numGroupChar, $decimalChar);
 
-   if ($numGroupChar eq 'thinspace')
-   {
-      print $fh "\\datatool_set_thinspace_group_decimal_char:";
-
-      print $fh &get_variant($decimalChar), ' ';
-
-      print $fh &get_param($decimalChar), "\n";
-   }
-   elsif ($numGroupChar eq 'apos')
-   {
-      print $fh "\\datatool_set_apos_group_decimal_char:";
-
-      print $fh &get_variant($decimalChar), ' ';
-
-      print $fh &get_param($decimalChar), "\n";
-   }
-   elsif ($numGroupChar eq 'underscore')
-   {
-      print $fh "\\datatool_set_underscore_group_decimal_char:";
-
-      print $fh &get_variant($decimalChar), ' ';
-
-      print $fh &get_param($decimalChar), "\n";
-   }
-   else
-   {
-      print $fh "\\datatool_set_numberchars:";
-
-      print $fh &get_variant($numGroupChar);
-      print $fh &get_variant($decimalChar);
-
-      print $fh ' ', &get_param($numGroupChar);
-      print $fh ' ', &get_param($decimalChar), "\n";
-   } 
    print $fh <<"_END";
  }
 %    \\end{macrocode}
@@ -373,42 +532,7 @@ _END
  {  
 _END
 
-      print $fh '  ';
-
-      if ($numGroupChar2 eq 'thinspace')
-      {
-         print $fh "\\datatool_set_thinspace_group_decimal_char:";
-
-         print $fh &get_variant($decimalChar2), ' ';
-
-         print $fh &get_param($decimalChar2), "\n";
-      }
-      elsif ($numGroupChar2 eq 'apos')
-      {
-         print $fh "\\datatool_set_apos_group_decimal_char:";
-
-         print $fh &get_variant($decimalChar2), ' ';
-
-         print $fh &get_param($decimalChar2), "\n";
-      }
-      elsif ($numGroupChar2 eq 'underscore')
-      {
-         print $fh "\\datatool_set_underscore_group_decimal_char:";
-
-         print $fh &get_variant($decimalChar2), ' ';
-
-         print $fh &get_param($decimalChar2), "\n";
-      }
-      else
-      {
-         print $fh "\\datatool_set_numberchars:";
-
-         print $fh &get_variant($numGroupChar2);
-         print $fh &get_variant($decimalChar2);
-
-         print $fh ' ', &get_param($numGroupChar2);
-         print $fh ' ', &get_param($decimalChar2), "\n";
-      } 
+      &write_numberchars($numGroupChar2, $decimalChar2);
 
    print $fh <<"_END";
  }
@@ -502,7 +626,16 @@ if ($currency{'code'} eq 'EUR')
       \\DTLsetdefaultcurrency { EUR }
 _END
 
-   unless ($currencyDigits eq '')
+   if ($currencyDigits eq '')
+   {
+      print $fh <<"_END";
+%    \\end{macrocode}
+%\\cs{DTLdecimaltocurrency} should not apply any rounding:
+%    \\begin{macrocode}
+      \\renewcommand \\DTLCurrentLocaleCurrencyDP { }
+_END
+   }
+   else
    {
       print $fh <<"_END";
 %    \\end{macrocode}
@@ -561,9 +694,10 @@ _END
 _END
    }
 
-   if ($currency{'command'} eq '')
+   if ($currency{'command'} eq 'none' or $currency{'command'} eq '')
    {
-     $currency{'command'} = $currency{'symbol'};
+      $currency{'command'} = $currency{'symbol'};
+      $currency{'command'}=~s/\$/\\\$/g;
    }
 
    print $fh <<"_END";
@@ -571,7 +705,25 @@ _END
 %    \\begin{macrocode}
 _END
 
-   if ($currency{label} eq '')
+   if ($currency{'string'} ne '')
+   {
+      if ($currency{'string'}=~/\\/)
+      {
+         print $fh "\\datatool_def_currency:nnne\n";
+      }
+      else
+      {
+         print $fh "\\datatool_def_currency:nnnn\n";
+      }
+
+      print $fh <<"_END";
+ { \\datatool${region}currencyfmt }
+ { $currency{code} }
+ { $currency{command} }
+ { $currency{string} }
+_END
+   }
+   elsif ($currency{'label'} eq '')
    {
       print $fh <<"_END";
 \\datatool_def_currency:nnnn
@@ -615,7 +767,16 @@ _END
       \\DTLsetdefaultcurrency { $currency{code} }
 _END
 
-   unless ($currencyDigits eq '')
+   if ($currencyDigits eq '')
+   {
+      print $fh <<"_END";
+%    \\end{macrocode}
+%\\cs{DTLdecimaltocurrency} should not apply any rounding:
+%    \\begin{macrocode}
+      \\renewcommand \\DTLCurrentLocaleCurrencyDP { }
+_END
+   }
+   else
    {
       print $fh <<"_END";
 %    \\end{macrocode}
@@ -937,7 +1098,7 @@ _END
    }
    else
    {
-      print $fh "No time zone mappings provided.\n";
+      print $fh "%No time zone mappings provided.\n";
    }
 }
 else
@@ -956,14 +1117,23 @@ _END
 
 if ($hasNumChars)
 {
-   print $fh "   number-style .choices:nn =\n    { official";
+   print $fh "   number-style .choices:nn =\n    {";
 
-   unless ($numGroupChar2 eq '')
+   if ($decimalChar ne '')
    {
-      print $fh ", unofficial";
+      print $fh " official ";
+
+      unless ($decimalChar2 eq '')
+      {
+         print $fh ", unofficial";
+      }
+   }
+   else
+   {
+      print $fh " default , dialect ";
    }
 
-   print $fh " }\n";
+   print $fh "}\n";
 
 print $fh <<"_END";
     {
@@ -1065,7 +1235,7 @@ print $fh <<"_END";
     {
       \\tl_set:Nn \\l_datatool_${region}_sym_sep_tl { \\nobreakspace }
     } ,
-   currency-symbol-sep . initial:n = { $curr_sym_sep } ,
+   currency-symbol-sep .initial:n = { $curr_sym_sep } ,
 _END
 
 if ($hasDateFormat)
@@ -1344,6 +1514,24 @@ sub choice_prompt{
    $result;
 }
 
+sub number_sep_prompt{
+   my ($stylename) = @_;
+
+   &choice_prompt(qw/^(?:comma|dot|space|thinspace|apos|underscore|middot)$/,, 
+    \@numGroupCharPrompts,
+    "For the ${stylename} style, what symbol is used for the number group separator?",
+    "Enter the type of punctuation character used to separate number groups. For example, 'comma' for a comma, or 'dot' for a period.");
+}
+
+sub decimal_sep_prompt{
+   my ($stylename) = @_;
+
+   &choice_prompt(qw/^(comma|dot|middot)$/,
+     \@decimalCharPrompts,
+    "For the ${stylename} style, what symbol is used for the decimal character?",
+    "Enter the type of punctuation character used for the decimal character. For example, 'comma' for a comma, or 'dot' for a period.");
+}
+
 sub regex_prompt{
    my ($regexp, $msg, $help) = @_;
 
@@ -1361,7 +1549,7 @@ sub regex_prompt{
 
       if (/$regexp/)
       {
-         $result = $_;
+         return $_;
       }
       elsif ($_ eq '?')
       {
@@ -1595,6 +1783,47 @@ sub lookup_currency{
    {
       $currency->{'label'} = 'som';
    }
+}
+
+sub write_numberchars{
+   my ($numSep, $decSep) = @_;
+
+   print $fh '  ';
+
+   if ($numSep eq 'thinspace')
+   {
+      print $fh "\\datatool_set_thinspace_group_decimal_char:";
+
+      print $fh &get_variant($decSep), ' ';
+
+      print $fh &get_param($decSep), "\n";
+   }
+   elsif ($numGroupChar2 eq 'apos')
+   {
+      print $fh "\\datatool_set_apos_group_decimal_char:";
+
+      print $fh &get_variant($decSep), ' ';
+
+      print $fh &get_param($decSep), "\n";
+   }
+   elsif ($numSep eq 'underscore')
+   {
+      print $fh "\\datatool_set_underscore_group_decimal_char:";
+
+      print $fh &get_variant($decSep), ' ';
+
+      print $fh &get_param($decSep), "\n";
+   }
+   else
+   {
+      print $fh "\\datatool_set_numberchars:";
+
+      print $fh &get_variant($numSep);
+      print $fh &get_variant($decSep);
+
+      print $fh ' ', &get_param($numSep);
+      print $fh ' ', &get_param($decSep), "\n";
+   } 
 }
 
 1;
